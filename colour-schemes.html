@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Colour Wheel Schemes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<style>
+/* ---------- Theme ---------- */
+:root {
+  color-scheme: light dark;
+  --bg: #f1efe9;
+  --panel: #ffffff;
+  --ink: #141414;
+  --muted: #5f5d58;
+  --border: #d8d4cb;
+  --ring: #141414;
+  --accent: #1F5FBF;
+  --accent-ink: #ffffff;
+  --font: "Archivo", Helvetica, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161616;
+    --panel: #242424;
+    --ink: #f2f0ea;
+    --muted: #b4b0a6;
+    --border: #464646;
+    --ring: #ffffff;
+  }
+}
+
+/* ---------- Base ---------- */
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--ink); line-height: 1.35; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+
+/* ---------- Layout ---------- */
+.app {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 24px;
+  padding: 24px;
+  max-width: 1220px;
+  margin: 0 auto;
+  align-items: start;
+}
+.controls {
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+}
+.controls h1 { font-size: 15px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 4px; }
+.controls .lead { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+.controls h2 { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
+
+/* Big wheel */
+.wheel { display: block; width: 100%; max-width: 300px; height: auto; margin: 0 auto; overflow: visible; }
+.seg {
+  cursor: pointer;
+  stroke: #141414;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  transition: transform .15s ease, stroke-width .15s ease;
+}
+.seg:hover { stroke-width: 3; }
+.seg[aria-pressed="true"] { transform: scale(1.06); stroke-width: 3; }
+.seg:focus-visible { outline: 3px solid var(--ring); outline-offset: 3px; stroke-width: 3; }
+.centre { stroke: #141414; stroke-width: 1.5; }
+.basename { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 8px 0 0; font-weight: 700; font-size: 16px; min-height: 44px; }
+.basename .sw { width: 26px; height: 26px; border: 1.5px solid #141414; border-radius: 6px; flex: none; }
+
+/* Pattern buttons */
+.pgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.pbtn {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 5px; min-height: 44px;
+  background: var(--panel); border: 2px solid var(--border); border-radius: 8px;
+  color: var(--ink); font: inherit; font-size: 11px; font-weight: 600; cursor: pointer; text-align: center;
+}
+.pbtn .pv { display: block; width: 100%; height: auto; aspect-ratio: 318 / 140; border: 1px solid #141414; background: #fff; border-radius: 3px; }
+.pbtn:hover { border-color: var(--ink); }
+.pbtn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+
+/* Options + actions */
+.check { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; font-size: 14px; }
+.check input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); flex: none; }
+.actions { display: grid; gap: 8px; margin-top: 8px; }
+.btn { min-height: 44px; padding: 10px 14px; border-radius: 10px; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border: 2px solid var(--accent); }
+.btn.ghost { background: transparent; color: var(--ink); border: 2px solid var(--accent); }
+.btn:hover { border-color: var(--ink); }
+.hint { margin: 4px 0 0; font-size: 12px; color: var(--muted); text-align: center; }
+
+/* Per-example overrides */
+.custom { margin-top: 18px; border: 1px solid var(--border); border-radius: 10px; }
+.custom summary {
+  cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); list-style: none;
+}
+.custom summary::-webkit-details-marker { display: none; }
+.custom summary::before { content: "+"; display: inline-block; width: 14px; font-size: 15px; color: var(--ink); }
+.custom[open] summary::before { content: "\2013"; }
+.custom .count { margin-left: auto; background: var(--accent); color: var(--accent-ink); border-radius: 999px; padding: 2px 8px; font-size: 11px; letter-spacing: 0; }
+.custom .inner { padding: 0 12px 12px; }
+.custom .inner .hint { text-align: left; margin: 0 0 6px; }
+.crow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+.crow .clabel { grid-column: 1 / -1; font-size: 12px; font-weight: 700; }
+.crow select {
+  min-height: 44px; width: 100%; font: inherit; font-size: 12px; padding: 6px 8px;
+  border: 2px solid var(--border); border-radius: 8px; background: var(--panel); color: var(--ink);
+}
+.crow select.set { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+
+/* ---------- Worksheet (always white paper, black ink) ---------- */
+.sheetwrap { min-width: 0; }
+.sheet {
+  container-type: inline-size;
+  container-name: sheet;
+  background: #fff;
+  color: #141414;
+  max-width: 794px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 34px 40px;
+  aspect-ratio: 210 / 297;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, .18);
+  border: 1px solid #cfcbc2;
+}
+.head { text-align: center; border-bottom: 2px solid #141414; padding-bottom: 10px; margin-bottom: 4px; }
+.head h1 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: .12em; }
+.head .sub { margin: 2px 0 10px; font-size: 13px; color: #333; }
+.who { display: flex; align-items: flex-end; gap: 8px; font-weight: 700; font-size: 12px; letter-spacing: .06em; text-align: left; }
+.who .blank { flex: 1; border-bottom: 1px solid #141414; height: 16px; }
+.who .blank.short { flex: 0 0 150px; }
+
+.row {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr) 318px;
+  gap: 14px;
+  align-items: center;
+  padding: 6px 0;
+  border-top: 1px solid #e1ded6;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.row:first-of-type { border-top: 0; }
+.mini { width: 112px; height: 112px; display: block; }
+.txt { min-width: 0; }
+.txt h2 { margin: 0; font-size: 12.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.txt .def { margin: 2px 0 0; font-size: 10.5px; font-style: italic; color: #222; }
+.chips { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 10px; }
+.chips li { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 9px; font-weight: 600; min-width: 34px; }
+.chip { width: 22px; height: 22px; border: 1px solid #141414; border-radius: 3px; display: block; }
+.note { margin: 6px 0 0; font-size: 10.5px; color: #222; }
+.pat { display: block; width: 100%; height: auto; aspect-ratio: 318 / 140; border: 1.5px solid #141414; background: #fff; }
+
+/* Narrow sheet: pattern box wraps under the text */
+@container sheet (max-width: 680px) {
+  .row { grid-template-columns: 112px minmax(0, 1fr); }
+  .row .pat { grid-column: 2; }
+}
+/* Stack the two columns below 900px */
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; padding: 16px; gap: 16px; }
+  .controls { position: static; max-height: none; overflow: visible; }
+  .sheet { padding: 24px 20px; aspect-ratio: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+/* ---------- Print ---------- */
+@page { size: A4; margin: 10mm; }
+@media print {
+  html, body { background: #fff; color: #141414; }
+  .app { display: block; padding: 0; margin: 0; max-width: none; }
+  .controls { display: none !important; }
+  .sheet { box-shadow: none; border: 0; padding: 0; max-width: none; width: 100%; aspect-ratio: auto; margin: 0; container-type: normal; }
+  .row { grid-template-columns: 112px minmax(0, 1fr) 280px !important; gap: 12px; break-inside: avoid; page-break-inside: avoid; }
+  .row .pat { grid-column: auto !important; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="controls" aria-label="Worksheet controls">
+    <h1>Colour Wheel Schemes</h1>
+    <p class="lead">Pick a base colour and a pattern, then print the worksheet.</p>
+
+    <h2 id="wheelLabel">Base colour</h2>
+    <svg class="wheel" viewBox="0 0 300 300" role="group" aria-labelledby="wheelLabel">
+      <g id="segs"></g>
+      <circle id="centre" class="centre" cx="150" cy="150" r="66" fill="#1F5FBF"></circle>
+    </svg>
+    <div class="basename"><span class="sw" id="baseSwatch"></span><span id="baseName">Blue</span></div>
+
+    <h2 id="patLabel">Pattern</h2>
+    <div class="pgrid" id="pgrid" role="group" aria-labelledby="patLabel"></div>
+
+    <details class="custom" id="custom">
+      <summary>Customise each example <span class="count" id="customCount" hidden></span></summary>
+      <div class="inner">
+        <p class="hint">Give any example its own colour or pattern. "Follow" uses the choices above.</p>
+        <div id="customRows"></div>
+        <div class="actions">
+          <button type="button" class="btn ghost" id="randomRowsBtn">Randomise each example</button>
+          <button type="button" class="btn ghost" id="resetRowsBtn">Reset all to follow</button>
+        </div>
+      </div>
+    </details>
+
+    <h2>Options</h2>
+    <label class="check"><input type="checkbox" id="showKey" checked> Show colour names and notes</label>
+
+    <div class="actions">
+      <button type="button" class="btn ghost" id="randomBtn">Randomise</button>
+      <button type="button" class="btn primary" id="printBtn">Print sheet</button>
+      <p class="hint">Or press Ctrl+P / Cmd+P</p>
+    </div>
+    <div class="sr-only" aria-live="polite" id="live"></div>
+  </aside>
+
+  <main class="sheetwrap">
+    <article class="sheet" id="sheet" aria-label="Colour Wheel Schemes worksheet"></article>
+  </main>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- Colour wheel data (RYB, clockwise from the top) ---------- */
+  var WHEEL = [
+    ['Yellow', '#F7D117'], ['Yellow-orange', '#F5A623'], ['Orange', '#F07C1E'], ['Red-orange', '#E4502A'],
+    ['Red', '#D7263D'], ['Red-violet', '#A8306E'], ['Violet', '#7B3A96'], ['Blue-violet', '#4B3FA0'],
+    ['Blue', '#1F5FBF'], ['Blue-green', '#12837F'], ['Green', '#3A9A3E'], ['Yellow-green', '#9CC43A']
+  ];
+  var N = WHEEL.length;
+  var INK = '#141414', WHITE = '#ffffff';
+  var S = 'stroke="' + INK + '" stroke-width="1"';
+
+  var w = function (i) { return ((i % N) + N) % N; };
+  var nameOf = function (i) { return WHEEL[w(i)][0]; };
+  var hexOf = function (i) { return WHEEL[w(i)][1]; };
+  var lc = function (s) { return s.toLowerCase(); };
+  var cyc = function (arr, i) { return arr[((i % arr.length) + arr.length) % arr.length]; };
+  var f1 = function (n) { return Math.round(n * 10) / 10; };
+
+  function mix(a, b, t) { // t = amount of b
+    var x = parseInt(a.slice(1), 16), y = parseInt(b.slice(1), 16);
+    var ch = function (sh) { return Math.round(((x >> sh) & 255) * (1 - t) + ((y >> sh) & 255) * t); };
+    return '#' + [16, 8, 0].map(function (sh) { return ch(sh).toString(16).padStart(2, '0'); }).join('');
+  }
+  function lum(hex) {
+    var n = parseInt(hex.slice(1), 16);
+    var f = function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    return 0.2126 * f((n >> 16) & 255) + 0.7152 * f((n >> 8) & 255) + 0.0722 * f(n & 255);
+  }
+  function inkFor(hex) { return lum(hex) > 0.179 ? INK : WHITE; }
+
+  function sectorPath(cx, cy, ro, ri, a0, a1) {
+    var p = function (r, a) { var t = a * Math.PI / 180; return [(cx + r * Math.cos(t)).toFixed(2), (cy + r * Math.sin(t)).toFixed(2)]; };
+    var A = p(ro, a0), B = p(ro, a1), C = p(ri, a1), D = p(ri, a0);
+    return 'M' + A[0] + ',' + A[1] + ' A' + ro + ',' + ro + ' 0 0 1 ' + B[0] + ',' + B[1] +
+           ' L' + C[0] + ',' + C[1] + ' A' + ri + ',' + ri + ' 0 0 0 ' + D[0] + ',' + D[1] + ' Z';
+  }
+
+  /* ---------- Schemes ---------- */
+  var SCHEMES = [
+    {
+      id: 'mono', title: 'Monochrome', def: 'One colour plus black and white', pattern: 'waves',
+      idx: function (b) { return [b]; },
+      palette: function (b) {
+        var h = hexOf(b);
+        return [
+          { name: 'Shade', hex: mix(h, INK, 0.55) },
+          { name: 'Base', hex: h },
+          { name: 'Tint', hex: mix(h, WHITE, 0.45) },
+          { name: 'Pale tint', hex: mix(h, WHITE, 0.80) }
+        ];
+      },
+      note: function (b) { return nameOf(b) + ' on its own, made darker with black and lighter with white.'; }
+    },
+    {
+      id: 'comp', title: 'Complementary', def: 'Two opposite colours plus black and white', pattern: 'diamonds',
+      idx: function (b) { return [b, b + 6]; },
+      note: function (b) { return nameOf(b) + ' and its opposite, ' + lc(nameOf(b + 6)) + '.'; }
+    },
+    {
+      id: 'ana', title: 'Analogous', def: 'Three adjacent colours plus black and white', pattern: 'circles',
+      idx: function (b) { return [b - 1, b, b + 1]; },
+      note: function (b) { return nameOf(b) + ' with its two neighbours, ' + lc(nameOf(b - 1)) + ' and ' + lc(nameOf(b + 1)) + '.'; }
+    },
+    {
+      id: 'split', title: 'Split Complementary', def: 'One colour plus two either side of its opposite colour plus black and white', pattern: 'triangles',
+      idx: function (b) { return [b, b + 5, b + 7]; },
+      note: function (b) {
+        var o = lc(nameOf(b + 6));
+        return nameOf(b) + ', plus the neighbours of ' + o + ' (not ' + o + ' itself): ' + lc(nameOf(b + 5)) + ' and ' + lc(nameOf(b + 7)) + '.';
+      }
+    },
+    {
+      id: 'dsplit', title: 'Double Split Complementary', def: 'Two colours either side of two opposite colours plus black and white', pattern: 'tiles',
+      idx: function (b) { return [b - 1, b + 1, b + 5, b + 7]; },
+      note: function (b) {
+        return 'The neighbours of ' + lc(nameOf(b)) + ' (' + lc(nameOf(b - 1)) + ', ' + lc(nameOf(b + 1)) + ') and of ' +
+               lc(nameOf(b + 6)) + ' (' + lc(nameOf(b + 5)) + ', ' + lc(nameOf(b + 7)) + '); ' +
+               lc(nameOf(b)) + ' and ' + lc(nameOf(b + 6)) + ' themselves are left out.';
+      }
+    },
+    {
+      id: 'tri', title: 'Triadic', def: 'Three equidistant colours plus black and white', pattern: 'grid',
+      idx: function (b) { return [b, b + 4, b + 8]; },
+      note: function (b) { return nameOf(b) + ', ' + lc(nameOf(b + 4)) + ' and ' + lc(nameOf(b + 8)) + ', spaced evenly around the wheel.'; }
+    }
+  ];
+
+  function schemePalette(sch, b) {
+    if (sch.palette) return sch.palette(b);
+    return sch.idx(b).map(function (i) { return { name: nameOf(i), hex: hexOf(i) }; });
+  }
+
+  /* ---------- Patterns: (palette of hex strings) => inner SVG on a 318x140 viewBox ---------- */
+  var BG = '<rect width="318" height="140" fill="' + WHITE + '"/>';
+
+  var PATTERNS = {
+    waves: function (p) {
+      var cols = p.concat([WHITE]), out = [BG], A = 6, L = 53, k = 0;
+      for (var y = -4; y < 150; y += 18, k++) {
+        var d = 'M-10,' + y;
+        for (var x = -10; x < 340; x += L) {
+          d += ' Q' + (x + L / 4) + ',' + (y - 2 * A) + ' ' + (x + L / 2) + ',' + y +
+               ' Q' + (x + 3 * L / 4) + ',' + (y + 2 * A) + ' ' + (x + L) + ',' + y;
+        }
+        d += ' L350,170 L-10,170 Z';
+        out.push('<path d="' + d + '" fill="' + cyc(cols, k) + '" ' + S + '/>');
+      }
+      return out.join('');
+    },
+
+    diamonds: function (p) {
+      var out = [BG], W = 40, H = 40;
+      for (var r = -1; r <= 8; r++) {
+        for (var c = -1; c <= 8; c++) {
+          var cx = c * W + (r % 2 ? W / 2 : 0), cy = r * H / 2;
+          out.push('<polygon points="' + cx + ',' + (cy - H / 2) + ' ' + (cx + W / 2) + ',' + cy + ' ' + cx + ',' + (cy + H / 2) + ' ' + (cx - W / 2) + ',' + cy +
+                   '" fill="' + cyc(p, c + Math.floor(r / 2)) + '" ' + S + '/>');
+          out.push('<circle cx="' + cx + '" cy="' + cy + '" r="3" fill="' + WHITE + '" ' + S + '/>');
+        }
+      }
+      return out.join('');
+    },
+
+    circles: function (p) {
+      var out = [BG], R = 24, dx = 40, dy = 34;
+      for (var r = 0; r <= 5; r++) {
+        for (var c = -1; c <= 8; c++) {
+          var cx = c * dx + (r % 2 ? dx / 2 : 0) + 10, cy = r * dy;
+          out.push('<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="' + cyc(p, c + r) + '" ' + S + '/>');
+          out.push('<circle cx="' + cx + '" cy="' + cy + '" r="' + (R * 0.45) + '" fill="none" stroke="' + WHITE + '" stroke-width="4"/>');
+        }
+      }
+      return out.join('');
+    },
+
+    triangles: function (p) {
+      var out = [BG], s = 40, h = 35, cols = p.concat([WHITE]);
+      for (var r = 0; r < 4; r++) {
+        var y0 = r * h, y1 = y0 + h, off = (r % 2) ? -s / 2 : 0;
+        for (var i = -1; i <= 17; i++) {
+          var x = i * s / 2 + off, up = (i % 2 === 0);
+          var pts = up ? (x + ',' + y1 + ' ' + (x + s) + ',' + y1 + ' ' + (x + s / 2) + ',' + y0)
+                       : (x + ',' + y0 + ' ' + (x + s) + ',' + y0 + ' ' + (x + s / 2) + ',' + y1);
+          out.push('<polygon points="' + pts + '" fill="' + cyc(cols, i + 2 * r) + '" ' + S + '/>');
+        }
+      }
+      return out.join('');
+    },
+
+    tiles: function (p) {
+      var out = [], T = 40, rots = [180, 270, 90, 0];
+      for (var r = 0; r < 4; r++) {
+        for (var c = 0; c < 8; c++) {
+          var k = c + r, bg = cyc(p, k), fg = cyc(p, k + 1);
+          var rot = rots[(c % 2) + 2 * (r % 2)];
+          out.push('<g transform="translate(' + (c * T) + ',' + (r * T) + ')">' +
+            '<rect width="' + T + '" height="' + T + '" fill="' + bg + '" ' + S + '/>' +
+            '<path d="M0,0 L' + T + ',0 A' + T + ',' + T + ' 0 0 1 0,' + T + ' Z" fill="' + fg + '" ' + S + ' transform="rotate(' + rot + ' ' + (T / 2) + ' ' + (T / 2) + ')"/>' +
+            '<circle cx="' + (T / 2) + '" cy="' + (T / 2) + '" r="4" fill="' + WHITE + '" ' + S + '/>' +
+            '</g>');
+        }
+      }
+      return out.join('');
+    },
+
+    grid: function (p) { // "Blocks": Mondrian-style composition
+      var cells = [
+        [0, 0, 70, 60, 0], [70, 0, 110, 60, 'w'], [180, 0, 80, 60, 1], [260, 0, 58, 90, 2],
+        [0, 60, 70, 80, 'w'], [70, 60, 50, 80, 2], [120, 60, 140, 40, 'w'],
+        [120, 100, 60, 40, 1], [180, 100, 80, 40, 2], [260, 90, 58, 50, 'w']
+      ];
+      return BG + cells.map(function (cl) {
+        var fill = cl[4] === 'w' ? WHITE : cyc(p, cl[4]);
+        return '<rect x="' + cl[0] + '" y="' + cl[1] + '" width="' + cl[2] + '" height="' + cl[3] + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="4"/>';
+      }).join('');
+    },
+
+    stripes: function (p) {
+      var out = [BG], cols = p.concat([WHITE]), wd = 22, k = 0;
+      for (var x = -160; x < 340; x += wd, k++) {
+        out.push('<polygon points="' + x + ',0 ' + (x + wd) + ',0 ' + (x + wd + 140) + ',140 ' + (x + 140) + ',140" fill="' + cyc(cols, k) + '" ' + S + '/>');
+      }
+      return out.join('');
+    },
+
+    checks: function (p) {
+      var out = [], T = 20;
+      for (var r = 0; r < 7; r++) {
+        for (var c = 0; c < 16; c++) {
+          var x = c * T, y = r * T, k = Math.floor((c + r) / 2);
+          if ((c + r) % 2 === 0) {
+            out.push('<rect x="' + x + '" y="' + y + '" width="' + T + '" height="' + T + '" fill="' + cyc(p, k) + '" ' + S + '/>');
+          } else {
+            out.push('<rect x="' + x + '" y="' + y + '" width="' + T + '" height="' + T + '" fill="' + WHITE + '" ' + S + '/>');
+            out.push('<rect x="' + (x + 6) + '" y="' + (y + 6) + '" width="8" height="8" fill="' + cyc(p, k + 1) + '" ' + S + '/>');
+          }
+        }
+      }
+      return out.join('');
+    },
+
+    hexagons: function (p) {
+      var out = [BG], R = 16, W = Math.sqrt(3) * R, cols = p.concat([WHITE]);
+      for (var r = -1; r <= 6; r++) {
+        for (var c = -1; c <= 12; c++) {
+          var cx = c * W + (r % 2 ? W / 2 : 0), cy = r * 1.5 * R, pts = [];
+          for (var k = 0; k < 6; k++) {
+            var a = (Math.PI / 180) * (60 * k - 30);
+            pts.push(f1(cx + R * Math.cos(a)) + ',' + f1(cy + R * Math.sin(a)));
+          }
+          out.push('<polygon points="' + pts.join(' ') + '" fill="' + cyc(cols, c + r) + '" ' + S + '/>');
+        }
+      }
+      return out.join('');
+    },
+
+    scales: function (p) {
+      var out = [BG], R = 20, dx = 40, dy = 16;
+      for (var r = Math.ceil(140 / dy) + 1; r >= -1; r--) { // bottom rows first so upper scales overlap
+        var off = (r % 2) ? dx / 2 : 0;
+        for (var c = -1; c <= 8; c++) {
+          var cx = c * dx + off, cy = r * dy;
+          out.push('<path d="M' + (cx - R) + ',' + cy + ' A' + R + ',' + R + ' 0 0 0 ' + (cx + R) + ',' + cy +
+                   ' L' + (cx + R) + ',' + (cy - R - dy) + ' L' + (cx - R) + ',' + (cy - R - dy) + ' Z" fill="' + cyc(p, c + r) + '" ' + S + '/>');
+        }
+      }
+      return out.join('');
+    },
+
+    chevrons: function (p) {
+      var out = [BG], cols = p.concat([WHITE]), L = 53, A = 9, step = 18, k = 0;
+      for (var y = -8; y < 160; y += step, k++) {
+        var d = 'M-10,' + (y + A);
+        for (var x = -10; x < 340; x += L) d += ' L' + (x + L / 2) + ',' + (y - A) + ' L' + (x + L) + ',' + (y + A);
+        d += ' L350,170 L-10,170 Z';
+        out.push('<path d="' + d + '" fill="' + cyc(cols, k) + '" ' + S + '/>');
+      }
+      return out.join('');
+    },
+
+    dots: function (p) {
+      var bg = p[0], cols = (p.length > 1 ? p.slice(1) : []).concat([WHITE]);
+      var out = ['<rect width="318" height="140" fill="' + bg + '"/>'], dx = 36, dy = 32;
+      for (var r = 0; r <= 5; r++) {
+        for (var c = -1; c <= 9; c++) {
+          var cx = c * dx + (r % 2 ? dx / 2 : 0) + 18, cy = r * dy + 6, big = (c + r) % 2 === 0;
+          out.push('<circle cx="' + cx + '" cy="' + cy + '" r="' + (big ? 11 : 6) + '" fill="' + cyc(cols, c + r) + '" ' + S + '/>');
+        }
+      }
+      return out.join('');
+    },
+
+    bricks: function (p) {
+      var out = [BG], bw = 53, bh = 20, cols = p.concat([WHITE]);
+      for (var r = 0; r < 7; r++) {
+        var off = (r % 2) ? -bw / 2 : 0;
+        for (var c = 0; c <= 7; c++) {
+          var x = c * bw + off, y = r * bh;
+          out.push('<rect x="' + (x + 1.5) + '" y="' + (y + 1.5) + '" width="' + (bw - 3) + '" height="' + (bh - 3) + '" rx="2" fill="' + cyc(cols, c + r) + '" ' + S + '/>');
+        }
+      }
+      return out.join('');
+    },
+
+    petals: function (p) {
+      var out = [BG], cw = 53, ch = 140 / 3;
+      for (var r = 0; r < 3; r++) {
+        for (var c = 0; c < 6; c++) {
+          var cx = c * cw + cw / 2, cy = r * ch + ch / 2, k = c + r, A = cyc(p, k), B = cyc(p, k + 1);
+          var g = '<g transform="translate(' + cx + ',' + f1(cy) + ')">';
+          [45, 135].forEach(function (a) { g += '<ellipse rx="7" ry="19" fill="' + B + '" ' + S + ' transform="rotate(' + a + ')"/>'; });
+          [0, 90].forEach(function (a) { g += '<ellipse rx="7" ry="19" fill="' + A + '" ' + S + ' transform="rotate(' + a + ')"/>'; });
+          g += '<circle r="5" fill="' + WHITE + '" ' + S + '/></g>';
+          out.push(g);
+        }
+      }
+      return out.join('');
+    },
+
+    sunburst: function (p) {
+      var cols = p.concat([WHITE]), out = [], cx = 159, cy = 70, R = 200;
+      var n = cols.length * Math.max(1, Math.round(24 / cols.length));
+      for (var k = 0; k < n; k++) {
+        var a0 = (k / n) * 2 * Math.PI, a1 = ((k + 1) / n) * 2 * Math.PI;
+        out.push('<polygon points="' + cx + ',' + cy + ' ' + f1(cx + R * Math.cos(a0)) + ',' + f1(cy + R * Math.sin(a0)) + ' ' +
+                 f1(cx + R * Math.cos(a1)) + ',' + f1(cy + R * Math.sin(a1)) + '" fill="' + cyc(cols, k) + '" ' + S + '/>');
+      }
+      out.push('<circle cx="' + cx + '" cy="' + cy + '" r="14" fill="' + WHITE + '" ' + S + '/>');
+      return out.join('');
+    },
+
+    stars: function (p) {
+      var out = [BG], cols = 7, rows = 3, cw = 318 / cols, ch = 140 / rows;
+      var star = function (cx, cy, Ro, Ri) {
+        var pts = [];
+        for (var i = 0; i < 10; i++) {
+          var a = (-90 + i * 36) * Math.PI / 180, r = i % 2 ? Ri : Ro;
+          pts.push(f1(cx + r * Math.cos(a)) + ',' + f1(cy + r * Math.sin(a)));
+        }
+        return pts.join(' ');
+      };
+      for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < cols; c++) {
+          var cx = c * cw + cw / 2, cy = r * ch + ch / 2, k = c + r, inv = k % 2 === 1;
+          out.push('<rect x="' + f1(c * cw) + '" y="' + f1(r * ch) + '" width="' + f1(cw) + '" height="' + f1(ch) + '" fill="' + (inv ? cyc(p, k + 1) : WHITE) + '" ' + S + '/>');
+          out.push('<polygon points="' + star(cx, cy, 20, 8.5) + '" fill="' + (inv ? WHITE : cyc(p, k)) + '" ' + S + '/>');
+          out.push('<circle cx="' + f1(cx) + '" cy="' + f1(cy) + '" r="4" fill="' + (inv ? cyc(p, k) : WHITE) + '" ' + S + '/>');
+        }
+      }
+      return out.join('');
+    },
+
+    plaid: function (p) {
+      var out = [BG], parts = [[0, 18], [24, 6], [36, 26], [68, 6]], per = 80, x, y;
+      for (y = 0; y < 140; y += per) {
+        parts.forEach(function (pt, i) { out.push('<rect x="0" y="' + (y + pt[0]) + '" width="318" height="' + pt[1] + '" fill="' + cyc(p, i + Math.floor(y / per)) + '"/>'); });
+      }
+      for (x = 0; x < 318; x += per) {
+        parts.forEach(function (pt, i) { out.push('<rect x="' + (x + pt[0]) + '" y="0" width="' + pt[1] + '" height="140" fill="' + cyc(p, i + 1 + Math.floor(x / per)) + '" fill-opacity="0.55"/>'); });
+      }
+      for (y = 0; y < 140; y += per) out.push('<line x1="0" y1="' + (y + 27) + '" x2="318" y2="' + (y + 27) + '" stroke="' + INK + '" stroke-width="1"/>');
+      for (x = 0; x < 318; x += per) out.push('<line x1="' + (x + 27) + '" y1="0" x2="' + (x + 27) + '" y2="140" stroke="' + INK + '" stroke-width="1"/>');
+      return out.join('');
+    }
+  };
+
+  var PATTERN_ORDER = ['mixed', 'waves', 'diamonds', 'circles', 'triangles', 'tiles', 'grid', 'stripes', 'checks',
+                       'hexagons', 'scales', 'chevrons', 'dots', 'bricks', 'petals', 'sunburst', 'stars', 'plaid'];
+  var PATTERN_LABEL = {
+    mixed: 'Mixed', waves: 'Waves', diamonds: 'Diamonds', circles: 'Circles', triangles: 'Triangles', tiles: 'Tiles',
+    grid: 'Blocks', stripes: 'Stripes', checks: 'Checks', hexagons: 'Hexagons', scales: 'Scales', chevrons: 'Chevrons',
+    dots: 'Dots', bricks: 'Bricks', petals: 'Petals', sunburst: 'Sunburst', stars: 'Stars', plaid: 'Plaid'
+  };
+
+  // "Mixed" preview: a patchwork of each scheme's default pattern
+  function mixedInner(pal) {
+    return SCHEMES.map(function (sch, i) {
+      var x = (i % 3) * 106, y = Math.floor(i / 3) * 70;
+      return '<svg x="' + x + '" y="' + y + '" width="106" height="70" viewBox="0 0 318 140" preserveAspectRatio="xMidYMid slice">' + PATTERNS[sch.pattern](pal) + '</svg>';
+    }).join('');
+  }
+  function patternInner(key, pal) { return key === 'mixed' ? mixedInner(pal) : PATTERNS[key](pal); }
+
+  /* ---------- State + storage ---------- */
+  var STORE_KEY = 'colourSchemes.v1';
+  // rows: per-scheme overrides, e.g. { comp: { base: 4, pattern: 'scales' } }; a missing key follows the global choice
+  var state = { base: 8, pattern: 'mixed', showKey: true, rows: {} };
+
+  var isBase = function (v) { return Number.isInteger(v) && v >= 0 && v < N; };
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return;
+      var s = JSON.parse(raw);
+      if (isBase(s.base)) state.base = s.base;
+      if (PATTERN_ORDER.indexOf(s.pattern) !== -1) state.pattern = s.pattern;
+      if (typeof s.showKey === 'boolean') state.showKey = s.showKey;
+      if (s.rows && typeof s.rows === 'object') {
+        SCHEMES.forEach(function (sch) {
+          var r = s.rows[sch.id];
+          if (!r || typeof r !== 'object') return;
+          if (isBase(r.base)) setRowOverride(sch.id, 'base', r.base);
+          if (typeof r.pattern === 'string' && PATTERNS[r.pattern]) setRowOverride(sch.id, 'pattern', r.pattern);
+        });
+      }
+    } catch (e) { /* storage unavailable or corrupt: keep defaults */ }
+  }
+
+  /* Effective (per-row) choices */
+  function rowBase(sch) { var r = state.rows[sch.id]; return (r && isBase(r.base)) ? r.base : state.base; }
+  function rowPattern(sch) {
+    var r = state.rows[sch.id], key = (r && r.pattern) ? r.pattern : state.pattern;
+    return key === 'mixed' ? sch.pattern : key;
+  }
+  function setRowOverride(id, kind, value) {
+    var r = state.rows[id] || {};
+    if (value === null) delete r[kind]; else r[kind] = value;
+    if (Object.keys(r).length) state.rows[id] = r; else delete state.rows[id];
+  }
+  function overrideCount() { return Object.keys(state.rows).length; }
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+  }
+
+  /* ---------- DOM ---------- */
+  var segsEl = document.getElementById('segs');
+  var centreEl = document.getElementById('centre');
+  var baseNameEl = document.getElementById('baseName');
+  var baseSwatchEl = document.getElementById('baseSwatch');
+  var pgridEl = document.getElementById('pgrid');
+  var showKeyEl = document.getElementById('showKey');
+  var sheetEl = document.getElementById('sheet');
+  var liveEl = document.getElementById('live');
+  var customEl = document.getElementById('custom');
+  var customRowsEl = document.getElementById('customRows');
+  var customCountEl = document.getElementById('customCount');
+
+  function announce(msg) { liveEl.textContent = ''; liveEl.textContent = msg; }
+
+  /* Big wheel: built once, updated in place so keyboard focus survives */
+  function buildWheel() {
+    segsEl.innerHTML = WHEEL.map(function (c, i) {
+      var a0 = -90 + i * 30;
+      return '<path class="seg" d="' + sectorPath(150, 150, 138, 84, a0, a0 + 30) + '" fill="' + c[1] +
+             '" data-i="' + i + '" role="button" tabindex="0" aria-label="' + c[0] + '" aria-pressed="false"><title>' + c[0] + '</title></path>';
+    }).join('');
+  }
+  function segAt(i) { return segsEl.querySelector('.seg[data-i="' + w(i) + '"]'); }
+  function updateWheel() {
+    var segs = segsEl.querySelectorAll('.seg');
+    for (var i = 0; i < segs.length; i++) segs[i].setAttribute('aria-pressed', String(+segs[i].dataset.i === state.base));
+    centreEl.setAttribute('fill', hexOf(state.base));
+    baseNameEl.textContent = nameOf(state.base);
+    baseSwatchEl.style.background = hexOf(state.base);
+  }
+
+  function applyAccent() {
+    var hex = hexOf(state.base);
+    document.documentElement.style.setProperty('--accent', hex);
+    document.documentElement.style.setProperty('--accent-ink', inkFor(hex));
+  }
+
+  /* Pattern buttons: built once, previews redrawn in the current base's colours */
+  function buildPatternButtons() {
+    pgridEl.innerHTML = PATTERN_ORDER.map(function (key) {
+      return '<button type="button" class="pbtn" data-key="' + key + '" aria-pressed="false">' +
+             '<svg class="pv" viewBox="0 0 318 140" aria-hidden="true"></svg><span>' + PATTERN_LABEL[key] + '</span></button>';
+    }).join('');
+  }
+  function updatePatternButtons() {
+    var pal = SCHEMES[0].palette(state.base).map(function (c) { return c.hex; });
+    var btns = pgridEl.querySelectorAll('.pbtn');
+    for (var i = 0; i < btns.length; i++) {
+      var key = btns[i].dataset.key;
+      btns[i].setAttribute('aria-pressed', String(key === state.pattern));
+      btns[i].querySelector('.pv').innerHTML = patternInner(key, pal);
+    }
+  }
+
+  /* Per-example controls: two selects per scheme, built once and synced to state */
+  function buildCustomControls() {
+    var baseOpts = '<option value="">Follow</option>' + WHEEL.map(function (c, i) {
+      return '<option value="' + i + '">' + c[0] + '</option>';
+    }).join('');
+    var patOpts = '<option value="">Follow</option>' + PATTERN_ORDER.filter(function (k) { return k !== 'mixed'; }).map(function (k) {
+      return '<option value="' + k + '">' + PATTERN_LABEL[k] + '</option>';
+    }).join('');
+    customRowsEl.innerHTML = SCHEMES.map(function (sch) {
+      return '<div class="crow" data-id="' + sch.id + '">' +
+        '<span class="clabel">' + sch.title + '</span>' +
+        '<select data-kind="base" aria-label="' + sch.title + ' colour">' + baseOpts + '</select>' +
+        '<select data-kind="pattern" aria-label="' + sch.title + ' pattern">' + patOpts + '</select>' +
+      '</div>';
+    }).join('');
+  }
+  function updateCustomControls() {
+    var rows = customRowsEl.querySelectorAll('.crow');
+    for (var i = 0; i < rows.length; i++) {
+      var r = state.rows[rows[i].dataset.id] || {};
+      var bSel = rows[i].querySelector('[data-kind="base"]'), pSel = rows[i].querySelector('[data-kind="pattern"]');
+      var hasBase = isBase(r.base), hasPat = !!r.pattern;
+      bSel.options[0].textContent = 'Follow (' + nameOf(state.base) + ')';
+      pSel.options[0].textContent = 'Follow (' + PATTERN_LABEL[state.pattern] + ')';
+      bSel.value = hasBase ? String(r.base) : '';
+      pSel.value = hasPat ? r.pattern : '';
+      bSel.classList.toggle('set', hasBase);
+      pSel.classList.toggle('set', hasPat);
+    }
+    var n = overrideCount();
+    customCountEl.textContent = n + ' custom';
+    customCountEl.hidden = n === 0;
+  }
+
+  /* Worksheet */
+  function miniWheel(set) {
+    var s = '';
+    for (var i = 0; i < N; i++) {
+      var a0 = -90 + i * 30;
+      s += '<path d="' + sectorPath(60, 60, 57, 34, a0, a0 + 30) + '" fill="' + (set[i] ? hexOf(i) : WHITE) + '" stroke="' + INK + '" stroke-width="1"/>';
+    }
+    return s;
+  }
+  function rowHTML(sch) {
+    var b = rowBase(sch), key = rowPattern(sch);
+    var idx = sch.idx(b).map(w), set = {};
+    idx.forEach(function (i) { set[i] = true; });
+    var pal = schemePalette(sch, b);
+    var hidden = state.showKey ? '' : ' hidden';
+    var chips = pal.map(function (c) {
+      return '<li><span class="chip" style="background:' + c.hex + '"></span><span class="lbl">' + c.name + '</span></li>';
+    }).join('');
+    return '<section class="row">' +
+      '<svg class="mini" viewBox="0 0 120 120" aria-hidden="true">' + miniWheel(set) + '</svg>' +
+      '<div class="txt">' +
+        '<h2>' + sch.title + '</h2>' +
+        '<p class="def">' + sch.def + '</p>' +
+        '<ul class="chips"' + hidden + '>' + chips + '</ul>' +
+        '<p class="note"' + hidden + '>' + sch.note(b) + '</p>' +
+      '</div>' +
+      '<svg class="pat" viewBox="0 0 318 140" role="img" aria-label="' + PATTERN_LABEL[key] + ' pattern in the ' + sch.title + ' colours">' +
+        PATTERNS[key](pal.map(function (c) { return c.hex; })) +
+      '</svg>' +
+    '</section>';
+  }
+  function subtitle() {
+    var names = [];
+    SCHEMES.forEach(function (sch) { var n = nameOf(rowBase(sch)); if (names.indexOf(n) === -1) names.push(n); });
+    if (names.length === 1) return 'Worked examples, all built around ' + names[0];
+    if (names.length <= 3) return 'Worked examples, built around ' + names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
+    return 'Worked examples, each built around its own colour';
+  }
+  function renderSheet() {
+    sheetEl.innerHTML =
+      '<header class="head">' +
+        '<h1>COLOUR WHEEL SCHEMES</h1>' +
+        '<p class="sub">' + subtitle() + '</p>' +
+        '<div class="who"><span>NAME:</span><span class="blank"></span><span>DATE:</span><span class="blank short"></span></div>' +
+      '</header>' +
+      SCHEMES.map(rowHTML).join('');
+  }
+
+  function renderAll() {
+    applyAccent();
+    updateWheel();
+    updatePatternButtons();
+    updateCustomControls();
+    showKeyEl.checked = state.showKey;
+    renderSheet();
+  }
+
+  /* ---------- Actions ---------- */
+  function setBase(i) {
+    state.base = w(i);
+    renderAll(); save();
+    announce('Base colour: ' + nameOf(state.base));
+  }
+  function setPattern(key) {
+    state.pattern = key;
+    renderAll(); save();
+    announce('Pattern: ' + PATTERN_LABEL[key]);
+  }
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  function randomise() {
+    var b;
+    do { b = Math.floor(Math.random() * N); } while (b === state.base);
+    var keys = PATTERN_ORDER.filter(function (k) { return k !== state.pattern; });
+    var hadRows = overrideCount() > 0;
+    state.base = b;
+    state.pattern = keys[Math.floor(Math.random() * keys.length)];
+    state.rows = {};
+    renderAll(); save();
+    announce('Randomised: ' + nameOf(b) + ' with the ' + PATTERN_LABEL[state.pattern] + ' pattern' + (hadRows ? '; per-example choices cleared' : ''));
+  }
+  function randomiseRows() {
+    // every example gets a different colour and a different pattern
+    var bases = shuffle(WHEEL.map(function (c, i) { return i; }));
+    var pats = shuffle(PATTERN_ORDER.filter(function (k) { return k !== 'mixed'; }));
+    SCHEMES.forEach(function (sch, i) { state.rows[sch.id] = { base: bases[i], pattern: pats[i] }; });
+    customEl.open = true;
+    renderAll(); save();
+    announce('Each example now has its own random colour and pattern');
+  }
+  function resetRows() {
+    state.rows = {};
+    renderAll(); save();
+    announce('All examples now follow the base colour and pattern');
+  }
+
+  /* ---------- Events ---------- */
+  segsEl.addEventListener('click', function (e) {
+    var t = e.target.closest('.seg');
+    if (t) setBase(+t.dataset.i);
+  });
+  segsEl.addEventListener('keydown', function (e) {
+    var t = e.target.closest('.seg');
+    if (!t) return;
+    var i = +t.dataset.i, next;
+    switch (e.key) {
+      case 'Enter': case ' ': e.preventDefault(); setBase(i); return;
+      case 'ArrowRight': case 'ArrowDown': next = i + 1; break;
+      case 'ArrowLeft': case 'ArrowUp': next = i - 1; break;
+      case 'Home': next = 0; break;
+      case 'End': next = N - 1; break;
+      default: return;
+    }
+    e.preventDefault();
+    setBase(next);
+    var el = segAt(next);
+    if (el) el.focus();
+  });
+  pgridEl.addEventListener('click', function (e) {
+    var t = e.target.closest('.pbtn');
+    if (t) setPattern(t.dataset.key);
+  });
+  showKeyEl.addEventListener('change', function () {
+    state.showKey = showKeyEl.checked;
+    renderSheet(); save();
+  });
+  customRowsEl.addEventListener('change', function (e) {
+    var sel = e.target.closest('select');
+    if (!sel) return;
+    var row = sel.closest('.crow'), sch = SCHEMES.filter(function (s) { return s.id === row.dataset.id; })[0];
+    var kind = sel.dataset.kind, v = sel.value;
+    setRowOverride(sch.id, kind, v === '' ? null : (kind === 'base' ? +v : v));
+    renderAll(); save();
+    announce(sch.title + ' ' + kind + ': ' + (v === '' ? 'follows the main choice' : (kind === 'base' ? nameOf(+v) : PATTERN_LABEL[v])));
+  });
+  document.getElementById('randomBtn').addEventListener('click', randomise);
+  document.getElementById('randomRowsBtn').addEventListener('click', randomiseRows);
+  document.getElementById('resetRowsBtn').addEventListener('click', resetRows);
+  document.getElementById('printBtn').addEventListener('click', function () {
+    try { window.print(); } catch (e) { /* printing blocked */ }
+  });
+
+  /* ---------- Init ---------- */
+  load();
+  buildWheel();
+  buildPatternButtons();
+  buildCustomControls();
+  renderAll();
+})();
+</script>
+</body>
+</html>
