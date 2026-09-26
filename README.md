@@ -55,6 +55,16 @@ The wheel is fully keyboard accessible: Tab to a segment, arrow keys step around
 - **Output**: download the study as PNG or print it on an A4 landscape sheet with its value key.
 - **Notan thumbnail sheet**: printable A4 with 6 or 9 frames in a chosen aspect ratio.
 
+## Gesture Timer
+
+`gesture-timer.html` runs timed drawing sessions.
+
+- **What to draw**: your own images (files, folder or drag-and-drop, kept in the browser), generated mannequin poses, or an editable list of life prompts.
+- **Sessions**: Warm-up, Class (10 × 30 s, 5 × 1 min, 3 × 5 min, 1 × 10 min), Quick sketch, Long, or custom rows.
+- **Options**: shuffle, greyscale, mirror, a thirds grid, breaks and beeps.
+- **Session view**: full-window, with a countdown ring and keyboard shortcuts (Space, ←/→, +, F, G, M, T, Esc). Timing is drift-free and keeps going in background tabs.
+- **Summary and log**: an end-of-session summary, and a practice log with totals kept in the browser.
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.

@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Gesture Timer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="lesson.css">
+<style>
+:root { --warn: #c2410c; }
+@media (prefers-color-scheme: dark) { :root { --warn: #fb923c; } }
+
+/* ---------- About gesture ---------- */
+.about { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.about svg { display: block; width: 100%; height: auto; }
+.about .cap { border-top: 1px solid #e1ded6; padding: 10px 16px 12px; font-size: 13px; color: #333; }
+.ladder { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ladder li { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 12px; align-items: baseline; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; font-size: 14px; }
+.ladder b { font-size: 15px; font-variant-numeric: tabular-nums; }
+.looks { list-style: none; margin: 20px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+.looks li { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+.looks b { display: block; font-size: 15px; margin-bottom: 2px; }
+
+/* ---------- Setup ---------- */
+.setup { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; align-items: start; }
+.bgrid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.drop {
+  display: grid; justify-items: center; gap: 10px; text-align: center;
+  padding: 22px 16px; border: 2px dashed var(--border); border-radius: 12px;
+  color: var(--muted); font-size: 14px;
+}
+.drop.over { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--panel)); color: var(--ink); }
+.drop .row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.thumbs { list-style: none; margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; max-height: 340px; overflow: auto; }
+.thumbs li { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: #fbfaf6; border: 1px solid var(--border); }
+.thumbs img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumbs button {
+  position: absolute; top: 2px; right: 2px; width: 40px; height: 40px;
+  display: grid; place-items: center; padding: 0;
+  background: transparent; border: 0; cursor: pointer;
+}
+.thumbs button span { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: rgba(20, 20, 20, .78); color: #fff; font-size: 16px; line-height: 1; }
+.thumbs button:hover span { background: #E4252C; }
+.imgbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 12px; font-size: 14px; }
+.imgbar .btn { margin-left: auto; }
+.fig-prev { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; align-items: center; }
+.fig-prev .paper svg { display: block; width: 100%; height: auto; }
+textarea {
+  width: 100%; min-height: 240px; padding: 10px 12px; resize: vertical;
+  background: var(--panel); color: var(--ink); border: 2px solid var(--border); border-radius: 10px;
+  font: inherit; font-size: 14px; line-height: 1.5;
+}
+textarea:focus { border-color: var(--accent); outline: none; }
+.rows { display: grid; gap: 6px; }
+.prow { display: grid; grid-template-columns: 76px 16px minmax(0, 1fr) 44px; gap: 6px; align-items: center; }
+.prow input, .prow select {
+  width: 100%; min-height: 44px; padding: 6px 8px;
+  background: var(--panel); color: var(--ink); border: 2px solid var(--border); border-radius: 9px;
+  font: inherit; font-size: 14px;
+}
+.prow span { text-align: center; color: var(--muted); }
+.prow .x { min-height: 44px; padding: 0; font-size: 18px; }
+.addrow { margin-top: 8px; width: 100%; }
+.plan { margin: 12px 0 0; padding: 10px 12px; background: var(--bg); border-radius: 10px; font-size: 14px; }
+.plan b { font-size: 16px; }
+.plan .warn { color: var(--warn); display: block; margin-top: 4px; }
+.start { width: 100%; margin-top: 16px; min-height: 52px; font-size: 16px; }
+.beeprow { display: flex; gap: 8px; align-items: end; }
+.beeprow .range { flex: 1; margin: 0; }
+.beeprow .btn { padding: 8px 12px; }
+
+/* ---------- History ---------- */
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+.stats div { background: var(--bg); border-radius: 10px; padding: 10px 12px; }
+.stats b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; }
+.stats span { font-size: 12px; color: var(--muted); }
+.tscroll { overflow-x: auto; }
+table.log { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.log th { text-align: left; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 6px 8px; border-bottom: 2px solid var(--border); white-space: nowrap; }
+.log td { padding: 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.log-foot { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-top: 12px; }
+.log-foot .hint { margin: 0 auto 0 0; }
+
+/* ---------- Session overlay ---------- */
+.sess {
+  position: fixed; inset: 0; z-index: 100;
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto;
+  background: var(--bg); color: var(--ink);
+}
+.s-top { display: flex; align-items: center; gap: 8px 14px; padding: 8px 16px; background: var(--panel); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.s-count { font-weight: 800; font-size: 18px; font-variant-numeric: tabular-nums; }
+.s-sec { color: var(--muted); font-size: 14px; }
+.s-name { color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
+.s-top .btn { padding: 6px 14px; }
+.s-stage { position: relative; min-height: 0; margin: 12px 12px 0; background: #fbfaf6; color: #141414; border: 1px solid #cfcbc2; border-radius: 14px; overflow: hidden; }
+.frame { position: absolute; }
+.frame > img, .frame > svg.fig { display: block; width: 100%; height: 100%; }
+.frame.grey > img, .frame.grey > svg.fig { filter: grayscale(1); }
+.frame.mirror > img, .frame.mirror > svg.fig { transform: scaleX(-1); }
+.frame svg.thirds { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.prompt { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; padding: 24px; gap: 14px; }
+.prompt small { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #6a6760; }
+.prompt p { margin: 0; font-size: clamp(26px, 5vw, 56px); font-weight: 800; line-height: 1.15; max-width: 22ch; }
+.prompt em { font-style: normal; font-size: 15px; color: #55534e; }
+.cover { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; gap: 10px; padding: 24px; background: #fbfaf6; }
+.cover h2 { margin: 0; font-size: clamp(28px, 5vw, 48px); font-weight: 800; }
+.cover p { margin: 0 auto; max-width: 52ch; color: #333; font-size: 16px; }
+.cover .next { font-weight: 700; color: #141414; font-size: 18px; }
+.cover .btn.primary { justify-self: center; margin-top: 6px; }
+.pausetag { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); padding: 6px 16px; border-radius: 999px; background: rgba(20, 20, 20, .82); color: #fff; font-weight: 800; letter-spacing: .12em; font-size: 13px; }
+.confirm { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: center; padding: 10px 14px; background: var(--panel); color: var(--ink); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, .25); }
+.confirm b { margin-right: 6px; }
+.s-bar { height: 6px; margin: 10px 12px 0; background: var(--border); border-radius: 3px; overflow: hidden; }
+.s-bar i { display: block; height: 100%; width: 0; background: var(--accent); }
+.sess.low .s-bar i { background: var(--warn); }
+.s-bot { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px 18px; align-items: center; padding: 10px 16px 12px; }
+.clock { display: flex; align-items: center; gap: 12px; }
+.clock svg { width: 64px; height: 64px; transform: rotate(-90deg); flex: none; }
+.clock .trk { fill: none; stroke: var(--border); stroke-width: 8; }
+.clock .arc { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; }
+.sess.low .clock .arc { stroke: var(--warn); }
+.sess.brk .clock .arc { stroke: var(--muted); }
+.clock time { font-size: clamp(38px, 6vw, 60px); font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; min-width: 3.4ch; }
+.sess.low .clock time { color: var(--warn); }
+.clock .ph { display: block; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.ctrls { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.ctrls .btn { min-width: 64px; }
+.ctrls #sPause { min-width: 108px; }
+.tog { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.tog .tbtn { padding: 6px 12px; }
+.keys { grid-column: 1 / -1; margin: 0; font-size: 12px; color: var(--muted); text-align: center; }
+kbd { font: inherit; font-weight: 700; padding: 1px 6px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 5px; background: var(--panel); color: var(--ink); }
+
+/* End-of-session summary */
+.summary { position: absolute; inset: 0; overflow: auto; background: #fbfaf6; color: #141414; padding: 28px 24px; }
+.summary-in { max-width: 860px; margin: 0 auto; }
+.summary h2 { margin: 0 0 4px; font-size: clamp(26px, 4vw, 38px); font-weight: 800; }
+.summary .sub { margin: 0 0 18px; color: #55534e; }
+.summary .stats div { background: #efece4; }
+.summary .stats span { color: #55534e; }
+.summary table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; margin-bottom: 18px; }
+.summary th { text-align: left; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #55534e; padding: 6px 8px; border-bottom: 2px solid #cfcbc2; }
+.summary td { padding: 7px 8px; border-bottom: 1px solid #e1ded6; }
+.review { list-style: none; margin: 0 0 20px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 6px; }
+.review li { position: relative; aspect-ratio: 3 / 4; border: 1px solid #cfcbc2; border-radius: 6px; overflow: hidden; background: #fff; font-size: 11px; display: grid; place-items: center; text-align: center; padding: 0; }
+.review li.txt { padding: 6px; line-height: 1.25; }
+.review img, .review svg { width: 100%; height: 100%; object-fit: cover; display: block; }
+.review i { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(20, 20, 20, .72); color: #fff; font-style: normal; font-size: 10px; padding: 2px 4px; font-variant-numeric: tabular-nums; }
+.review li.skip { opacity: .45; }
+.summary .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.summary .btn.ghost { color: #141414; }
+
+@media (max-width: 960px) {
+  .about, .setup { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  .s-bot { grid-template-columns: 1fr; justify-items: center; }
+  .tog { justify-content: center; }
+  .s-top .btn { padding: 6px 10px; font-size: 13px; }
+  #sFull { margin-left: auto; }
+  .s-sec { flex-basis: 100%; order: 3; }
+  .s-name { display: none; }
+  .fig-prev { grid-template-columns: 110px minmax(0, 1fr); }
+  .keys { display: none; }
+}
+@media (max-width: 560px) {
+  .stats b { font-size: 18px; }
+  .ladder li { grid-template-columns: 60px minmax(0, 1fr); }
+}
+</style>
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Colour</button>
+        <ul>
+          <li><a href="colour-schemes.html">Colour schemes</a></li>
+          <li><a href="colour-interaction.html">Colour interaction</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Form &amp; space</button>
+        <ul>
+          <li><a href="shape-shading.html">3D shape shading</a></li>
+          <li><a href="perspective.html">Perspective</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Reference tools</button>
+        <ul>
+          <li><a href="value-notan.html">Value &amp; notan</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Practice</button>
+        <ul>
+          <li><a href="gesture-timer.html" aria-current="page">Gesture timer</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>Gesture timer</h1>
+    <p>Timed drawing sessions from your own reference photos, built-in mannequin poses or a list of things to draw from life. Short poses force you to find the movement of a subject before its details.</p>
+    <ul class="jump">
+      <li><a href="#about">Why short poses</a></li>
+      <li><a href="#setup">Set up a session</a></li>
+      <li><a href="#history">Session log</a></li>
+    </ul>
+  </div>
+
+  <!-- ---------- About gesture ---------- -->
+  <section id="about" aria-labelledby="aboutTitle">
+    <h2 class="sec-title" id="aboutTitle">Why draw in short, timed poses</h2>
+    <p class="sec-lead">Gesture drawing is fast drawing of a pose, figure or object, done against the clock. The time limit matters. In thirty seconds you cannot copy contours or detail, so you have to work out what the pose is <em>doing</em>: the line of action through it, the rhythm of its curves, the tilt of head, ribcage and pelvis, and where the weight falls. Frequent short poses train you to see the whole before the parts. Longer drawings built on that foundation stay lively instead of stiff.</p>
+    <div class="about">
+      <div class="paper">
+        <svg id="loaSvg" viewBox="0 0 900 420" role="img" aria-label="Three mannequin poses (standing, lunging and throwing), each with its line of action drawn as a single red curve from the head to the supporting foot."></svg>
+        <div class="cap">The red curve is the <b>line of action</b>: one continuous line from the head, through the spine, to the leg that carries the weight. In a 30-second pose it may be most of the drawing.</div>
+      </div>
+      <ol class="ladder" aria-label="What to aim for at each pose length" id="ladder"></ol>
+    </div>
+    <ul class="looks">
+      <li><b>Line of action</b>The dominant curve or straight line through the pose. Put it down first, in one stroke, and make it more curved than it looks, not less.</li>
+      <li><b>Rhythm</b>Contours alternate: a full convex curve on one side of a limb is answered by a flatter or straighter one on the other, and staggered across it. Following that alternation moves the eye through the figure.</li>
+      <li><b>Weight and balance</b>Find the supporting leg. A plumb line from the pit of the neck falls on or near it. In contrapposto the pelvis tilts one way and the shoulders the other.</li>
+      <li><b>Three masses</b>Treat the head, ribcage and pelvis as simple volumes. Their tilt and twist against each other carry most of the movement.</li>
+      <li><b>Economy</b>Draw from the shoulder with a soft medium or the side of the lead, on cheap paper such as newsprint. Accept distortion. A short pose records what you saw, not a finished image.</li>
+    </ul>
+  </section>
+
+  <!-- ---------- Setup ---------- -->
+  <section id="setup" aria-labelledby="setupTitle">
+    <h2 class="sec-title" id="setupTitle">Set up a session</h2>
+    <p class="sec-lead">Choose what to draw from, pick a sequence of poses, then press <em>Start</em>. Images you load stay in this browser. Nothing is uploaded, and they are forgotten when you close the page.</p>
+    <div class="setup">
+      <div class="panel">
+        <h3 class="label" id="srcLbl">Draw from</h3>
+        <div class="bgrid" role="group" aria-labelledby="srcLbl" id="srcBtns">
+          <button type="button" class="tbtn" data-src="images" aria-pressed="false">Your images</button>
+          <button type="button" class="tbtn" data-src="figures" aria-pressed="false">Sample figures</button>
+          <button type="button" class="tbtn" data-src="prompts" aria-pressed="false">Life prompts</button>
+        </div>
+
+        <div id="srcImages">
+          <h3 class="label">Reference images</h3>
+          <div class="drop" id="drop">
+            <div>Drag photos or a folder here, or</div>
+            <div class="row">
+              <label class="btn primary" for="fileIn" style="display:flex;align-items:center">Choose images</label>
+              <label class="btn ghost" for="dirIn" id="dirLbl" style="display:flex;align-items:center">Choose a folder</label>
+            </div>
+            <input type="file" id="fileIn" accept="image/*" multiple class="sr-only">
+            <input type="file" id="dirIn" multiple class="sr-only" webkitdirectory>
+          </div>
+          <ul class="thumbs" id="thumbs" aria-label="Loaded images"></ul>
+          <div class="imgbar">
+            <span id="imgCount" aria-live="polite">No images loaded.</span>
+            <button type="button" class="btn ghost" id="clearImgs" hidden>Remove all</button>
+          </div>
+          <p class="hint">Good sources: your own photos of friends posing, pose-reference sites, or stills from dance and sport. If the session has more poses than images, the images repeat.</p>
+        </div>
+
+        <div id="srcFigures" hidden>
+          <h3 class="label">Sample figures</h3>
+          <div class="fig-prev">
+            <div class="paper"><svg id="figPrev" viewBox="0 0 300 400" role="img" aria-label="A randomly posed wooden-mannequin figure"></svg></div>
+            <div>
+              <p style="margin:0 0 12px;font-size:14px">A new mannequin pose is generated for every pose in the session: standing, lunging, reaching, crouching, running, throwing and kneeling, each varied at random and sometimes mirrored. Mannequins are simplified, so use them to practise line of action and the three masses, then move to photographs or life.</p>
+              <button type="button" class="btn ghost" id="figAnother">Show another</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="srcPrompts" hidden>
+          <h3 class="label"><label for="prompts">Prompts, one per line</label></h3>
+          <textarea id="prompts" spellcheck="true"></textarea>
+          <div class="imgbar">
+            <span id="promptCount"></span>
+            <button type="button" class="btn ghost" id="promptReset">Restore default list</button>
+          </div>
+          <p class="hint">For drawing from life with no reference images: each pose shows one thing to find in the room (or yourself, in a mirror) and draw. Objects have gesture too: the thrust of a chair leg, the slump of a bag, the curve of a draped cloth.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3 class="label" id="presetLbl">Session</h3>
+        <div class="bgrid two" role="group" aria-labelledby="presetLbl" id="presetBtns"></div>
+        <h3 class="label" id="rowsLbl">Poses</h3>
+        <div class="rows" id="rows" aria-labelledby="rowsLbl"></div>
+        <button type="button" class="btn ghost addrow" id="addRow">Add a row</button>
+        <div class="plan" id="plan" aria-live="polite"></div>
+
+        <h3 class="label">Options</h3>
+        <label class="check"><input type="checkbox" id="oShuffle" checked> Shuffle the order</label>
+        <label class="check"><input type="checkbox" id="oGrey"> Show images in greyscale</label>
+        <label class="check"><input type="checkbox" id="oMirror"> Mirror images</label>
+        <label class="check"><input type="checkbox" id="oGrid"> Thirds grid over the image</label>
+        <label class="check"><input type="checkbox" id="oHold"> Wait for me at the start of each section</label>
+        <div class="range" style="margin-top:8px">
+          <span><label for="oBreak">Break between poses</label><output id="oBreakOut" for="oBreak"></output></span>
+          <input type="range" id="oBreak" min="0" max="60" step="5" value="0">
+        </div>
+        <div class="range">
+          <span><label for="oSecBreak">Break between sections</label><output id="oSecBreakOut" for="oSecBreak"></output></span>
+          <input type="range" id="oSecBreak" min="0" max="120" step="5" value="15">
+        </div>
+        <div class="beeprow">
+          <div class="range">
+            <span><label for="oVol">Beep volume</label><output id="oVolOut" for="oVol"></output></span>
+            <input type="range" id="oVol" min="0" max="100" step="5" value="50">
+          </div>
+          <button type="button" class="btn ghost" id="testBeep">Test</button>
+        </div>
+        <p class="hint">Beeps sound at 3, 2 and 1 seconds before a pose ends, and a chime marks each change. The timer keeps time if you switch tabs.</p>
+        <button type="button" class="btn primary start" id="startBtn">Start session</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- History ---------- -->
+  <section id="history" aria-labelledby="histTitle">
+    <h2 class="sec-title" id="histTitle">Session log</h2>
+    <p class="sec-lead">Every session you finish (or end early) is logged here, in this browser only. Little and often counts more than the odd long session.</p>
+    <div class="panel">
+      <div class="stats">
+        <div><b id="hSessions">0</b><span>sessions</span></div>
+        <div><b id="hTotal">0 min</b><span>total drawing time</span></div>
+        <div><b id="hWeek">0 min</b><span>in the last 7 days</span></div>
+      </div>
+      <div class="tscroll">
+        <table class="log">
+          <thead><tr><th scope="col">Date</th><th scope="col">Session</th><th scope="col">Source</th><th scope="col">Poses</th><th scope="col">Drawing time</th></tr></thead>
+          <tbody id="hBody"></tbody>
+        </table>
+      </div>
+      <div class="log-foot">
+        <p class="hint" id="hNote"></p>
+        <button type="button" class="btn ghost" id="hClear">Clear history</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ---------- Session view ---------- -->
+<div class="sess" id="sess" role="dialog" aria-modal="true" aria-labelledby="sCount" hidden>
+  <div class="s-top">
+    <span class="s-count" id="sCount" aria-live="polite"></span>
+    <span class="s-sec" id="sSec"></span>
+    <span class="s-name" id="sName"></span>
+    <button type="button" class="btn ghost" id="sFull">Fullscreen</button>
+    <button type="button" class="btn ghost" id="sEnd">End session</button>
+  </div>
+  <div class="s-stage" id="stage">
+    <div class="frame" id="frame"></div>
+    <div class="prompt" id="promptView" hidden><small>Draw</small><p id="promptText"></p><em>Line of action first, then the big shapes.</em></div>
+    <div class="cover" id="cover" hidden></div>
+    <div class="pausetag" id="pauseTag" hidden>PAUSED</div>
+    <div class="confirm" id="confirm" hidden>
+      <b>End the session now?</b>
+      <button type="button" class="btn primary" id="cEnd">End and see summary</button>
+      <button type="button" class="btn ghost" id="cBack">Keep drawing</button>
+    </div>
+    <div class="summary" id="summary" hidden></div>
+  </div>
+  <div class="s-bar" aria-hidden="true"><i id="sBar"></i></div>
+  <div class="s-bot" id="sBot">
+    <div class="clock">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle class="trk" cx="32" cy="32" r="27"/><circle class="arc" id="sArc" cx="32" cy="32" r="27" pathLength="1" stroke-dasharray="1" stroke-dashoffset="0"/></svg>
+      <div><time id="sTime" role="timer">0:00</time><span class="ph" id="sPhase">Pose</span></div>
+    </div>
+    <div class="ctrls">
+      <button type="button" class="btn ghost" id="sPrev" aria-label="Previous pose">&#8592; Prev</button>
+      <button type="button" class="btn primary" id="sPause">Pause</button>
+      <button type="button" class="btn ghost" id="sNext" aria-label="Next pose">Next &#8594;</button>
+      <button type="button" class="btn ghost" id="sAdd">+30 s</button>
+    </div>
+    <div class="tog" role="group" aria-label="View options">
+      <button type="button" class="tbtn" id="tGrey" aria-pressed="false">Grey</button>
+      <button type="button" class="tbtn" id="tMirror" aria-pressed="false">Mirror</button>
+      <button type="button" class="tbtn" id="tGrid" aria-pressed="false">Grid</button>
+      <button type="button" class="tbtn" id="tSound" aria-pressed="true">Sound</button>
+    </div>
+    <p class="keys"><kbd>Space</kbd> pause &nbsp; <kbd>&#8592;</kbd> <kbd>&#8594;</kbd> previous / next &nbsp; <kbd>+</kbd> add 30 s &nbsp; <kbd>F</kbd> fullscreen &nbsp; <kbd>G</kbd> grey &nbsp; <kbd>M</kbd> mirror &nbsp; <kbd>T</kbd> grid &nbsp; <kbd>Esc</kbd> end</p>
+  </div>
+</div>
+
+<script src="site.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Small helpers ---------- */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function shuffle(arr, rnd = Math.random) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+// Duration label: 30 s, 1 min, 1 min 30 s
+function durLabel(sec) {
+  const m = Math.floor(sec / 60), s = sec % 60;
+  if (!m) return s + ' s';
+  return m + ' min' + (s ? ' ' + s + ' s' : '');
+}
+// Countdown text m:ss, rounding up so "0:00" only shows at the very end
+function clock(ms) {
+  const t = Math.max(0, Math.ceil(ms / 1000));
+  return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0');
+}
+// Long-form total: 1 h 05 min, 12 min 30 s
+function total(ms) {
+  const t = Math.round(ms / 1000), h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = t % 60;
+  if (h) return h + ' h ' + String(m).padStart(2, '0') + ' min';
+  if (m) return m + ' min' + (s ? ' ' + s + ' s' : '');
+  return s + ' s';
+}
+// What to aim for at each pose length (used in the intro ladder and on break screens)
+const TIERS = [
+  [30, '30 s', 'Line of action and the tilt of the head, ribcage and pelvis. Nothing else.'],
+  [120, '1–2 min', 'Line of action, then the three masses and where the weight falls.'],
+  [300, '3–5 min', 'Check proportion and overlaps. State the limbs’ direction, with hands and feet as simple shapes.'],
+  [900, '10–15 min', 'Build structure over the gesture: planes, overlapping contours, and the main light and shadow shapes.'],
+  [Infinity, '20 min +', 'A developed study. Keep the gesture from the first minutes alive under the detail.']
+];
+const tierFor = sec => TIERS.find(t => sec <= t[0]);
+$('ladder').innerHTML = TIERS.map(t => '<li><b>' + t[1] + '</b><span>' + t[2] + '</span></li>').join('');
+
+/* ---------- Mannequin figures ----------
+   Angles are in degrees: 0 points down the page, 90 to the right, 180 up.
+   t torso, h head, pt pelvis tilt, st shoulder tilt, tw twist (narrows the shoulders),
+   l/L far/near leg [thigh, shin], a/A far/near arm [upper, fore], f feet angles. */
+const POSES = [
+  { n: 'standing', t: 176, h: 186, pt: 8, st: -6, tw: .1, l: [-4, 2], L: [12, 4], a: [10, 4], A: [32, -55] },
+  { n: 'lunge', s: 0, t: 150, h: 140, pt: -5, st: 5, tw: .2, l: [-38, -72], L: [72, 4], a: [-40, -20], A: [112, 124], f: [40, 90] },
+  { n: 'reach', t: 188, h: 200, pt: 6, st: -14, tw: .1, l: [6, 0], L: [-6, 4], a: [205, 198], A: [150, 172] },
+  { n: 'crouch', t: 158, h: 150, pt: 0, st: 0, tw: .3, l: [96, -6], L: [84, 2], a: [95, 40], A: [120, 70] },
+  { n: 'run', t: 162, h: 160, pt: 0, st: 6, tw: .3, l: [-30, -88], L: [56, 6], a: [62, 140], A: [-52, 8], f: [10, 90] },
+  { n: 'lean back', t: 204, h: 212, pt: -8, st: 12, tw: .5, l: [18, 6], L: [-18, -4], a: [-120, -160], A: [70, 110] },
+  { n: 'throw', t: 196, h: 188, pt: 4, st: -18, tw: .4, l: [30, 5], L: [-28, -10], a: [-160, -122], A: [70, 40] },
+  { n: 'stoop', t: 112, h: 100, pt: 0, st: 0, tw: .2, l: [3, 0], L: [-6, 0], a: [5, 0], A: [16, 6] },
+  { n: 'kneel', t: 176, h: 182, pt: 4, st: -4, tw: .2, l: [95, 0], L: [2, -88], a: [22, 42], A: [-10, 10], f: [90, -90] }
+];
+const dir = a => [Math.sin(a * Math.PI / 180), Math.cos(a * Math.PI / 180)];
+const add = (p, a, len) => { const d = dir(a); return [p[0] + d[0] * len, p[1] + d[1] * len]; };
+
+// Solve a pose into joint positions, with optional random jitter and mirroring
+function solve(base, rnd) {
+  const j = v => v + (rnd ? (rnd() - .5) * 22 : 0);
+  const P = [0, 0];
+  const t = j(base.t), h = j(base.h), pt = j(base.pt) * .6, st = j(base.st) * .6;
+  const C = add(P, t, 62);
+  const sw = 27 * (1 - base.tw * .55);
+  const S = [add(C, t + 90 + st, sw), add(C, t - 90 + st, sw)];   // far, near shoulder
+  const Hp = [add(P, 270 + pt, 16), add(P, 90 + pt, 16)];          // far, near hip
+  const legs = [base.l, base.L].map((lg, k) => {
+    const K = add(Hp[k], j(lg[0]), 60), A = add(K, j(lg[1]), 56);
+    const fa = base.f ? base.f[k] : 90;
+    return [Hp[k], K, A, add(A, fa, 17)];
+  });
+  const arms = [base.a, base.A].map((am, k) => {
+    const E = add(S[k], j(am[0]), 44), lo = j(am[1]), W = add(E, lo, 38);
+    return [S[k], E, W, add(W, lo, 9)];
+  });
+  const head = add(C, h, 30);
+  return { P, C, t, h, pt, head, legs, arms, sup: base.s, mirror: rnd ? rnd() < .5 : false };
+}
+
+// SVG markup for a mannequin (300 x 400 box), with an optional line of action
+function figureSVG(base, rnd, withLine) {
+  const F = solve(base, rnd);
+  const pts = [F.P, F.C, F.head].concat(...F.legs, ...F.arms);
+  let x0 = Math.min(...pts.map(p => p[0])) - 22, x1 = Math.max(...pts.map(p => p[0])) + 22;
+  let y0 = Math.min(...pts.map(p => p[1])) - 22, y1 = Math.max(...pts.map(p => p[1])) + 12;
+  const sc = Math.min(270 / (x1 - x0), 350 / (y1 - y0), 1.6);
+  const tx = 150 - (x0 + x1) / 2 * sc, ty = 384 - y1 * sc;
+  const f = n => n.toFixed(1);
+  const seg = (pts, w, col) =>
+    '<path d="M' + pts.map(p => f(p[0]) + ' ' + f(p[1])).join('L') + '" fill="none" stroke="#2b2b2b" stroke-width="' + (w + 3.5) + '" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '<path d="M' + pts.map(p => f(p[0]) + ' ' + f(p[1])).join('L') + '" fill="none" stroke="' + col + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round"/>';
+  const limb = (L, w1, w2, col) =>
+    seg([L[0], L[1]], w1, col) + seg([L[1], L[2]], w2, col) + seg([L[2], L[3]], w2 * .7, col) +
+    '<circle cx="' + f(L[1][0]) + '" cy="' + f(L[1][1]) + '" r="' + (w2 * .42) + '" fill="#2b2b2b" opacity=".35"/>';
+  const ell = (c, rx, ry, rot, col) =>
+    '<ellipse cx="' + f(c[0]) + '" cy="' + f(c[1]) + '" rx="' + rx + '" ry="' + ry + '" transform="rotate(' + f(rot) + ' ' + f(c[0]) + ' ' + f(c[1]) + ')" fill="' + col + '" stroke="#2b2b2b" stroke-width="1.8"/>';
+  const far = '#b8b3a8', near = '#e4dfd4', body = '#d5d0c5';
+  const rib = add(F.P, F.t, 40), pel = add(F.P, F.t, 3);
+  let s = '';
+  s += limb(F.arms[0], 12, 10, far) + limb(F.legs[0], 18, 13, far);
+  s += seg([F.P, F.C], 14, body);
+  s += ell(pel, 20, 15, -F.pt, body);
+  s += ell(rib, 22, 31, 180 - F.t, body);
+  s += seg([F.C, add(F.C, F.h, 12)], 9, body);
+  s += ell(F.head, 13, 17, 180 - F.h, near);
+  s += limb(F.legs[1], 18, 13, near) + limb(F.arms[1], 12, 10, near);
+  // Line of action: a quadratic curve from the top of the head to the supporting ankle, bent to pass the pelvis
+  let line = '';
+  if (withLine) {
+    const top = add(F.head, F.h, 14);
+    const sup = F.sup != null ? F.legs[F.sup][2] : F.legs[0][2][1] > F.legs[1][2][1] ? F.legs[0][2] : F.legs[1][2];
+    const Q = [2 * F.P[0] - (top[0] + sup[0]) / 2, 2 * F.P[1] - (top[1] + sup[1]) / 2];
+    line = '<path d="M' + f(top[0]) + ' ' + f(top[1]) + 'Q' + f(Q[0]) + ' ' + f(Q[1]) + ' ' + f(sup[0]) + ' ' + f(sup[1]) + '" fill="none" stroke="#E4252C" stroke-width="' + (4.5 / sc).toFixed(2) + '" stroke-linecap="round" opacity=".9"/>';
+  }
+  const feet = [F.legs[0][3], F.legs[1][3]];
+  const gx = (feet[0][0] + feet[1][0]) / 2 * sc + tx, gy = y1 * sc + ty;
+  const flip = F.mirror ? 'translate(300 0) scale(-1 1) ' : '';
+  return '<g transform="' + flip + '"><ellipse cx="' + f(gx) + '" cy="' + f(gy - 2) + '" rx="' + f(Math.max(40, Math.abs(feet[0][0] - feet[1][0]) * sc / 2 + 30)) + '" ry="7" fill="#141414" opacity=".08"/>' +
+    '<g transform="translate(' + f(tx) + ' ' + f(ty) + ') scale(' + sc.toFixed(3) + ')">' + s + line + '</g></g>';
+}
+
+// Intro illustration: three poses with their lines of action
+(function () {
+  const picks = [0, 1, 6];
+  let s = '';
+  picks.forEach((k, i) => {
+    s += '<svg x="' + (i * 300) + '" y="0" width="300" height="400" viewBox="0 0 300 400">' + figureSVG(POSES[k], null, true) + '</svg>';
+    s += '<text class="lbl" x="' + (i * 300 + 150) + '" y="412" text-anchor="middle">' + POSES[k].n.toUpperCase() + '</text>';
+  });
+  $('loaSvg').innerHTML = s;
+})();
+
+/* ---------- Preferences ---------- */
+const PRESETS = [
+  { id: 'warm', name: 'Warm-up', rows: [[10, 30]] },
+  { id: 'class', name: 'Class', rows: [[10, 30], [5, 60], [3, 300], [1, 600]] },
+  { id: 'sketch', name: 'Quick sketch', rows: [[5, 60], [5, 120]] },
+  { id: 'long', name: 'Long', rows: [[2, 1200]] }
+];
+const DURS = [15, 20, 30, 45, 60, 90, 120, 180, 300, 600, 900, 1200, 1800, 2700, 3600];
+const DEFAULT_PROMPTS = [
+  'Your non-drawing hand, relaxed on the table',
+  'Your hand holding a pen',
+  'A chair, seen from a low angle',
+  'A shoe, on its side',
+  'A crumpled cloth or T-shirt',
+  'A mug, with its handle turned away',
+  'A bag slumped on the floor',
+  'A coat hanging from a hook or door',
+  'Your foot, or your crossed legs',
+  'Yourself in a mirror: head, neck and shoulders',
+  'A houseplant: the movement of its stems',
+  'A stack of books, slightly toppling',
+  'A pair of scissors, half open',
+  'A bunch of keys',
+  'A kettle or teapot',
+  'A pillow or cushion, squashed',
+  'A bottle and a glass together',
+  'Fruit in a bowl',
+  'A desk lamp',
+  'A branch or tree through the window',
+  'A person nearby, whatever they are doing',
+  'A figure from memory: standing in contrapposto',
+  'A figure from imagination: reaching up to a high shelf',
+  'A figure from imagination: sitting cross-legged',
+  'A figure from imagination: pushing something heavy',
+  'An animal from memory, walking',
+  'A bicycle, or part of one',
+  'A draped towel over a chair back'
+];
+const P = {
+  src: 'figures', preset: 'class', rows: PRESETS[1].rows.map(r => r.slice()),
+  shuffle: true, grey: false, mirror: false, grid: false, hold: false,
+  brk: 0, secBrk: 15, vol: 50, prompts: DEFAULT_PROMPTS.join('\n')
+};
+try { Object.assign(P, JSON.parse(localStorage.getItem('gestureTimer') || '{}')); } catch (e) { /* ignore */ }
+function save() { try { localStorage.setItem('gestureTimer', JSON.stringify(P)); } catch (e) { /* ignore */ } }
+
+/* ---------- Reference images (kept in memory as object URLs) ---------- */
+let images = [];   // { id, name, url, key }
+let nextId = 1;
+const imgExt = /\.(jpe?g|png|gif|webp|avif|bmp|svg)$/i;
+function addFiles(files) {
+  let added = 0;
+  const keys = new Set(images.map(im => im.key));
+  Array.from(files).forEach(file => {
+    if (!(file.type.startsWith('image/') || imgExt.test(file.name))) return;
+    const key = (file.webkitRelativePath || file.name) + '|' + file.size;
+    if (keys.has(key)) return;
+    keys.add(key);
+    images.push({ id: nextId++, name: file.name, url: URL.createObjectURL(file), key });
+    added++;
+  });
+  if (added && P.src !== 'images') setSrc('images');
+  renderThumbs();
+}
+function removeImage(id) {
+  const im = images.find(x => x.id === id);
+  if (im) URL.revokeObjectURL(im.url);
+  images = images.filter(x => x.id !== id);
+  renderThumbs();
+}
+function renderThumbs() {
+  $('thumbs').innerHTML = images.map(im =>
+    '<li><img src="' + im.url + '" alt="" loading="lazy"><button type="button" data-id="' + im.id + '" aria-label="Remove ' + esc(im.name) + '"><span aria-hidden="true">&times;</span></button></li>').join('');
+  $('imgCount').textContent = images.length ? images.length + (images.length === 1 ? ' image' : ' images') + ' loaded.' : 'No images loaded.';
+  $('clearImgs').hidden = !images.length;
+  updatePlan();
+}
+$('thumbs').addEventListener('click', e => {
+  const b = e.target.closest('button[data-id]');
+  if (!b) return;
+  const li = b.parentElement, next = li.nextElementSibling || li.previousElementSibling;
+  const nid = next && next.querySelector('button').dataset.id;
+  removeImage(+b.dataset.id);
+  const nb = nid && $('thumbs').querySelector('button[data-id="' + nid + '"]');
+  (nb || $('drop').querySelector('label') || $('startBtn')).focus();
+});
+$('clearImgs').addEventListener('click', () => { images.forEach(im => URL.revokeObjectURL(im.url)); images = []; renderThumbs(); });
+$('fileIn').addEventListener('change', e => { addFiles(e.target.files); e.target.value = ''; });
+$('dirIn').addEventListener('change', e => { addFiles(e.target.files); e.target.value = ''; });
+if (!('webkitdirectory' in document.createElement('input'))) $('dirLbl').hidden = true;
+// Keyboard access for the label-buttons that open the file pickers
+document.querySelectorAll('label.btn[for]').forEach(l => {
+  l.tabIndex = 0; l.setAttribute('role', 'button');
+  l.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $(l.htmlFor).click(); } });
+});
+
+// Drag and drop, including whole folders where the browser exposes directory entries
+const drop = $('drop');
+function readEntry(entry, out) {
+  return new Promise(res => {
+    if (entry.isFile) entry.file(f => { out.push(f); res(); }, () => res());
+    else if (entry.isDirectory) {
+      const reader = entry.createReader(), kids = [];
+      const more = () => reader.readEntries(batch => {
+        if (!batch.length) Promise.all(kids.map(k => readEntry(k, out))).then(() => res());
+        else { kids.push(...batch); more(); }
+      }, () => res());
+      more();
+    } else res();
+  });
+}
+['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, () => drop.classList.remove('over')));
+drop.addEventListener('drop', e => {
+  e.preventDefault();
+  const items = e.dataTransfer.items;
+  if (items && items.length && items[0].webkitGetAsEntry) {
+    const entries = Array.from(items).map(it => it.webkitGetAsEntry()).filter(Boolean);
+    const out = [];
+    Promise.all(entries.map(en => readEntry(en, out))).then(() => addFiles(out));
+  } else addFiles(e.dataTransfer.files);
+});
+// Stop a stray drop elsewhere on the page from navigating away
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => e.preventDefault());
+
+/* ---------- Source choice ---------- */
+function setSrc(src) {
+  P.src = src;
+  document.querySelectorAll('#srcBtns .tbtn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.src === src)));
+  $('srcImages').hidden = src !== 'images';
+  $('srcFigures').hidden = src !== 'figures';
+  $('srcPrompts').hidden = src !== 'prompts';
+  save(); updatePlan();
+}
+$('srcBtns').addEventListener('click', e => { const b = e.target.closest('[data-src]'); if (b) setSrc(b.dataset.src); });
+function newPreview() {
+  const k = Math.floor(Math.random() * POSES.length);
+  $('figPrev').innerHTML = figureSVG(POSES[k], mulberry32(Math.random() * 1e9), false);
+}
+$('figAnother').addEventListener('click', newPreview);
+
+const promptList = () => $('prompts').value.split('\n').map(s => s.trim()).filter(Boolean);
+$('prompts').value = P.prompts;
+$('prompts').addEventListener('input', () => { P.prompts = $('prompts').value; save(); updatePlan(); });
+$('promptReset').addEventListener('click', () => { $('prompts').value = P.prompts = DEFAULT_PROMPTS.join('\n'); save(); updatePlan(); });
+
+/* ---------- Session builder ---------- */
+$('presetBtns').innerHTML = PRESETS.map(p =>
+  '<button type="button" class="tbtn" data-p="' + p.id + '" aria-pressed="false">' + p.name + '<br><small style="font-weight:400;color:var(--muted)">' +
+  p.rows.map(r => r[0] + ' × ' + durLabel(r[1])).join(', ') + '</small></button>').join('') +
+  '<button type="button" class="tbtn" data-p="custom" aria-pressed="false">Custom<br><small style="font-weight:400;color:var(--muted)">edit the rows below</small></button>';
+$('presetBtns').addEventListener('click', e => {
+  const b = e.target.closest('[data-p]');
+  if (!b) return;
+  P.preset = b.dataset.p;
+  const pr = PRESETS.find(p => p.id === P.preset);
+  if (pr) P.rows = pr.rows.map(r => r.slice());
+  renderRows(); save();
+});
+function renderRows() {
+  document.querySelectorAll('#presetBtns .tbtn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.p === P.preset)));
+  $('rows').innerHTML = P.rows.map((r, i) =>
+    '<div class="prow" data-i="' + i + '">' +
+    '<input type="number" min="1" max="99" value="' + r[0] + '" aria-label="Number of poses, row ' + (i + 1) + '">' +
+    '<span aria-hidden="true">×</span>' +
+    '<select aria-label="Pose length, row ' + (i + 1) + '">' +
+    DURS.concat(DURS.includes(r[1]) ? [] : [r[1]]).map(d => '<option value="' + d + '"' + (d === r[1] ? ' selected' : '') + '>' + durLabel(d) + '</option>').join('') +
+    '</select>' +
+    '<button type="button" class="tbtn x" aria-label="Remove row ' + (i + 1) + '"' + (P.rows.length < 2 ? ' disabled' : '') + '>&times;</button></div>').join('');
+  updatePlan();
+}
+// Editing any row turns the session into a custom one
+function rowsEdited() {
+  const pr = PRESETS.find(p => JSON.stringify(p.rows) === JSON.stringify(P.rows));
+  P.preset = pr ? pr.id : 'custom';
+  document.querySelectorAll('#presetBtns .tbtn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.p === P.preset)));
+  save(); updatePlan();
+}
+$('rows').addEventListener('input', e => {
+  const row = e.target.closest('.prow');
+  if (!row) return;
+  const i = +row.dataset.i;
+  if (e.target.tagName === 'INPUT') P.rows[i][0] = Math.max(0, Math.min(99, Math.round(+e.target.value || 0)));
+  else P.rows[i][1] = +e.target.value;
+  rowsEdited();
+});
+$('rows').addEventListener('change', e => { if (e.target.tagName === 'INPUT') e.target.value = P.rows[+e.target.closest('.prow').dataset.i][0]; });
+$('rows').addEventListener('click', e => {
+  const b = e.target.closest('.x');
+  if (!b || P.rows.length < 2) return;
+  P.rows.splice(+b.closest('.prow').dataset.i, 1);
+  renderRows(); rowsEdited();
+  $('addRow').focus();
+});
+$('addRow').addEventListener('click', () => {
+  const last = P.rows[P.rows.length - 1];
+  P.rows.push([Math.max(1, Math.ceil((last ? last[0] : 4) / 2)), DURS[Math.min(DURS.length - 1, DURS.indexOf(last ? last[1] : 60) + 1)] || 60]);
+  renderRows(); rowsEdited();
+});
+
+function planTotals() {
+  const rows = P.rows.filter(r => r[0] > 0);
+  const n = rows.reduce((a, r) => a + r[0], 0);
+  const draw = rows.reduce((a, r) => a + r[0] * r[1], 0);
+  const brk = Math.max(0, n - rows.length) * P.brk + rows.length * (P.hold ? 0 : P.secBrk);
+  return { n, draw, brk, sections: rows.length };
+}
+function updatePlan() {
+  const t = planTotals();
+  let msg = '<b>' + t.n + (t.n === 1 ? ' pose' : ' poses') + '</b> · ' + total(t.draw * 1000) + ' of drawing';
+  if (t.brk) msg += ' · about ' + total((t.draw + t.brk) * 1000) + ' with breaks';
+  let warn = '', ok = t.n > 0;
+  if (!t.n) warn = 'Add at least one pose.';
+  else if (P.src === 'images' && !images.length) { warn = 'No images loaded yet. Add some, or switch to sample figures or life prompts.'; ok = false; }
+  else if (P.src === 'images' && images.length < t.n) warn = images.length + (images.length === 1 ? ' image' : ' images') + ' for ' + t.n + ' poses: some will repeat.';
+  else if (P.src === 'prompts' && !promptList().length) { warn = 'The prompt list is empty.'; ok = false; }
+  $('plan').innerHTML = msg + (warn ? '<span class="warn">' + warn + '</span>' : '');
+  $('startBtn').disabled = !ok;
+  $('promptCount').textContent = promptList().length + ' prompts';
+}
+
+// Options
+const opts = [['oShuffle', 'shuffle'], ['oGrey', 'grey'], ['oMirror', 'mirror'], ['oGrid', 'grid'], ['oHold', 'hold']];
+opts.forEach(([id, k]) => { $(id).checked = !!P[k]; $(id).addEventListener('change', () => { P[k] = $(id).checked; save(); updatePlan(); }); });
+const ranges = [['oBreak', 'brk', v => v ? v + ' s' : 'none'], ['oSecBreak', 'secBrk', v => v ? v + ' s' : 'none'], ['oVol', 'vol', v => v ? v + '%' : 'off']];
+ranges.forEach(([id, k, fmt]) => {
+  const el = $(id), out = $(id + 'Out');
+  el.value = P[k]; out.textContent = fmt(+el.value);
+  el.addEventListener('input', () => { P[k] = +el.value; out.textContent = fmt(P[k]); save(); updatePlan(); });
+});
+
+/* ---------- Audio ---------- */
+let actx = null;
+function audio() {
+  if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+let soundOn = true;
+// tones: [[frequency, start offset s, length s], ...]
+function tone(list) {
+  if (!soundOn || !P.vol) return;
+  const ctx = audio();
+  if (!ctx) return;
+  const peak = Math.pow(P.vol / 100, 2) * .5;
+  list.forEach(([fq, at, len]) => {
+    const o = ctx.createOscillator(), g = ctx.createGain(), t0 = ctx.currentTime + at;
+    o.type = 'sine'; o.frequency.value = fq;
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(peak, t0 + .01);
+    g.gain.exponentialRampToValueAtTime(.0001, t0 + len);
+    o.connect(g).connect(ctx.destination);
+    o.start(t0); o.stop(t0 + len + .05);
+  });
+}
+const SND = {
+  tick: () => tone([[880, 0, .12]]),
+  pose: () => tone([[660, 0, .16], [990, .14, .3]]),
+  rest: () => tone([[520, 0, .45]]),
+  done: () => tone([[523, 0, .3], [659, .15, .3], [784, .3, .6]])
+};
+$('testBeep').addEventListener('click', () => { const s = soundOn; soundOn = true; tone([[880, 0, .12], [660, .45, .16], [990, .59, .3]]); soundOn = s; });
+
+/* ---------- Session engine ----------
+   Everything is derived from performance.now(): each phase stores its end time, and when a
+   phase runs out the next one starts exactly at that end time, so no drift builds up and a
+   backgrounded tab catches up correctly when its timers next fire. */
+let S = null;
+const sess = $('sess');
+
+function buildSession() {
+  const rows = P.rows.filter(r => r[0] > 0);
+  const poses = [];
+  const n = rows.reduce((a, r) => a + r[0], 0);
+  // Sequence of items to draw from, cycling (and reshuffling) as needed
+  let pool = [];
+  const nextItem = () => {
+    if (P.src === 'figures') return { fig: Math.floor(Math.random() * POSES.length), seed: Math.floor(Math.random() * 1e9) };
+    if (!pool.length) {
+      const src = P.src === 'images' ? images.slice() : promptList();
+      let fresh = P.shuffle ? shuffle(src) : src;
+      if (P.shuffle && fresh.length > 1 && lastItem && fresh[0] === lastItem) fresh.push(fresh.shift());
+      pool = fresh;
+    }
+    lastItem = pool.shift();
+    return P.src === 'images' ? { img: lastItem } : { text: lastItem };
+  };
+  let lastItem = null;
+  rows.forEach((r, s) => { for (let k = 0; k < r[0]; k++) poses.push(Object.assign({ dur: r[1] * 1000, base: r[1] * 1000, sec: s }, nextItem())); });
+  return {
+    poses, rows, n,
+    name: (PRESETS.find(p => p.id === P.preset) || { name: 'Custom' }).name,
+    src: P.src,
+    i: 0, phase: 'pose', end: 0, rem: 0, paused: false, hold: false,
+    drawn: poses.map(() => 0), done: poses.map(() => false), seen: poses.map(() => false),
+    poseStart: 0, lastBeep: 0, started: Date.now(), finished: false
+  };
+}
+
+const now = () => performance.now();
+function remaining(t) { return S.paused || S.hold ? S.rem : S.end - t; }
+
+// Bank the drawing time of the current pose (up to time t)
+function bank(t) {
+  if (S.phase !== 'pose') return;
+  const p = S.poses[S.i];
+  const left = Math.max(0, remaining(t));
+  S.drawn[S.i] += Math.max(0, (p.dur - left) - S.poseStart);
+  S.poseStart = p.dur - left;
+}
+function startPose(i, t, fresh = true) {
+  S.phase = 'pose'; S.hold = false; S.i = i;
+  const p = S.poses[i];
+  if (fresh) { p.dur = p.base; S.poseStart = 0; }
+  S.seen[i] = true;
+  if (S.paused) S.rem = p.dur; else S.end = t + p.dur;
+  S.lastBeep = 0;
+  showPose(); SND.pose();
+}
+function startBreak(kind, t, len) {
+  S.phase = kind; S.lastBeep = 0;
+  S.hold = kind === 'sbreak' && P.hold;
+  if (S.hold) S.rem = 0;
+  else if (S.paused) S.rem = len; else S.end = t + len;
+  showBreak(); if (!S.hold) SND.rest();
+}
+// What follows the pose that ended (or was left) at time t
+function afterPose(t) {
+  const next = S.i + 1;
+  if (next >= S.n) return finish();
+  S.i = next;
+  if (S.poses[next].sec !== S.poses[next - 1].sec && (P.secBrk || P.hold)) startBreak('sbreak', t, P.secBrk * 1000);
+  else if (P.brk) startBreak('break', t, P.brk * 1000);
+  else startPose(next, t);
+}
+// A phase ran out at exactly time t
+function expire(t) {
+  if (S.phase === 'pose') { bank(t); S.done[S.i] = true; afterPose(t); }
+  else startPose(S.i, t);
+}
+
+function tick() {
+  if (!S || S.finished) return;
+  const t = now();
+  let guard = 0;
+  while (!S.paused && !S.hold && !S.finished && t >= S.end && guard++ < 500) expire(S.end);
+  if (S.finished) return;
+  const rem = remaining(t);
+  // Countdown beeps in the last three seconds of a pose or break
+  const secs = Math.ceil(rem / 1000);
+  if (!S.paused && !S.hold && secs >= 1 && secs <= 3 && secs !== S.lastBeep && rem > 0) {
+    if (S.lastBeep === 0 || secs < S.lastBeep) SND.tick();
+    S.lastBeep = secs;
+  }
+  paint(t);
+}
+
+// Ticks: requestAnimationFrame for smooth drawing while visible, plus a worker (or interval)
+// clock that keeps firing in background tabs, where rAF stops.
+let rafId = 0, ticker = null;
+function frame() { tick(); rafId = S && !S.finished ? requestAnimationFrame(frame) : 0; }
+function startTicker() {
+  stopTicker();
+  const fallback = () => { const id = setInterval(tick, 250); ticker = { stop: () => clearInterval(id) }; };
+  try {
+    const url = URL.createObjectURL(new Blob(['setInterval(function(){postMessage(0)},250)'], { type: 'text/javascript' }));
+    const w = new Worker(url);
+    let alive = false, dead = false;
+    const die = () => { if (dead) return; dead = true; w.terminate(); if (ticker && ticker.w === w) fallback(); };
+    w.onmessage = () => { alive = true; tick(); };
+    w.onerror = die;
+    ticker = { w, stop: () => { dead = true; w.terminate(); } };
+    // Some browsers refuse blob workers on file:// pages without an error: fall back if silent
+    setTimeout(() => { if (!alive) die(); }, 1500);
+  } catch (e) { fallback(); }
+  rafId = requestAnimationFrame(frame);
+}
+function stopTicker() { if (ticker) ticker.stop(); ticker = null; if (rafId) cancelAnimationFrame(rafId); rafId = 0; }
+document.addEventListener('visibilitychange', () => {
+  if (!S || S.finished) return;
+  tick();
+  if (!document.hidden) { if (!rafId) rafId = requestAnimationFrame(frame); lockScreen(); }
+});
+
+// Keep the screen awake during a session where supported
+let wake = null;
+function lockScreen() { try { if (navigator.wakeLock && !wake) navigator.wakeLock.request('screen').then(w => { wake = w; w.addEventListener('release', () => { wake = null; }); }).catch(() => {}); } catch (e) { /* ignore */ } }
+function unlockScreen() { try { if (wake) wake.release(); } catch (e) { /* ignore */ } wake = null; }
+
+/* ---------- Session view ---------- */
+const view = { grey: false, mirror: false, grid: false };
+let lastShown = -1, lastSec = -1, curAR = 1;
+
+function setToggle(id, on) { $(id).setAttribute('aria-pressed', String(on)); }
+function applyView() {
+  $('frame').classList.toggle('grey', view.grey);
+  $('frame').classList.toggle('mirror', view.mirror);
+  const g = $('frame').querySelector('.thirds');
+  if (g) g.style.display = view.grid ? '' : 'none';
+  setToggle('tGrey', view.grey); setToggle('tMirror', view.mirror); setToggle('tGrid', view.grid); setToggle('tSound', soundOn);
+}
+const THIRDS = '<svg class="thirds" viewBox="0 0 3 3" preserveAspectRatio="none" aria-hidden="true">' +
+  [1, 2].map(k => '<path d="M' + k + ' 0V3M0 ' + k + 'H3" stroke="#fff" stroke-opacity=".75" stroke-width="3" vector-effect="non-scaling-stroke"/><path d="M' + k + ' 0V3M0 ' + k + 'H3" stroke="#141414" stroke-width="1" vector-effect="non-scaling-stroke"/>').join('') + '</svg>';
+
+// Fit the frame to the stage, keeping the image's aspect ratio, so the grid lies on the image itself
+function fitFrame() {
+  const st = $('stage'), fr = $('frame');
+  const W = st.clientWidth - 24, H = st.clientHeight - 24;
+  if (W <= 0 || H <= 0) return;
+  let w = Math.min(W, H * curAR), h = w / curAR;
+  fr.style.width = w + 'px'; fr.style.height = h + 'px';
+  fr.style.left = (st.clientWidth - w) / 2 + 'px'; fr.style.top = (st.clientHeight - h) / 2 + 'px';
+}
+new ResizeObserver(fitFrame).observe($('stage'));
+
+function showPose() {
+  const p = S.poses[S.i];
+  $('cover').hidden = true;
+  if (lastShown !== S.i || $('frame').hidden && !p.text) {
+    lastShown = S.i;
+    const fr = $('frame');
+    $('promptView').hidden = !p.text;
+    fr.hidden = !!p.text;
+    if (p.img) {
+      fr.innerHTML = '<img alt="Reference image: ' + esc(p.img.name) + '">' + THIRDS;
+      const im = fr.firstChild;
+      im.onload = () => { curAR = im.naturalWidth / im.naturalHeight || 1; fitFrame(); };
+      im.src = p.img.url;
+      $('sName').textContent = p.img.name;
+      // Preload the next image
+      const nx = S.poses[S.i + 1];
+      if (nx && nx.img) new Image().src = nx.img.url;
+    } else if (p.fig != null) {
+      curAR = 300 / 400;
+      fr.innerHTML = '<svg class="fig" viewBox="0 0 300 400" role="img" aria-label="Mannequin figure, ' + POSES[p.fig].n + ' pose">' + figureSVG(POSES[p.fig], mulberry32(p.seed), false) + '</svg>' + THIRDS;
+      $('sName').textContent = 'Sample figure';
+      fitFrame();
+    } else {
+      $('promptText').textContent = p.text;
+      $('sName').textContent = '';
+    }
+    applyView();
+  }
+  $('sCount').textContent = 'Pose ' + (S.i + 1) + ' of ' + S.n;
+  secLabel();
+  $('sPhase').textContent = durLabel(p.base / 1000) + ' pose';
+  sess.classList.remove('brk');
+  paint(now());
+}
+function secLabel() {
+  const r = S.rows[S.poses[S.i].sec];
+  $('sSec').textContent = (S.rows.length > 1 ? 'Section ' + (S.poses[S.i].sec + 1) + ' of ' + S.rows.length + ' · ' : '') + r[0] + ' × ' + durLabel(r[1]);
+}
+function showBreak() {
+  const p = S.poses[S.i], r = S.rows[p.sec];
+  const sectionStart = S.phase === 'sbreak';
+  const tier = tierFor(p.base / 1000);
+  $('cover').innerHTML = sectionStart
+    ? '<h2>' + (S.rows.length > 1 ? 'Section ' + (p.sec + 1) + ' of ' + S.rows.length : 'Get ready') + '</h2>' +
+      '<p class="next">Next: ' + r[0] + (r[0] === 1 ? ' pose' : ' poses') + ' of ' + durLabel(r[1]) + '</p>' +
+      '<p>' + tier[2] + '</p>' +
+      (S.hold ? '<button type="button" class="btn primary" id="goOn">Start section</button>' : '')
+    : '<h2>Break</h2><p class="next">Next: pose ' + (S.i + 1) + ' of ' + S.n + ' · ' + durLabel(p.base / 1000) + '</p><p>Look away, turn the page, loosen your hand.</p>';
+  $('cover').hidden = false;
+  const go = $('goOn');
+  if (go) go.addEventListener('click', () => { continueHold(); });
+  $('sCount').textContent = sectionStart ? 'Pose ' + (S.i + 1) + ' of ' + S.n + ' next' : 'Break';
+  secLabel();
+  $('sPhase').textContent = S.hold ? 'Waiting' : 'Break';
+  sess.classList.add('brk');
+  if (go) go.focus();
+  paint(now());
+}
+function continueHold() {
+  if (!S || !S.hold) return;
+  S.hold = false; S.paused = false;
+  startPose(S.i, now());
+  $('sPause').focus();
+}
+
+let lastText = '';
+function paint(t) {
+  if (!S || S.finished) return;
+  const rem = remaining(t);
+  let len = S.phase === 'pose' ? S.poses[S.i].dur : S.phase === 'sbreak' ? P.secBrk * 1000 : P.brk * 1000;
+  const frac = S.hold ? 0 : len ? Math.max(0, Math.min(1, rem / len)) : 0;
+  const txt = S.hold ? '–:––' : clock(rem);
+  if (txt !== lastText) { $('sTime').textContent = txt; lastText = txt; }
+  $('sArc').style.strokeDashoffset = String(1 - frac);
+  $('sBar').style.width = ((1 - frac) * 100).toFixed(2) + '%';
+  sess.classList.toggle('low', S.phase === 'pose' && !S.hold && rem <= 3000 && len > 3000);
+  $('pauseTag').hidden = !S.paused;
+  $('sPause').textContent = S.paused ? 'Resume' : 'Pause';
+}
+
+/* ---------- Controls ---------- */
+function openSession() {
+  S = buildSession();
+  if (!S.n) { S = null; return; }
+  audio();
+  view.grey = P.grey; view.mirror = P.mirror; view.grid = P.grid;
+  lastShown = -1; lastText = '';
+  $('summary').hidden = true; $('confirm').hidden = true;
+  sess.querySelectorAll('.s-bot, .s-bar').forEach(el => { el.hidden = false; });
+  $('sEnd').hidden = false;
+  sess.hidden = false;
+  document.documentElement.style.overflow = 'hidden';
+  const t = now();
+  if (P.secBrk || P.hold) startBreak('sbreak', t, P.secBrk * 1000); else startPose(0, t);
+  if (!S.hold) $('sPause').focus();
+  startTicker(); lockScreen();
+}
+function closeSession() {
+  stopTicker(); unlockScreen();
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  sess.hidden = true;
+  document.documentElement.style.overflow = '';
+  S = null;
+  $('startBtn').focus();
+}
+function togglePause() {
+  if (!S || S.finished) return;
+  if (S.hold) return continueHold();
+  const t = now();
+  if (S.paused) { S.end = t + S.rem; S.paused = false; }
+  else { bank(t); S.rem = S.end - t; S.paused = true; }
+  $('confirm').hidden = true;
+  paint(t);
+}
+function goNext() {
+  if (!S || S.finished) return;
+  const t = now();
+  if (S.phase === 'pose') { bank(t); afterPoseSkip(t); }
+  else { S.hold = false; startPose(S.i, t); }
+}
+// Skipping ahead goes straight to the next pose (no break), but still stops at a new section
+function afterPoseSkip(t) {
+  const next = S.i + 1;
+  if (next >= S.n) return finish();
+  S.i = next;
+  if (S.poses[next].sec !== S.poses[next - 1].sec && (P.secBrk || P.hold)) startBreak('sbreak', t, P.secBrk * 1000);
+  else startPose(next, t);
+}
+function goPrev() {
+  if (!S || S.finished) return;
+  const t = now();
+  if (S.phase === 'pose') { bank(t); startPose(Math.max(0, S.i - 1), t); }
+  else startPose(Math.max(0, S.i - 1), t);
+}
+function addTime() {
+  if (!S || S.finished || S.phase !== 'pose') return;
+  S.poses[S.i].dur += 30000;
+  if (S.paused) S.rem += 30000; else S.end += 30000;
+  S.lastBeep = 0;
+  paint(now());
+}
+function askEnd() {
+  if (!S || S.finished) return;
+  if (!S.paused && !S.hold) togglePause();
+  $('confirm').hidden = false;
+  $('cBack').focus();
+}
+function toggleFull() {
+  const el = sess;
+  if (document.fullscreenElement || document.webkitFullscreenElement) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+}
+document.addEventListener('fullscreenchange', () => { $('sFull').textContent = document.fullscreenElement ? 'Exit fullscreen' : 'Fullscreen'; fitFrame(); });
+if (!(sess.requestFullscreen || sess.webkitRequestFullscreen)) $('sFull').hidden = true;
+
+$('startBtn').addEventListener('click', openSession);
+$('sPause').addEventListener('click', togglePause);
+$('sNext').addEventListener('click', goNext);
+$('sPrev').addEventListener('click', goPrev);
+$('sAdd').addEventListener('click', addTime);
+$('sEnd').addEventListener('click', askEnd);
+$('sFull').addEventListener('click', toggleFull);
+$('cEnd').addEventListener('click', () => finish(true));
+$('cBack').addEventListener('click', () => { $('confirm').hidden = true; togglePause(); $('sPause').focus(); });
+$('tGrey').addEventListener('click', () => { view.grey = !view.grey; applyView(); });
+$('tMirror').addEventListener('click', () => { view.mirror = !view.mirror; applyView(); });
+$('tGrid').addEventListener('click', () => { view.grid = !view.grid; applyView(); });
+$('tSound').addEventListener('click', () => { soundOn = !soundOn; applyView(); });
+
+document.addEventListener('keydown', e => {
+  if (sess.hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key;
+  if (S && S.finished) { if (k === 'Escape') { e.preventDefault(); closeSession(); } return; }
+  const map = {
+    ' ': togglePause, 'ArrowRight': goNext, 'ArrowLeft': goPrev, '+': addTime, '=': addTime,
+    'f': toggleFull, 'F': toggleFull,
+    'g': () => $('tGrey').click(), 'G': () => $('tGrey').click(),
+    'm': () => $('tMirror').click(), 'M': () => $('tMirror').click(),
+    't': () => $('tGrid').click(), 'T': () => $('tGrid').click(),
+    'Escape': () => ($('confirm').hidden ? askEnd() : finish(true)),
+    'Enter': () => { if (S && S.hold) continueHold(); else if (!$('confirm').hidden && document.activeElement === document.body) finish(true); }
+  };
+  if (k === 'Enter' && document.activeElement && document.activeElement.tagName === 'BUTTON') return;
+  if (map[k]) { e.preventDefault(); e.stopPropagation(); map[k](); }
+}, true);
+// Space activates a focused button on keyup; swallow it so it doesn't toggle twice
+document.addEventListener('keyup', e => { if (!sess.hidden && S && !S.finished && e.key === ' ') e.preventDefault(); }, true);
+// Keep keyboard focus inside the session view
+sess.addEventListener('keydown', e => {
+  if (e.key !== 'Tab') return;
+  const f = Array.from(sess.querySelectorAll('button, [href]')).filter(el => !el.disabled && el.offsetParent !== null);
+  if (!f.length) return;
+  const first = f[0], last = f[f.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+
+/* ---------- End of session ---------- */
+function finish(early) {
+  if (!S || S.finished) return;
+  const t = now();
+  if (S.phase === 'pose' && !S.paused) bank(t);
+  S.finished = true;
+  stopTicker(); unlockScreen();
+  const drawn = S.drawn.reduce((a, b) => a + b, 0);
+  const done = S.done.filter(Boolean).length;
+  const skipped = S.poses.filter((p, i) => S.seen[i] && !S.done[i] && S.drawn[i] > 0).length;
+  if (!early) SND.done();
+  if (drawn >= 10000) {
+    logSession({ d: new Date().toISOString(), name: S.name, src: S.src, done, planned: S.n, ms: Math.round(drawn) });
+  }
+  // Per-section breakdown
+  const secRows = S.rows.map((r, s) => {
+    const idx = S.poses.map((p, i) => i).filter(i => S.poses[i].sec === s);
+    const d = idx.filter(i => S.done[i]).length, ms = idx.reduce((a, i) => a + S.drawn[i], 0);
+    return '<tr><td>' + r[0] + ' × ' + durLabel(r[1]) + '</td><td>' + d + ' of ' + r[0] + '</td><td>' + total(ms) + '</td></tr>';
+  }).join('');
+  // Review strip of what was drawn
+  const review = S.poses.map((p, i) => {
+    if (!S.seen[i]) return '';
+    const cls = S.done[i] ? '' : ' class="skip"';
+    const tag = '<i>' + clock(S.drawn[i]) + '</i>';
+    if (p.img) return '<li' + cls + '><img src="' + p.img.url + '" alt="' + esc(p.img.name) + '">' + tag + '</li>';
+    if (p.fig != null) return '<li' + cls + '><svg viewBox="0 0 300 400" aria-hidden="true">' + figureSVG(POSES[p.fig], mulberry32(p.seed), true) + '</svg>' + tag + '</li>';
+    return '<li class="txt' + (S.done[i] ? '' : ' skip') + '">' + esc(p.text) + tag + '</li>';
+  }).join('');
+  const s = $('summary');
+  s.innerHTML = '<div class="summary-in">' +
+    '<h2>' + (early ? 'Session ended' : 'Session complete') + '</h2>' +
+    '<p class="sub">' + esc(S.name) + ' · ' + (early ? 'stopped at pose ' + (S.i + 1) + ' of ' + S.n : 'all ' + S.n + ' poses') + (drawn < 10000 ? ' · too short to log' : ' · saved to your session log') + '</p>' +
+    '<div class="stats"><div><b>' + total(drawn) + '</b><span>drawing time</span></div>' +
+    '<div><b>' + done + ' / ' + S.n + '</b><span>poses completed</span></div>' +
+    '<div><b>' + skipped + '</b><span>moved on early</span></div></div>' +
+    '<table><thead><tr><th scope="col">Section</th><th scope="col">Completed</th><th scope="col">Time</th></tr></thead><tbody>' + secRows + '</tbody></table>' +
+    (review ? '<p class="sub" style="margin-bottom:8px">What you drew' + (S.src === 'figures' ? ', with each figure’s line of action for comparison' : '') + '. Faded ones were skipped.</p><ul class="review">' + review + '</ul>' : '') +
+    '<div class="btns"><button type="button" class="btn primary" id="again">Run the same session again</button><button type="button" class="btn ghost" id="back">Back to setup</button></div></div>';
+  s.hidden = false;
+  $('cover').hidden = true; $('confirm').hidden = true; $('pauseTag').hidden = true;
+  sess.querySelectorAll('.s-bot, .s-bar').forEach(el => { el.hidden = true; });
+  $('sEnd').hidden = true;
+  $('sCount').textContent = early ? 'Session ended' : 'Session complete';
+  $('sSec').textContent = ''; $('sName').textContent = '';
+  $('again').addEventListener('click', () => { openSession(); });
+  $('back').addEventListener('click', closeSession);
+  $('again').focus();
+}
+
+/* ---------- History ---------- */
+const HKEY = 'gestureTimerLog';
+function readLog() { try { return JSON.parse(localStorage.getItem(HKEY) || '[]'); } catch (e) { return []; } }
+function logSession(entry) {
+  const log = readLog();
+  log.push(entry);
+  try { localStorage.setItem(HKEY, JSON.stringify(log.slice(-300))); } catch (e) { /* ignore */ }
+  renderLog();
+}
+const SRC_NAMES = { images: 'Your images', figures: 'Sample figures', prompts: 'Life prompts' };
+function renderLog() {
+  const log = readLog();
+  const tot = log.reduce((a, e) => a + (e.ms || 0), 0);
+  const week = Date.now() - 7 * 864e5;
+  const wk = log.filter(e => Date.parse(e.d) >= week).reduce((a, e) => a + (e.ms || 0), 0);
+  $('hSessions').textContent = log.length;
+  $('hTotal').textContent = total(tot);
+  $('hWeek').textContent = total(wk);
+  const fmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  $('hBody').innerHTML = log.length
+    ? log.slice().reverse().map(e => '<tr><td>' + esc(fmt.format(new Date(e.d))) + '</td><td>' + esc(e.name) + '</td><td>' + esc(SRC_NAMES[e.src] || '') + '</td><td>' + e.done + ' of ' + e.planned + '</td><td>' + total(e.ms) + '</td></tr>').join('')
+    : '<tr><td colspan="5" style="color:var(--muted)">No sessions yet.</td></tr>';
+  $('hNote').textContent = log.length ? 'Stored in this browser only. Sessions under 10 seconds of drawing are not logged.' : '';
+  $('hClear').disabled = !log.length;
+}
+$('hClear').addEventListener('click', () => {
+  if (!confirm('Clear the whole session log? This cannot be undone.')) return;
+  try { localStorage.removeItem(HKEY); } catch (e) { /* ignore */ }
+  renderLog();
+});
+
+/* ---------- Start up ---------- */
+setSrc(P.src === 'images' ? 'figures' : P.src);   // images don't survive a reload
+renderRows();
+renderThumbs();
+newPreview();
+renderLog();
+</script>
+</body>
+</html>
