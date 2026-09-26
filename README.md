@@ -65,6 +65,16 @@ The wheel is fully keyboard accessible: Tab to a segment, arrow keys step around
 - **Session view**: full-window, with a countdown ring and keyboard shortcuts (Space, ←/→, +, F, G, M, T, Esc). Timing is drift-free and keeps going in background tabs.
 - **Summary and log**: an end-of-session summary, and a practice log with totals kept in the browser.
 
+## Atmospheric Perspective
+
+`atmospheric-perspective.html` covers aerial perspective.
+
+- **Principles**: value, contrast, chroma, hue and edges, with the scattering physics (Koschmieder's model) and a short history.
+- **Landscape builder**: generates layered landscapes from a seed. Controls for planes, haze, atmosphere presets (clear day, golden hour, fog, night) and local colour, plus a before/after split, edge softening, detail reduction and greyscale.
+- **Colour analysis**: a table and charts of L*, C* and hue per plane, converging on the atmosphere colour.
+- **Plan it step by step**: an animated guide to value bands, then colour temperature.
+- **Exercise sheet**: a printable A4 value-band study from the current scene, with targets on a 1–9 scale (1 = paper white).
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.

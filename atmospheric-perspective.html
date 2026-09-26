@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Atmospheric Perspective</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="lesson.css">
+<style>
+/* ---------- Principles ---------- */
+.rules { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; margin: 0; padding: 0; }
+.rules li { list-style: none; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+.rules svg { display: block; width: 100%; height: auto; border-radius: 8px; margin-bottom: 10px; border: 1px solid #cfcbc2; }
+.rules b { display: block; margin-bottom: 3px; font-size: 15px; }
+.twocol { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; margin-top: 14px; }
+.twocol h3 { margin: 0 0 6px; font-size: 16px; }
+.twocol p { margin: 0 0 10px; font-size: 14px; line-height: 1.5; }
+.twocol p:last-child { margin-bottom: 0; }
+.formula { font-family: ui-monospace, Consolas, monospace; font-size: 13.5px; background: var(--bg); border-radius: 8px; padding: 8px 10px; overflow-x: auto; }
+
+/* ---------- Landscape builder ---------- */
+.ab { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+.ab canvas { display: block; width: 100%; height: auto; aspect-ratio: 1200 / 680; }
+.ab canvas.cmp { cursor: ew-resize; touch-action: none; }
+.ab-foot { border-top: 1px solid #e1ded6; padding: 10px 16px 12px; }
+.ab-foot p { margin: 0; font-size: 14px; color: #333; min-height: 2.7em; }
+.ab-foot .range { margin: 0 0 6px; color: #141414; }
+.ab-foot .range output { color: #555; }
+.ab-foot .range input { accent-color: #1F5FBF; }
+.bgrid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.seedrow { display: flex; gap: 8px; align-items: center; }
+.seedrow .btn { flex: 1; }
+.seedrow code { font-size: 12px; color: var(--muted); }
+.swb { display: flex; align-items: center; gap: 8px; justify-content: flex-start; text-align: left; }
+.swb i { width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(0, 0, 0, .35); flex: none; }
+.pick { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 14px; margin-top: 6px; }
+.pick input { width: 52px; height: 36px; padding: 0; border: 2px solid var(--border); border-radius: 8px; background: none; cursor: pointer; }
+
+/* ---------- Analysis ---------- */
+.an { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.an-head { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.an-head .tbtn { padding: 6px 14px; }
+.strip { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.strip th { text-align: left; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 0 6px 6px; }
+.strip td { padding: 5px 6px; border-top: 1px solid var(--border); }
+.strip td.num, .strip th.num { text-align: right; }
+.strip .sw { display: block; width: 100%; min-width: 48px; height: 28px; border-radius: 6px; border: 1px solid rgba(0, 0, 0, .25); }
+.strip tr.sky td { font-style: italic; }
+.charts { display: grid; gap: 14px; }
+.charts svg { display: block; width: 100%; height: auto; }
+.charts text { font-family: var(--font); }
+.an-sum { margin: 12px 0 0; font-size: 14px; line-height: 1.5; }
+
+/* ---------- Printable sheet ---------- */
+.sheet-ctl { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 16px; }
+.sheet-ctl .bgrid { display: flex; gap: 6px; }
+.sheet-ctl .check { margin-right: auto; }
+.sheet {
+  background: #fff; color: #141414;
+  max-width: 1123px; margin: 0 auto;
+  aspect-ratio: 297 / 210;
+  padding: 26px 34px 20px;
+  border: 1px solid #cfcbc2; box-shadow: 0 2px 14px rgba(0, 0, 0, .18);
+  display: flex; flex-direction: column;
+  container-type: inline-size;
+}
+.sheet .head { display: flex; align-items: flex-end; gap: 24px; border-bottom: 2px solid #141414; padding-bottom: 8px; }
+.sheet h3 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: .12em; }
+.sheet .sub { margin: 2px 0 0; font-size: 13px; color: #333; }
+.sheet .who { margin-left: auto; display: flex; gap: 8px; align-items: flex-end; font-weight: 700; font-size: 12px; letter-spacing: .06em; }
+.sheet .who i { display: inline-block; border-bottom: 1px solid #141414; width: 180px; height: 14px; }
+.sheet .who i.short { width: 110px; }
+.sheet .body { flex: 1; min-height: 0; display: flex; gap: 18px; margin: 10px 0 8px; }
+.sheet .body svg { display: block; flex: 1; min-width: 0; width: 100%; height: 100%; }
+.sheet .vs { width: 92px; flex: none; display: flex; flex-direction: column; font-size: 11px; }
+.sheet .vs b { font-size: 11px; letter-spacing: .08em; margin-bottom: 4px; }
+.sheet .vs ol { list-style: none; margin: 0; padding: 0; flex: 1; display: grid; grid-template-rows: repeat(9, 1fr); gap: 3px; }
+.sheet .vs li { display: flex; align-items: stretch; gap: 6px; min-height: 22px; }
+.sheet .vs li span { width: 14px; align-self: center; font-weight: 700; text-align: right; }
+.sheet .vs li i { flex: 1; border: 1.5px solid #141414; }
+.sheet .vs small { margin-top: 4px; color: #333; line-height: 1.25; }
+.sheet ol.steps { margin: 0; padding: 0 0 0 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 22px; font-size: 12px; }
+@container (max-width: 700px) {
+  .sheet ol.steps { grid-template-columns: 1fr; }
+  .sheet .head { flex-wrap: wrap; }
+  .sheet .who { margin-left: 0; }
+  .sheet .body { flex-direction: column; }
+  .sheet .body svg { height: auto; }
+  .sheet .vs { width: 100%; }
+  .sheet .vs ol { grid-template-rows: none; grid-template-columns: repeat(9, 1fr); }
+  .sheet .vs li { flex-direction: column; min-height: 44px; }
+  .sheet .vs li span { width: auto; text-align: center; }
+}
+
+@media (max-width: 960px) {
+  .ab, .an, .twocol { grid-template-columns: 1fr; }
+  .sheet { aspect-ratio: auto; padding: 18px; }
+}
+
+@page { size: A4 landscape; margin: 10mm; }
+@media print {
+  html, body { background: #fff; }
+  main > *:not(#sheetSec), #sheetSec > *:not(.sheet) { display: none !important; }
+  .wrap { padding: 0; max-width: none; }
+  #sheetSec { margin: 0; }
+  .sheet { box-shadow: none; border: 0; padding: 0; max-width: none; width: 100%; height: 186mm; aspect-ratio: auto; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Colour</button>
+        <ul>
+          <li><a href="colour-schemes.html">Colour schemes</a></li>
+          <li><a href="colour-interaction.html">Colour interaction</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Form &amp; space</button>
+        <ul>
+          <li><a href="shape-shading.html">3D shape shading</a></li>
+          <li><a href="perspective.html">Perspective</a></li>
+          <li><a href="atmospheric-perspective.html" aria-current="page">Atmospheric perspective</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Reference tools</button>
+        <ul>
+          <li><a href="value-notan.html">Value &amp; notan</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Practice</button>
+        <ul>
+          <li><a href="gesture-timer.html">Gesture timer</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>Atmospheric perspective</h1>
+    <p>Also called aerial perspective. Air is not perfectly transparent: the further away something is, the more atmosphere lies between it and your eye, and the more its colour is replaced by the colour of that air. Painters use this to build depth with value, chroma, hue and edge quality, without a single converging line.</p>
+    <ul class="jump">
+      <li><a href="#principles">Principles</a></li>
+      <li><a href="#builder">Landscape builder</a></li>
+      <li><a href="#analysis">Colour analysis</a></li>
+      <li><a href="#guide">Plan it step by step</a></li>
+      <li><a href="#sheetSec">Exercise sheet</a></li>
+    </ul>
+  </div>
+
+  <!-- ---------- Principles ---------- -->
+  <section id="principles" aria-labelledby="prTitle">
+    <h2 class="sec-title" id="prTitle">Principles</h2>
+    <p class="sec-lead">Each effect below is a consequence of the same thing: light from a distant object is partly absorbed and scattered on its way to you, while the air in between adds its own light. The effects increase continuously with distance and with the density of the air.</p>
+    <ul class="rules" id="rules"></ul>
+
+    <div class="twocol">
+      <div class="panel">
+        <h3>Why it happens</h3>
+        <p>Air molecules scatter short wavelengths far more than long ones (Rayleigh scattering, roughly proportional to 1/λ⁴), which is why a clear sky and the veil of air in front of distant hills are blue. Larger particles such as water droplets, dust and smoke scatter all wavelengths about equally (Mie scattering), so humid air, haze and fog turn distance grey or white. When the sun is low, its light crosses a long path of air, loses most of its blue, and the atmosphere glows warm.</p>
+        <p>Two things happen at once. Light from the object is attenuated, and the sunlit air between you and it adds <em>airlight</em> in the atmosphere’s colour. Koschmieder’s model (1924) describes the result:</p>
+        <p class="formula">seen = t × object + (1 − t) × atmosphere,&nbsp;&nbsp; t = e<sup>−βd</sup></p>
+        <p>Here t is the transmittance: 1 up close, falling towards 0 with distance d at a rate β set by the density of the air. Every colour therefore slides along a straight line towards the atmosphere colour. Dark objects get lighter and bluer; very light objects, such as snow in sunlight, can get slightly darker and warmer, because blue is scattered out of the light they send you. The builder below uses exactly this model.</p>
+      </div>
+      <div class="panel">
+        <h3>A short history</h3>
+        <p>Pale, bluish distances already appear in Roman wall paintings, such as the first-century BC landscapes of the <em>Odyssey</em> frieze found on the Esquiline Hill. In Chinese landscape painting, Guo Xi’s <em>Early Spring</em> (1072) separates its planes with graded ink washes and bands of mist, and his writings on the “three distances” treat depth as a matter of tone and clarity as much as of placement.</p>
+        <p>Leonardo da Vinci gave the idea its European name. In the notes later collected as the <em>Treatise on Painting</em> he wrote of <em>prospettiva aerea</em> (aerial perspective), alongside a perspective of colour and a “perspective of disappearance”, in which outlines and details are lost with distance. He advised painting a more distant building bluer and less distinct, and the blue-grey mountains behind the <em>Mona Lisa</em> and the <em>Virgin of the Rocks</em> put this into practice, together with the soft transitions of his <em>sfumato</em>.</p>
+        <p>Joachim Patinir’s “world landscapes” (early sixteenth century) turned it into a formula of brown foreground, green middle ground and blue distance. Claude Lorrain painted luminous, warm hazes looking into a low sun; J. M. W. Turner dissolved whole scenes into atmosphere; Caspar David Friedrich’s <em>Wanderer above the Sea of Fog</em> (c. 1818) stacks ridges in fog; and the Hudson River School painters, such as Albert Bierstadt and Frederic Church, built vast American distances from layered, glowing haze.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Landscape builder ---------- -->
+  <section id="builder" aria-labelledby="abTitle">
+    <h2 class="sec-title" id="abTitle">Landscape builder</h2>
+    <p class="sec-lead">A procedurally generated landscape of overlapping planes, all painted with the same local colour. Only the distance changes. Turn on the comparison to drag a before and after split across the scene.</p>
+    <div class="ab">
+      <div class="paper">
+        <canvas id="cv" width="1200" height="680" role="img" aria-label="Generated landscape of layered mountains, hills, trees and a road, showing atmospheric perspective."></canvas>
+        <div class="ab-foot">
+          <label class="range" id="splitWrap" hidden><span>Split position (left: without, right: with) <output id="splitOut">50%</output></span><input type="range" id="split" min="0" max="100" value="50"></label>
+          <p id="abNote" aria-live="polite"></p>
+        </div>
+      </div>
+      <div class="panel" aria-label="Landscape controls">
+        <h3 class="label">Scene</h3>
+        <div class="seedrow"><button type="button" class="btn primary" id="newSeed">New scene</button><code id="seedOut"></code></div>
+        <h3 class="label" id="presetLbl">Atmosphere</h3>
+        <div class="bgrid two" role="group" aria-labelledby="presetLbl" id="presetBtns"></div>
+        <h3 class="label">Depth</h3>
+        <label class="range"><span>Planes <output id="layersOut">5</output></span><input type="range" id="layers" min="3" max="7" step="1" value="5"></label>
+        <label class="range"><span>Haze strength <output id="hazeOut">55%</output></span><input type="range" id="haze" min="0" max="100" step="1" value="55"></label>
+        <h3 class="label" id="nearLbl">Near (local) colour</h3>
+        <div class="bgrid two" role="group" aria-labelledby="nearLbl" id="nearBtns"></div>
+        <label class="pick"><input type="color" id="nearPick" value="#3f7a2e"> Custom colour</label>
+        <h3 class="label">Show</h3>
+        <label class="check"><input type="checkbox" id="oCompare"> Compare without atmospheric perspective</label>
+        <label class="check"><input type="checkbox" id="oSoften" checked> Soften edges with distance</label>
+        <label class="check"><input type="checkbox" id="oDetail" checked> Reduce detail with distance</label>
+        <label class="check"><input type="checkbox" id="oGrey"> Greyscale (values only)</label>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Analysis ---------- -->
+  <section id="analysis" aria-labelledby="anTitle">
+    <h2 class="sec-title" id="anTitle">Colour analysis</h2>
+    <p class="sec-lead">The ground colour of each plane in the current scene, measured in CIE L*C*h: L* is value (0 black, 100 white), C* is chroma (0 is neutral grey) and h is hue angle in degrees. Rows run from the back of the scene to the front, as they sit in the picture. The step column converts L* to a 1–9 drawing scale (1 = paper white, 9 = black).</p>
+    <div class="an">
+      <div class="panel">
+        <div class="an-head">
+          <strong id="anPreset"></strong>
+          <button type="button" class="tbtn" id="greyBtn" aria-pressed="false">Greyscale</button>
+        </div>
+        <table class="strip">
+          <thead><tr><th>Plane</th><th>Colour</th><th class="num">L*</th><th class="num">C*</th><th class="num">h°</th><th class="num">Step</th></tr></thead>
+          <tbody id="stripBody"></tbody>
+        </table>
+        <p class="an-sum" id="anSum" aria-live="polite"></p>
+      </div>
+      <div class="charts">
+        <div class="paper"><svg id="chL" viewBox="0 0 400 230" role="img" aria-label="Chart of value (L*) against distance"></svg></div>
+        <div class="paper"><svg id="chC" viewBox="0 0 400 230" role="img" aria-label="Chart of chroma (C*) against distance"></svg></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Guide ---------- -->
+  <section id="guide" aria-labelledby="guideTitle">
+    <h2 class="sec-title" id="guideTitle">Plan it step by step</h2>
+    <p class="sec-lead">Plan the value structure first, then add colour temperature on top of it. Work back to front in both passes. Press <em>Next</em> for each step, or <em>Play all</em>.</p>
+    <div class="tabs" role="tablist" aria-label="Guide to follow" id="gTabs"></div>
+    <div class="guide">
+      <div class="paper gstage">
+        <svg id="gsvg" viewBox="0 0 400 260" role="img" aria-labelledby="gText">
+          <g id="gBack"></g><g id="gFill"></g><g id="gLine"></g>
+        </svg>
+      </div>
+      <div class="panel gpanel">
+        <div class="gcount" id="gCount"></div>
+        <p class="gtext" id="gText" aria-live="polite"></p>
+        <div class="dots" id="gDots" aria-label="Steps"></div>
+        <div class="gbtns">
+          <button type="button" class="btn ghost" id="gPrev">Back</button>
+          <button type="button" class="btn primary" id="gNext">Next</button>
+          <button type="button" class="btn ghost" id="gPlay">Play all</button>
+          <button type="button" class="btn ghost" id="gAgain">Replay step</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Printable sheet ---------- -->
+  <section id="sheetSec" aria-labelledby="sheetTitle">
+    <h2 class="sec-title" id="sheetTitle">Exercise sheet</h2>
+    <p class="sec-lead">A value study of the current scene. Fill in the value scale first, then tone each band to the target step printed beside it, in pencil, charcoal or a single paint colour. The outline follows the builder’s scene; press <em>New scene</em> for another.</p>
+    <div class="sheet-ctl">
+      <div class="bgrid" role="group" aria-label="Number of bands" id="shBands"></div>
+      <label class="check"><input type="checkbox" id="shKey"> Show tones (answer key)</label>
+      <button type="button" class="btn ghost" id="shNew">New scene</button>
+      <button type="button" class="btn primary" id="shPrint">Print sheet</button>
+    </div>
+    <div class="sheet" id="sheet">
+      <div class="head">
+        <div><h3>ATMOSPHERIC PERSPECTIVE</h3><p class="sub" id="shSub"></p></div>
+        <div class="who">NAME <i></i> DATE <i class="short"></i></div>
+      </div>
+      <div class="body">
+        <svg id="shv" viewBox="0 0 1330 680" preserveAspectRatio="xMidYMid meet" aria-label="Landscape outline in bands with value targets"></svg>
+        <div class="vs">
+          <b>VALUE SCALE</b>
+          <ol id="shScale"></ol>
+          <small>Grade 1 (paper) to 9 (darkest) in even steps.</small>
+        </div>
+      </div>
+      <ol class="steps" id="shSteps"></ol>
+    </div>
+  </section>
+</main>
+
+<script src="site.js"></script>
+<script src="stepper.js"></script>
+<script>
+(function () {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const f1 = n => Math.round(n * 10) / 10;
+
+/* ================= Colour maths ================= */
+// All mixing happens in linear-light sRGB, the space in which scattered light adds up.
+
+const s2l = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+const l2s = v => { v = clamp(v, 0, 1); return Math.round(255 * (v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055)); };
+const hexLin = h => [1, 3, 5].map(i => s2l(parseInt(h.slice(i, i + 2), 16)));
+const css = c => 'rgb(' + l2s(c[0]) + ',' + l2s(c[1]) + ',' + l2s(c[2]) + ')';
+const hexOf = c => '#' + c.map(v => l2s(v).toString(16).padStart(2, '0')).join('');
+const mul = (c, k) => Array.isArray(k) ? [c[0] * k[0], c[1] * k[1], c[2] * k[2]] : [c[0] * k, c[1] * k, c[2] * k];
+const mix = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
+const lumY = c => 0.2126729 * c[0] + 0.7151522 * c[1] + 0.0721750 * c[2];
+
+function lab(c) {
+  const [r, g, b] = c.map(v => clamp(v, 0, 1));
+  const X = (0.4124564 * r + 0.3575761 * g + 0.1804375 * b) / 0.95047;
+  const Y = 0.2126729 * r + 0.7151522 * g + 0.0721750 * b;
+  const Z = (0.0193339 * r + 0.1191920 * g + 0.9503041 * b) / 1.08883;
+  const f = t => t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116;
+  const fx = f(X), fy = f(Y), fz = f(Z);
+  const a = 500 * (fx - fy), bb = 200 * (fy - fz);
+  return { L: 116 * fy - 16, a, b: bb, C: Math.hypot(a, bb), h: (Math.atan2(bb, a) * 180 / Math.PI + 360) % 360 };
+}
+const yOfL = L => { const fy = (L + 16) / 116; return fy ** 3 > 0.008856 ? fy ** 3 : (fy - 16 / 116) / 7.787; };
+const greyL = L => { const y = yOfL(L); return [y, y, y]; };
+
+// L*C*h back to linear sRGB, reducing chroma until the colour fits the gamut
+function lchLin(L, C, h) {
+  for (let c = C; c >= 0; c -= 1) {
+    const a = c * Math.cos(h * Math.PI / 180), b = c * Math.sin(h * Math.PI / 180);
+    const fy = (L + 16) / 116, fx = fy + a / 500, fz = fy - b / 200;
+    const inv = t => t ** 3 > 0.008856 ? t ** 3 : (t - 16 / 116) / 7.787;
+    const X = inv(fx) * 0.95047, Y = inv(fy), Z = inv(fz) * 1.08883;
+    const rgb = [
+      3.2404542 * X - 1.5371385 * Y - 0.4985314 * Z,
+      -0.9692660 * X + 1.8760108 * Y + 0.0415560 * Z,
+      0.0556434 * X - 0.2040259 * Y + 1.0572252 * Z,
+    ];
+    if (rgb.every(v => v >= -0.001 && v <= 1.001)) return rgb.map(v => clamp(v, 0, 1));
+  }
+  return greyL(L);
+}
+
+// 1–9 drawing value scale: 1 = paper white, 9 = black
+const stepL = s => 100 - (s - 1) * 11.5;
+const stepOf = L => clamp(Math.round(1 + (100 - L) / 11.5), 1, 9);
+function hueName(h, C) {
+  if (C < 6) return 'near-neutral';
+  return h < 20 ? 'magenta-red' : h < 50 ? 'red' : h < 75 ? 'orange' : h < 100 ? 'yellow' : h < 150 ? 'yellow-green'
+    : h < 200 ? 'green' : h < 240 ? 'blue-green' : h < 290 ? 'blue' : h < 330 ? 'violet' : 'magenta-red';
+}
+
+/* ================= Atmospheres and local colours ================= */
+
+const PRESETS = {
+  clear: { name: 'Clear day', zenith: '#4f84c4', horizon: '#bcd3e8', haze: '#aac6e0', light: [1, .98, .94], kMul: 1 },
+  golden: { name: 'Golden hour', zenith: '#5d6f9e', horizon: '#f3c38e', haze: '#e6ae86', light: [1, .74, .48], kMul: 1.1, sun: true },
+  fog: { name: 'Fog', zenith: '#c3c7c8', horizon: '#d5d8d7', haze: '#cfd2d1', light: [.8, .82, .83], kMul: 2.4 },
+  night: { name: 'Night', zenith: '#0b1128', horizon: '#2a3960', haze: '#26355a', light: [.07, .09, .16], kMul: 1, stars: true },
+};
+const NEARS = [['#3f7a2e', 'Meadow'], ['#2b4f2c', 'Forest'], ['#8a5a2b', 'Autumn'], ['#6a4c6b', 'Heather']];
+const ROAD = hexLin('#b7a07a'), ROCK = hexLin('#6d6a66'), SNOW = hexLin('#f3f5f7');
+
+/* ================= State ================= */
+
+const S = { seed: 1234, layers: 5, haze: .55, preset: 'clear', near: '#3f7a2e', compare: false, soften: true, detail: true, grey: false, split: .5 };
+try { Object.assign(S, JSON.parse(localStorage.getItem('cf-atmo') || '{}')); } catch (e) { /* ignore */ }
+S.seed = S.seed >>> 0 || 1234;
+const save = () => { try { localStorage.setItem('cf-atmo', JSON.stringify({ seed: S.seed, layers: S.layers, haze: S.haze, preset: S.preset, near: S.near, soften: S.soften, detail: S.detail })); } catch (e) { /* ignore */ } };
+
+/* ================= Terrain generation ================= */
+
+function rng(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+// 1D value noise with cosine interpolation, returns 0..1
+function noise1(r) {
+  const v = Array.from({ length: 256 }, r);
+  return x => {
+    const i = Math.floor(x), f = x - i, u = (1 - Math.cos(f * Math.PI)) / 2;
+    return lerp(v[i & 255], v[(i + 1) & 255], u);
+  };
+}
+
+const W = 1200, H = 680, STEP = 5, NX = W / STEP + 1;
+
+// Layer 0 is the furthest. Each layer: ridge heights, distance (0..1), perspective scale, trees, road.
+function makeTerrain(seed, n) {
+  const R = rng(seed * 7919 + n);
+  const phase = R() * 6.28;
+  const mCount = n >= 5 ? 2 : 1;
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const u = n === 1 ? 1 : i / (n - 1);
+    const L = { i, u, dist: 0.05 + 0.95 * Math.pow(1 - u, 1.15), scale: 0.1 + 0.9 * u * u, mount: i < mCount };
+    const nz = noise1(R), nz2 = noise1(R);
+    const yb = H * (0.44 + 0.38 * Math.pow(u, 1.1));
+    L.ridge = new Float32Array(NX);
+    if (L.mount) {
+      const amp = H * (0.22 - 0.07 * i) * (0.8 + 0.4 * R());
+      const off = R() * 100;
+      for (let k = 0; k < NX; k++) {
+        const x = k * STEP / W;
+        let h = 0, a = 1, f = 3 + R() * 0;
+        for (let o = 0; o < 5; o++) { h += a * (1 - Math.abs(2 * nz(off + x * f * 2 ** o + o * 17) - 1)); a *= 0.5; }
+        L.ridge[k] = yb - amp * Math.pow(h / 1.94, 1.6) * 1.1;
+      }
+      L.amp = amp; L.yb = yb;
+    } else {
+      const amp = H * (0.04 + 0.05 * R()) * (1.2 - 0.5 * u);
+      const off = R() * 100, fr = 1.6 + R() * 1.6;
+      for (let k = 0; k < NX; k++) {
+        const x = k * STEP / W;
+        L.ridge[k] = yb - amp * (nz(off + x * fr) * 1.2 + 0.25 * nz2(off + x * fr * 4.5)) + amp * 0.5;
+      }
+      // Road: a strip climbing over each hill, winding from plane to plane
+      const rx = W * (0.5 + 0.27 * Math.sin(phase + u * 4.3));
+      const w = 4 + 46 * u * u;
+      L.road = { x: rx, w, wb: w * 2 + 280 * u * u * u, bend: (R() - .5) * 120 * u };
+      // Trees: either conifers or broadleaf, in clumps along the ridge and scattered below it
+      L.trees = [];
+      const kind = R() < .5 ? 'pine' : 'round';
+      const th = 16 + 90 * L.scale;
+      const clumps = 3 + Math.floor(R() * 4);
+      for (let c = 0; c < clumps; c++) {
+        const cx = R() * W, spread = 60 + R() * 220, count = Math.round(spread / (th * .45) * (0.5 + R() * .6));
+        for (let k = 0; k < Math.min(count, 60); k++) {
+          const x = cx + (R() - .5) * spread;
+          if (x < -40 || x > W + 40) continue;
+          if (Math.abs(x - rx) < w * 1.2 + th * .3) continue;
+          L.trees.push({ x, dy: R() * H * 0.05 * (0.4 + u), h: th * (0.7 + R() * .6), kind, lean: (R() - .5) * .1 });
+        }
+      }
+      L.trees.sort((a, b) => a.dy - b.dy);
+    }
+    L.marks = Array.from({ length: 160 }, () => [R(), R(), R()]);
+    out.push(L);
+  }
+  return out;
+}
+const ridgeAt = (L, x) => { const k = clamp(x / STEP, 0, NX - 1), i = Math.floor(k), f = k - i; return lerp(L.ridge[i], L.ridge[Math.min(i + 1, NX - 1)], f); };
+
+/* ================= Rendering ================= */
+
+const cv = $('cv'), ctx = cv.getContext('2d');
+const mk = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; };
+const cWith = mk(), cWithout = mk(), cLayer = mk();
+const FILTER_OK = typeof ctx.filter === 'string';
+let TER = null;
+
+const kOf = () => S.haze * 2.6 * PRESETS[S.preset].kMul;
+const localLit = () => mul(hexLin(S.near), PRESETS[S.preset].light);
+const atmoLin = () => hexLin(PRESETS[S.preset].haze);
+const seen = (c, t) => mix(atmoLin(), c, t);
+const transOf = L => Math.exp(-kOf() * L.dist);
+
+function drawSky(g) {
+  const P = PRESETS[S.preset], R = rng(S.seed + 99);
+  const gr = g.createLinearGradient(0, 0, 0, H * 0.6);
+  gr.addColorStop(0, P.zenith); gr.addColorStop(1, P.horizon);
+  g.fillStyle = gr; g.fillRect(0, 0, W, H);
+  if (P.stars) {
+    for (let k = 0; k < 140; k++) {
+      const y = R() * H * 0.5;
+      g.fillStyle = 'rgba(255,255,255,' + f1((0.25 + R() * .6) * (1 - y / (H * .55))) + ')';
+      g.fillRect(R() * W, y, 1.6, 1.6);
+    }
+    g.fillStyle = '#e9ecf2'; g.beginPath(); g.arc(W * .8, H * .14, 16, 0, 7); g.fill();
+  }
+  if (P.sun) {
+    const sx = W * (0.25 + R() * .5), sy = H * 0.33;
+    const glow = g.createRadialGradient(sx, sy, 10, sx, sy, 360);
+    glow.addColorStop(0, 'rgba(255,236,190,.9)'); glow.addColorStop(1, 'rgba(255,220,170,0)');
+    g.fillStyle = glow; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#fff1cf'; g.beginPath(); g.arc(sx, sy, 24, 0, 7); g.fill();
+  }
+}
+
+function layerPath(g, L) {
+  g.beginPath(); g.moveTo(0, H);
+  for (let k = 0; k < NX; k++) g.lineTo(k * STEP, L.ridge[k]);
+  g.lineTo(W, H); g.closePath();
+}
+
+// Draw one plane onto g. t = transmittance (1 = no atmosphere), det = amount of detail 0..1
+function drawLayer(g, L, t, det, valley) {
+  const lit = L.mount ? mix(localLit(), mul(ROCK, PRESETS[S.preset].light), .45) : localLit();
+  let top = H; for (let k = 0; k < NX; k++) top = Math.min(top, L.ridge[k]);
+  const bot = (L.mount ? L.yb : ridgeAt(L, W / 2)) + H * 0.14;
+  const gr = g.createLinearGradient(0, top, 0, bot);
+  gr.addColorStop(0, css(seen(mul(lit, 1.12), t)));
+  gr.addColorStop(1, css(seen(mul(lit, .8), t * (1 - valley))));
+  layerPath(g, L);
+  g.fillStyle = gr; g.fill();
+
+  g.save(); layerPath(g, L); g.clip();
+  // Snow on the far peaks: a bright local colour that the atmosphere darkens and tints
+  if (L.mount && L.i === 0 && S.preset !== 'night') {
+    const line = L.yb - L.amp * 0.62, nz = noise1(rng(S.seed + 5));
+    g.beginPath(); g.moveTo(0, 0);
+    for (let x = 0; x <= W; x += 10) g.lineTo(x, line + nz(x / 18) * 22 - 11);
+    g.lineTo(W, 0); g.closePath();
+    g.fillStyle = css(seen(mul(SNOW, PRESETS[S.preset].light), t)); g.fill();
+  }
+  // Gullies on mountains, grass strokes on hills: both fade out with lost detail
+  if (det > 0.02) {
+    g.lineCap = 'round';
+    if (L.mount) {
+      g.strokeStyle = css(seen(mul(lit, .55), t)); g.globalAlpha = .45 * det; g.lineWidth = 2;
+      L.marks.slice(0, 40).forEach(([a, b, c]) => {
+        const x = a * W, y = ridgeAt(L, x) + b * L.amp * .3 + 4;
+        g.beginPath(); g.moveTo(x, y); g.lineTo(x + (c - .5) * 40, y + L.amp * (.2 + c * .3)); g.stroke();
+      });
+    } else {
+      const len = 3 + 16 * L.scale;
+      g.lineWidth = 1 + 1.8 * L.scale;
+      L.marks.slice(0, Math.round(40 + 120 * L.u)).forEach(([a, b, c], k) => {
+        const x = a * W, y = ridgeAt(L, x) + 6 + b * H * .16;
+        g.strokeStyle = css(seen(mul(lit, k % 2 ? 1.35 : .6), t)); g.globalAlpha = .55 * det;
+        g.beginPath(); g.moveTo(x, y); g.lineTo(x + (c - .5) * len * .6, y - len); g.stroke();
+      });
+    }
+    g.globalAlpha = 1;
+  }
+  // Road
+  if (L.road) {
+    const r = L.road, ty = ridgeAt(L, r.x) + 1, bx = r.x + r.bend * 1.6, my = (ty + H) / 2;
+    const rg = g.createLinearGradient(0, ty, 0, H);
+    rg.addColorStop(0, css(seen(mul(ROAD, mul(PRESETS[S.preset].light, 1.05)), t)));
+    rg.addColorStop(1, css(seen(mul(ROAD, mul(PRESETS[S.preset].light, .85)), t * (1 - valley))));
+    g.beginPath();
+    g.moveTo(r.x - r.w / 2, ty);
+    g.quadraticCurveTo(r.x + r.bend - (r.w + r.wb) / 4, my, bx - r.wb / 2, H);
+    g.lineTo(bx + r.wb / 2, H);
+    g.quadraticCurveTo(r.x + r.bend + (r.w + r.wb) / 4, my, r.x + r.w / 2, ty);
+    g.closePath(); g.fillStyle = rg; g.fill();
+    if (det > .3 && L.u > .5) { g.strokeStyle = css(seen(mul(ROAD, .5), t)); g.globalAlpha = det * .6; g.lineWidth = 1.5 + 2 * L.scale; g.stroke(); g.globalAlpha = 1; }
+  }
+  g.restore();
+
+  // Trees: with lost detail they merge into the plane's own colour and read as ridge bumps
+  if (L.trees) {
+    const dark = mix(lit, mul(lit, .42), det), light = mul(lit, 1.25);
+    const trunk = seen(mul(hexLin('#4a3524'), PRESETS[S.preset].light), t);
+    L.trees.forEach(tr => {
+      const x = tr.x, y = ridgeAt(L, x) + tr.dy + 2, h = tr.h, w = h * (tr.kind === 'pine' ? .42 : .7);
+      if (det > .5 && h > 30) { g.fillStyle = css(trunk); g.fillRect(x - h * .03, y - h * .3, h * .06, h * .3); }
+      g.fillStyle = css(seen(dark, t));
+      g.beginPath();
+      if (tr.kind === 'pine') {
+        g.moveTo(x + tr.lean * h, y - h); g.lineTo(x + w / 2, y - h * .15); g.lineTo(x - w / 2, y - h * .15);
+      } else {
+        g.ellipse(x, y - h * .58, w / 2, h * .45, 0, 0, 7);
+      }
+      g.fill();
+      if (det > .05) {
+        g.fillStyle = css(seen(light, t)); g.globalAlpha = .5 * det;
+        g.beginPath();
+        if (tr.kind === 'pine') { g.moveTo(x + tr.lean * h, y - h); g.lineTo(x - w / 2, y - h * .15); g.lineTo(x - w * .1, y - h * .2); }
+        else g.ellipse(x - w * .15, y - h * .68, w * .25, h * .22, 0, 0, 7);
+        g.fill(); g.globalAlpha = 1;
+      }
+    });
+  }
+}
+
+function renderScene(g, atmo) {
+  g.filter = 'none';
+  drawSky(g);
+  const lg = cLayer.getContext('2d');
+  TER.forEach(L => {
+    const t = atmo ? transOf(L) : 1;
+    const det = atmo && S.detail ? clamp(1.25 - L.dist * 1.6, 0, 1) : 1;
+    const blur = atmo && S.soften ? L.dist * L.dist * (1.5 + 5 * Math.min(1, kOf() / 3)) : 0;
+    const valley = atmo ? S.haze * .35 * (1 - t) : 0;
+    lg.clearRect(0, 0, W, H);
+    drawLayer(lg, L, t, det, valley);
+    if (blur < .3) g.drawImage(cLayer, 0, 0);
+    else if (FILTER_OK) { g.filter = 'blur(' + f1(blur) + 'px)'; g.drawImage(cLayer, 0, 0); g.filter = 'none'; }
+    else {
+      // Fallback blur: average several offset copies
+      const offs = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [.7, .7], [-.7, -.7], [.7, -.7], [-.7, .7]];
+      offs.forEach(([dx, dy], k) => { g.globalAlpha = 1 / (k + 1); g.drawImage(cLayer, dx * blur * .7, dy * blur * .7); });
+      g.globalAlpha = 1;
+    }
+  });
+}
+
+// Convert the composite to greyscale by luminance (the same quantity L* measures)
+const LUT = Array.from({ length: 256 }, (_, v) => s2l(v));
+function toGrey(g) {
+  const im = g.getImageData(0, 0, W, H), d = im.data;
+  for (let p = 0; p < d.length; p += 4) {
+    const v = l2s(0.2126 * LUT[d[p]] + 0.7152 * LUT[d[p + 1]] + 0.0722 * LUT[d[p + 2]]);
+    d[p] = d[p + 1] = d[p + 2] = v;
+  }
+  g.putImageData(im, 0, 0);
+}
+
+function tag(g, text, x, align) {
+  g.font = '700 20px Archivo, Arial, sans-serif';
+  const w = g.measureText(text).width + 24;
+  const bx = align === 'right' ? x - w : x;
+  g.fillStyle = 'rgba(251,250,246,.92)'; g.strokeStyle = '#141414'; g.lineWidth = 1.5;
+  g.beginPath(); g.roundRect ? g.roundRect(bx, 16, w, 34, 8) : g.rect(bx, 16, w, 34); g.fill(); g.stroke();
+  g.fillStyle = '#141414'; g.textBaseline = 'middle'; g.fillText(text, bx + 12, 34);
+}
+
+function composite() {
+  ctx.clearRect(0, 0, W, H);
+  if (S.compare) {
+    const sx = Math.round(S.split * W);
+    ctx.drawImage(cWithout, 0, 0, sx, H, 0, 0, sx, H);
+    ctx.drawImage(cWith, sx, 0, W - sx, H, sx, 0, W - sx, H);
+  } else ctx.drawImage(cWith, 0, 0);
+  if (S.grey) toGrey(ctx);
+  if (S.compare) {
+    const sx = Math.round(S.split * W);
+    ctx.fillStyle = '#fbfaf6'; ctx.fillRect(sx - 2, 0, 4, H);
+    ctx.fillStyle = '#141414'; ctx.beginPath(); ctx.arc(sx, H / 2, 20, 0, 7); ctx.fill();
+    ctx.fillStyle = '#fbfaf6';
+    ctx.beginPath(); ctx.moveTo(sx - 5, H / 2 - 8); ctx.lineTo(sx - 13, H / 2); ctx.lineTo(sx - 5, H / 2 + 8); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(sx + 5, H / 2 - 8); ctx.lineTo(sx + 13, H / 2); ctx.lineTo(sx + 5, H / 2 + 8); ctx.fill();
+    if (sx > 170) tag(ctx, 'WITHOUT', 16, 'left');
+    if (sx < W - 130) tag(ctx, 'WITH', W - 16, 'right');
+  }
+}
+
+function render() {
+  TER = makeTerrain(S.seed, S.layers);
+  renderScene(cWith.getContext('2d'), true);
+  if (S.compare) renderScene(cWithout.getContext('2d'), false);
+  composite();
+  analyse();
+  drawSheet();
+  save();
+}
+
+/* ================= Builder controls ================= */
+
+function pickButtons(el, items, current, onPick, html) {
+  el.innerHTML = '';
+  items.forEach(([key, label]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tbtn' + (html ? ' swb' : '');
+    if (html) b.innerHTML = html(key, label); else b.textContent = label;
+    b.dataset.key = key;
+    b.setAttribute('aria-pressed', String(key === current));
+    b.addEventListener('click', () => {
+      el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      onPick(key);
+    });
+    el.appendChild(b);
+  });
+}
+pickButtons($('presetBtns'), Object.entries(PRESETS).map(([k, p]) => [k, p.name]), S.preset, k => { S.preset = k; render(); });
+pickButtons($('nearBtns'), NEARS, S.near, k => { S.near = k; $('nearPick').value = k; render(); },
+  (k, label) => '<i style="background:' + k + '"></i>' + label);
+$('nearPick').value = S.near;
+$('nearPick').addEventListener('input', e => {
+  S.near = e.target.value;
+  $('nearBtns').querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.key === S.near)));
+  render();
+});
+
+const bindRange = (id, get, set, fmt) => {
+  const el = $(id), out = $(id + 'Out');
+  el.value = get(); out.textContent = fmt(get());
+  el.addEventListener('input', () => { set(+el.value); out.textContent = fmt(get()); render(); });
+};
+bindRange('layers', () => S.layers, v => { S.layers = v; }, v => v);
+bindRange('haze', () => Math.round(S.haze * 100), v => { S.haze = v / 100; }, v => v + '%');
+
+function newSeed() { S.seed = (Math.random() * 1e9) >>> 0; showSeed(); render(); }
+const showSeed = () => { $('seedOut').textContent = 'seed ' + S.seed; };
+$('newSeed').addEventListener('click', newSeed);
+showSeed();
+
+$('oSoften').checked = S.soften; $('oDetail').checked = S.detail;
+$('oSoften').addEventListener('change', e => { S.soften = e.target.checked; render(); });
+$('oDetail').addEventListener('change', e => { S.detail = e.target.checked; render(); });
+$('oCompare').addEventListener('change', e => {
+  S.compare = e.target.checked;
+  $('splitWrap').hidden = !S.compare;
+  cv.classList.toggle('cmp', S.compare);
+  render();
+});
+function setGrey(on) {
+  S.grey = on;
+  $('oGrey').checked = on;
+  $('greyBtn').setAttribute('aria-pressed', String(on));
+  composite(); analyse();
+}
+$('oGrey').addEventListener('change', e => setGrey(e.target.checked));
+$('greyBtn').addEventListener('click', () => setGrey(!S.grey));
+
+// Before/after split: slider, or drag on the picture
+const setSplit = v => { S.split = clamp(v, 0, 1); $('split').value = Math.round(S.split * 100); $('splitOut').textContent = Math.round(S.split * 100) + '%'; composite(); };
+$('split').addEventListener('input', e => setSplit(e.target.value / 100));
+let splitDrag = false;
+const splitFrom = e => { const r = cv.getBoundingClientRect(); setSplit((e.clientX - r.left) / r.width); };
+cv.addEventListener('pointerdown', e => { if (!S.compare) return; splitDrag = true; cv.setPointerCapture(e.pointerId); splitFrom(e); });
+cv.addEventListener('pointermove', e => { if (splitDrag) splitFrom(e); });
+cv.addEventListener('pointerup', () => { splitDrag = false; });
+cv.addEventListener('pointercancel', () => { splitDrag = false; });
+
+/* ================= Analysis ================= */
+
+const planeName = (L, n) => L.i === 0 ? 'Furthest' : L.i === n - 1 ? 'Nearest' : 'Plane ' + (L.i + 1);
+
+function analyse() {
+  const n = TER.length, A = atmoLin(), base = localLit();
+  const rows = TER.map(L => {
+    const col = seen(L.mount ? mix(base, mul(ROCK, PRESETS[S.preset].light), .45) : base, transOf(L));
+    return { L, col, m: lab(col) };
+  });
+  const sky = lab(A), own = lab(base);
+  const sw = c => S.grey ? css(greyL(lab(c).L)) : css(c);
+  const maxC = Math.max(20, sky.C, own.C, ...rows.map(r => r.m.C));
+  const tr = (cls, name, c, m) => '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td>' + name + '</td><td><span class="sw" style="background:' + sw(c) + '" title="' + hexOf(c) + '"></span></td>' +
+    '<td class="num">' + Math.round(m.L) + '</td><td class="num">' + Math.round(m.C) + '</td>' +
+    '<td class="num">' + (m.C < 3 ? '–' : Math.round(m.h)) + '</td><td class="num">' + stepOf(m.L) + '</td></tr>';
+  $('stripBody').innerHTML = tr('sky', 'Atmosphere', A, sky) + rows.map(r => tr('', planeName(r.L, n), r.col, r.m)).join('') + tr('sky', 'Local colour', base, own);
+  $('anPreset').textContent = PRESETS[S.preset].name + ', haze ' + Math.round(S.haze * 100) + '%';
+
+  const near = rows[n - 1].m, far = rows[0].m;
+  const dNear = Math.abs(near.L - sky.L), dFar = Math.abs(far.L - sky.L);
+  $('anSum').textContent = 'Nearest plane: L* ' + Math.round(near.L) + ', C* ' + Math.round(near.C) + ', ' + hueName(near.h, near.C) + '. ' +
+    'Furthest plane: L* ' + Math.round(far.L) + ', C* ' + Math.round(far.C) + ', ' + hueName(far.h, far.C) + '. ' +
+    'The value gap to the sky shrinks from ' + Math.round(dNear) + ' to ' + Math.round(dFar) + ' L* units, and chroma ' +
+    (far.C < near.C ? 'drops by ' + Math.round(near.C - far.C) : 'changes by ' + Math.round(far.C - near.C)) + '.' +
+    (S.haze === 0 ? ' Haze is at zero, so every plane keeps its local colour.' : '');
+  $('abNote').textContent = (S.compare ? 'Left of the line: every plane in its local colour. Right: the same planes seen through the atmosphere. ' : '') +
+    'Value step from front to back: ' + rows.slice().reverse().map(r => stepOf(r.m.L)).join(' → ') + ' (sky ' + stepOf(sky.L) + ').';
+
+  chart($('chL'), 'VALUE (L*)', rows, r => r.m.L, sky.L, own.L, 0, 100);
+  chart($('chC'), 'CHROMA (C*)', rows, r => r.m.C, sky.C, own.C, 0, Math.ceil(maxC / 10) * 10);
+}
+
+// Small line chart: distance runs left (near) to right (far); dashed lines mark the atmosphere and local colour
+function chart(svg, title, rows, get, skyV, ownV, lo, hi) {
+  const x0 = 46, x1 = 380, y0 = 190, y1 = 34;
+  const n = rows.length;
+  const X = i => x1 - (x1 - x0) * i / Math.max(1, n - 1) * .92 - (x1 - x0) * .04;
+  const Y = v => y0 - (y0 - y1) * (v - lo) / (hi - lo);
+  let s = '<rect width="400" height="230" fill="#fbfaf6"/>';
+  s += '<text x="' + x0 + '" y="20" font-size="12" font-weight="700" letter-spacing=".08em" fill="#141414">' + title + '</text>';
+  for (let k = 0; k <= 4; k++) {
+    const v = lo + (hi - lo) * k / 4, y = Y(v);
+    s += '<path d="M' + x0 + ' ' + f1(y) + 'H' + x1 + '" stroke="#e1ded6"/><text x="' + (x0 - 6) + '" y="' + f1(y + 4) + '" font-size="10" text-anchor="end" fill="#555">' + Math.round(v) + '</text>';
+  }
+  s += '<text x="' + x0 + '" y="210" font-size="10" fill="#555">NEAR</text><text x="' + x1 + '" y="210" font-size="10" text-anchor="end" fill="#555">FAR →</text>';
+  s += '<path d="M' + x0 + ' ' + f1(Y(skyV)) + 'H' + x1 + '" stroke="#1F5FBF" stroke-width="1.6" stroke-dasharray="6 4"/>';
+  // Labels sit at the end of each reference line away from the data, on the side facing away from the nearest point
+  const nearV = get(rows[rows.length - 1]), farV = get(rows[0]);
+  const side = (ref, v) => (v <= ref ? -5 : 13);
+  s += '<text x="' + (x0 + 4) + '" y="' + f1(Y(skyV) + side(skyV, nearV)) + '" font-size="10" font-weight="700" fill="#1F5FBF">ATMOSPHERE</text>';
+  s += '<path d="M' + x0 + ' ' + f1(Y(ownV)) + 'H' + x1 + '" stroke="#8b8882" stroke-width="1.3" stroke-dasharray="2 4"/>';
+  s += '<text x="' + (x1 - 2) + '" y="' + f1(Y(ownV) + side(ownV, farV)) + '" font-size="10" text-anchor="end" fill="#6b6964">NO ATMOSPHERE</text>';
+  const pts = rows.map((r, k) => [X(k), Y(get(r))]);
+  s += '<path d="M' + pts.map(p => f1(p[0]) + ' ' + f1(p[1])).join('L') + '" fill="none" stroke="#1d1d1f" stroke-width="2"/>';
+  rows.forEach((r, k) => {
+    const c = S.grey ? css(greyL(r.m.L)) : css(r.col);
+    s += '<circle cx="' + f1(pts[k][0]) + '" cy="' + f1(pts[k][1]) + '" r="8" fill="' + c + '" stroke="#1d1d1f" stroke-width="1.5"><title>' + planeName(r.L, n) + ': ' + Math.round(get(r)) + '</title></circle>';
+  });
+  svg.innerHTML = s;
+}
+
+/* ================= Principles cards ================= */
+// Each card shows a near and a far hill, changing only the property it describes
+
+(function principles() {
+  const sky = hexLin('#bcd3e8'), g = hexLin('#2f6a2a');
+  const hills = (far, near, bg, blurFar, detail) =>
+    '<svg viewBox="0 0 200 90" aria-hidden="true"><rect width="200" height="90" fill="' + css(bg || sky) + '"/>' +
+    (blurFar ? '<filter id="bf' + blurFar + '"><feGaussianBlur stdDeviation="1.6"/></filter>' : '') +
+    '<path d="M0 50Q30 22 60 40T120 30T200 42V90H0Z" fill="' + far + '"' + (blurFar ? ' filter="url(#bf' + blurFar + ')"' : '') + '/>' +
+    '<path d="M0 70Q50 50 100 64T200 58V90H0Z" fill="' + near + '"/>' + (detail || '') + '</svg>';
+  const see = t => css(mix(sky, g, t));
+  const lc = l => { const m = lab(g); return css(lchLin(l, m.C, m.h)); };
+  const cc = c => { const m = lab(g); return css(lchLin(m.L, c, m.h)); };
+  const grass = '<path d="M20 76l2-7M34 80l1-8M52 74l3-7M150 72l2-8M166 78l1-7M180 70l3-7" stroke="#173a14" stroke-width="2" stroke-linecap="round"/><circle cx="118" cy="56" r="9" fill="#1d4418"/><rect x="117" y="60" width="2.4" height="9" fill="#3b2a1a"/>';
+  const items = [
+    ['Value moves towards the sky', 'Dark distant forms get lighter; in daylight the far hills end up only a step or two darker than the sky behind them.', hills(lc(72), lc(36))],
+    ['Contrast drops', 'Lights and darks within a distant plane converge, so its internal value range shrinks. The strongest contrasts in a picture belong in the foreground.', hills(see(.25), see(1), null, 0, '<path d="M60 40l6 10M70 36l5 9" stroke="' + see(.18) + '" stroke-width="3"/>')],
+    ['Saturation falls', 'Chroma drops as the colour is diluted by the neutral-leaning airlight. Distant greens become greyed, not merely lighter.', hills(cc(8), cc(48))],
+    ['Hue shifts to the atmosphere', 'Distant colours move towards the colour of the air: blue on a clear day, orange and pink at sunrise and sunset, grey in fog.', hills(css(mix(hexLin('#e6ae86'), g, .3)), css(mix(hexLin('#e6ae86'), g, .9)), hexLin('#f3c38e'))],
+    ['Edges and detail soften', 'Texture, small forms and hard edges disappear first. Far planes read as flat shapes with soft silhouettes; detail belongs up close.', hills(see(.3), see(1), null, 1, grass)],
+  ];
+  $('rules').innerHTML = items.map(([b, p, svg]) => '<li>' + svg + '<b>' + b + '</b>' + p + '</li>').join('');
+})();
+
+/* ================= Step-by-step guides ================= */
+
+const tri = (x, c, w) => Math.max(0, 1 - Math.abs(x - c) / w);
+const GR = [
+  x => 112 - 40 * tri(x, 110, 120) - 28 * tri(x, 300, 95) - 3 * Math.sin(x / 7),
+  x => 150 - 16 * Math.sin(x / 55 + 1) - 5 * Math.sin(x / 17),
+  x => 193 - 12 * Math.sin(x / 70 + 3) - 3 * Math.sin(x / 13),
+  x => 232 - 8 * Math.sin(x / 90 + .5),
+];
+const ridgePts = f => { const p = []; for (let x = 0; x <= 400; x += 8) p.push([x, f(x)]); return p; };
+const pth = pts => 'M' + pts.map(p => f1(p[0]) + ' ' + f1(p[1])).join('L');
+const ridgeLine = i => '<path class="ln" pathLength="1" d="' + pth(ridgePts(GR[i])) + '"/>';
+function region(i) {
+  // i = -1 is the sky; otherwise the visible part of band i
+  const top = i < 0 ? [[0, 0], [400, 0]] : ridgePts(GR[i]);
+  const bottom = i < 3 ? ridgePts(GR[i + 1]).reverse() : [[400, 260], [0, 260]];
+  return pth(top.concat(bottom)) + 'Z';
+}
+const fillR = (i, col) => ({ l: 'f', s: '<path class="sh" d="' + region(i) + '" fill="' + col + '"/>' });
+const tag2 = (x, y, t, cn) => '<g><circle cx="' + x + '" cy="' + (y - 4) + '" r="10" fill="#fbfaf6" stroke="#55534e" class="' + (cn ? 'cn' : '') + '" style="stroke-dasharray:none"/><text class="lbl' + (cn ? ' cnl' : '') + '" x="' + x + '" y="' + y + '" text-anchor="middle">' + t + '</text></g>';
+const numLbl = (x, y, t) => '<text class="lbl cnl" x="' + x + '" y="' + y + '" text-anchor="middle" style="font-size:13px">' + t + '</text>';
+const VALS = [2, 4, 6, 8];
+const LBL_Y = [[330, 40], [340, 108], [60, 150], [250, 208], [120, 250]];
+
+function guideValues() {
+  const g = s => css(greyL(s === 1 ? 96 : stepL(s)));
+  const grass = '<path class="ln" pathLength="1" d="M30 250l3-10M44 252l2-12M60 249l4-10M300 251l2-11M318 250l3-10M336 252l2-12M354 249l3-9"/>';
+  return { name: 'Value bands', steps: [
+    { t: 'Lightly draw the skyline of each plane, from back to front: the distant mountains, two ranges of hills and the foreground. Four planes plus the sky is enough for most landscapes.', e: [0, 1, 2, 3].map(ridgeLine) },
+    { t: 'Give every plane a single value on a 1–9 scale (1 = paper white, 9 = black). In daylight the sky is lightest, at 1, and each plane steps darker as it comes forward: 2, 4, 6, 8.', e: [numLbl(LBL_Y[0][0], LBL_Y[0][1], '1')].concat(VALS.map((v, i) => numLbl(LBL_Y[i + 1][0], LBL_Y[i + 1][1], v))) },
+    { t: 'Tone the sky and the far mountains first and keep them close together, at 1 and 2. The distant plane is barely darker than the sky behind it.', e: [fillR(-1, g(1)), fillR(0, g(2))] },
+    { t: 'Add the middle planes at 4 and 6. Each step darker is a step forward in space, so keep the steps even and the boundaries between planes clear.', e: [fillR(1, g(4)), fillR(2, g(6))] },
+    { t: 'Put in the foreground at 8. It carries the darkest darks, the highest contrast and the sharpest edges. Keep all the small detail, such as grass and trunks, for this plane.', e: [fillR(3, g(8)), grass] },
+    { t: 'Rub out the numbers and squint. If two neighbouring planes merge, move one of them by a whole step. Soften the far skyline slightly and keep the near one crisp.', erase: true, e: [] },
+  ] };
+}
+
+function guideColour() {
+  const A = hexLin('#aac6e0'), local = mul(hexLin('#3f7a2e'), [1, .98, .94]);
+  const dists = [.95, .62, .32, .05];
+  const band = i => {
+    const m = lab(mix(A, local, Math.exp(-2.3 * dists[i])));
+    return css(lchLin(stepL(VALS[i]), m.C, m.h));
+  };
+  const sky = css(lchLin(95, lab(A).C, lab(A).h));
+  const g = s => css(greyL(s === 1 ? 96 : stepL(s)));
+  const accents = '<path class="ln" pathLength="1" style="stroke:#10230d" d="M30 250l3-10M44 252l2-12M60 249l4-10M300 251l2-11M318 250l3-10M336 252l2-12"/>';
+  return { name: 'Colour temperature', steps: [
+    { t: 'Start from the value plan: sky 1, then 2, 4, 6 and 8 from back to front. The colour you add must keep these values, or the depth falls apart.', e: [0, 1, 2, 3].map(ridgeLine).concat([fillR(-1, g(1)), fillR(0, g(2)), fillR(1, g(4)), fillR(2, g(6)), fillR(3, g(8))]) },
+    { t: 'Decide the colour of the atmosphere and paint the sky with it. On a clear day it is a light, slightly greyed blue near the horizon; this colour is mixed into everything distant.', e: [fillR(-1, sky)] },
+    { t: 'Mix the far mountains mostly from the sky colour with a little of the local green, darkened to value 2. Their hue is cool, their chroma very low and their value close to the sky.', e: [fillR(0, band(0))] },
+    { t: 'Work forward through the middle planes. Each one gets more local colour and less atmosphere: the hue warms from blue towards green and chroma rises, at values 4 and 6.', e: [fillR(1, band(1)), fillR(2, band(2))] },
+    { t: 'The foreground uses the local colour almost unmixed: the warmest, most saturated plane at value 8, with dark accents and sharp detail.', e: [fillR(3, band(3)), accents] },
+    { t: 'The rule is “towards the atmosphere colour”, not “towards blue”. At sunset the same plan shifts distant planes towards orange and pink; in fog, towards grey with very little chroma.', e: ['<text class="lbl" x="200" y="34" text-anchor="middle">COOL · LOW CHROMA · SOFT</text>', '<text class="lbl" x="200" y="252" text-anchor="middle" style="fill:#fbfaf6">WARM · HIGH CHROMA · SHARP</text>'] },
+  ] };
+}
+
+Stepper({ values: guideValues(), colour: guideColour() });
+
+/* ================= Printable sheet ================= */
+
+const SH = { bands: 4, key: false };
+const TARGETS = { 4: [2, 4, 6, 8], 5: [2, 4, 5, 7, 8] };
+const SHEET_STEPS = [
+  'Fill in the value scale: leave 1 as paper, make 9 as dark as your medium allows, then grade 2–8 in even steps.',
+  'Tone the sky to its target, then each band from the back to the front, matching the number beside it against your scale.',
+  'Squint to check that every band separates from its neighbours. Keep far edges soft; put texture and crisp edges only in the front band.',
+];
+
+function drawSheet() {
+  const n = SH.bands, ter = makeTerrain(S.seed, n), tg = TARGETS[n];
+  $('shSub').textContent = 'Value study in ' + n + ' bands. Targets use the 1–9 scale: 1 = paper white, 9 = darkest.';
+  $('shSteps').innerHTML = SHEET_STEPS.map(t => '<li>' + t + '</li>').join('');
+  $('shScale').innerHTML = Array.from({ length: 9 }, (_, k) => '<li><span>' + (k + 1) + '</span><i' + (SH.key ? ' style="background:' + css(greyL(stepL(k + 1))) + '"' : '') + '></i></li>').join('');
+
+  const ridge = L => 'M0 ' + f1(L.ridge[0]) + Array.from(L.ridge).map((y, k) => 'L' + k * STEP + ' ' + f1(y)).join('') + 'L' + W + ' ' + H + 'L0 ' + H + 'Z';
+  let s = '<defs><clipPath id="shClip"><rect width="' + W + '" height="' + H + '"/></clipPath></defs>';
+  s += '<rect width="' + W + '" height="' + H + '" fill="' + (SH.key ? css(greyL(stepL(1))) : '#fff') + '"/>';
+  s += '<g clip-path="url(#shClip)">';
+  ter.forEach((L, i) => {
+    s += '<path d="' + ridge(L) + '" fill="' + (SH.key ? css(greyL(stepL(tg[i]))) : '#fff') + '" stroke="#141414" stroke-width="2.2" stroke-linejoin="round"/>';
+  });
+  s += '</g><rect width="' + W + '" height="' + H + '" fill="none" stroke="#141414" stroke-width="2.5"/>';
+
+  // Find a roomy point inside each visible band (and the sky) for its marker
+  const marks = [];
+  const skyTop = x => Math.min(...ter.map(L => ridgeAt(L, x)));
+  let bx = 1100, bt = 0;
+  for (let x = 700; x <= 1150; x += 25) if (skyTop(x) > bt) { bt = skyTop(x); bx = x; }
+  marks.push({ x: bx, y: bt / 2, v: 1, name: 'SKY' });
+  ter.forEach((L, i) => {
+    let best = null;
+    for (let x = 40; x <= 1160; x += 20) {
+      const top = ridgeAt(L, x);
+      const above = ter.slice(i + 1).map(M => ridgeAt(M, x));
+      const bottom = Math.min(H, ...above);
+      if (above.some(y => y < top)) continue;
+      const score = (bottom - top) + x * 0.04;
+      if (!best || score > best.score) best = { x, y: (top + bottom) / 2, score };
+    }
+    if (best) marks.push({ x: best.x, y: best.y, v: tg[i], name: i === 0 ? 'FAR' : i === n - 1 ? 'NEAR' : '' });
+  });
+  // Target circles in the right margin, spread out so they never overlap
+  const order = marks.map((m, k) => k).sort((a, b) => marks[a].y - marks[b].y);
+  let last = -1e9;
+  order.forEach(k => { const m = marks[k]; m.cy = clamp(Math.max(m.y, last + 80), 34, H - 50); last = m.cy; });
+  for (let j = order.length - 1, next = 1e9; j >= 0; j--) { const m = marks[order[j]]; m.cy = Math.min(m.cy, next - 80, H - 50); next = m.cy; }
+  const cx = W + 64;
+  marks.forEach(m => {
+    s += '<path d="M' + m.x + ' ' + f1(m.y) + 'L' + (W - 6) + ' ' + f1(m.y) + 'L' + (cx - 30) + ' ' + f1(m.cy) + '" fill="none" stroke="#555" stroke-width="1.4" stroke-dasharray="4 3"/>';
+    s += '<circle cx="' + m.x + '" cy="' + f1(m.y) + '" r="6" fill="#141414" stroke="#fff" stroke-width="2"/>';
+    s += '<circle cx="' + cx + '" cy="' + f1(m.cy) + '" r="28" fill="#fff" stroke="#141414" stroke-width="2.5"/>';
+    s += '<text x="' + cx + '" y="' + f1(m.cy + 11) + '" text-anchor="middle" font-family="Archivo, Arial, sans-serif" font-size="32" font-weight="800" fill="#141414">' + m.v + '</text>';
+    if (m.name) s += '<text x="' + cx + '" y="' + f1(m.cy + 44) + '" text-anchor="middle" font-family="Archivo, Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="1.5" fill="#333">' + m.name + '</text>';
+  });
+  $('shv').innerHTML = s;
+}
+
+pickButtons($('shBands'), [[4, '4 bands'], [5, '5 bands']], SH.bands, k => { SH.bands = k; drawSheet(); });
+$('shKey').addEventListener('change', e => { SH.key = e.target.checked; drawSheet(); });
+$('shNew').addEventListener('click', newSeed);
+$('shPrint').addEventListener('click', () => window.print());
+
+render();
+
+})();
+</script>
+</body>
+</html>
