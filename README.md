@@ -16,6 +16,19 @@ Classroom tools for teaching colour theory. Everything is plain HTML with inline
 
 The wheel is fully keyboard accessible: Tab to a segment, arrow keys step around the wheel, Enter or Space selects.
 
+## 3D Shape Shading
+
+`shape-shading.html` teaches how to draw and shade 3D shapes (cube, cylinder, cone, sphere, pyramid, triangular prism).
+
+- **3D playbox**: drag to turn the shape, drag the sun to move the light. Jump to top, front, side, bottom or three-quarter views. Shade as smooth tone, a 5-step value scale or pencil hatching, with optional outlines, dashed hidden edges, cast shadow and perspective.
+- **Five views**: the chosen shape from every side, with what to look for in each.
+- **Draw it step by step**: animated guides for the cube, cylinder, cone, sphere and pyramid, from first line to cast shadow.
+- **Shading with a pencil**: the parts of light and shadow, a value scale with pencil grades, and animated hatching, cross-hatching, contour hatching, stippling, blending and scumbling swatches.
+
+## Site structure
+
+`index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
+
 ## Running locally
 
-Open `colour-schemes.html` in any modern browser. Nothing to install.
+Open `index.html` in any modern browser. Nothing to install.

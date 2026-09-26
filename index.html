@@ -2,11 +2,77 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="refresh" content="0; url=colour-schemes.html">
-<title>Colour Wheel Schemes</title>
-<link rel="canonical" href="colour-schemes.html">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>ColourFun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
+<style>
+.wrap { max-width: 1000px; margin: 0 auto; padding: 32px 24px 64px; }
+h1 { font-size: clamp(28px, 4.5vw, 40px); font-weight: 800; margin: 0 0 6px; }
+.lead { margin: 0 0 28px; color: var(--muted); font-size: 16px; max-width: 60ch; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.card {
+  display: flex; flex-direction: column;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+  color: var(--ink); text-decoration: none;
+}
+.card:hover { border-color: var(--ink); }
+.card .art { background: #fbfaf6; border-bottom: 1px solid var(--border); display: flex; justify-content: center; padding: 18px; }
+.card svg { width: 160px; height: 160px; display: block; }
+.card .txt { padding: 14px 18px 18px; }
+.card h2 { margin: 0; font-size: 18px; }
+.card p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+@media (max-width: 560px) { .wrap { padding: 20px 16px 48px; } }
+</style>
 </head>
 <body>
-<p>Opening <a href="colour-schemes.html">Colour Wheel Schemes</a>&hellip;</p>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li><a href="colour-schemes.html">Colour schemes</a></li>
+      <li><a href="shape-shading.html">3D shape shading</a></li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>ColourFun</h1>
+  <p class="lead">Art tools for learning about colour, shape and shading.</p>
+  <div class="cards">
+    <a class="card" href="colour-schemes.html">
+      <span class="art">
+        <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/><circle cx="13" cy="13" r="5" fill="#fbfaf6"/></svg>
+      </span>
+      <span class="txt"><h2>Colour schemes</h2><p>Build a printable worksheet of colour wheel schemes: complementary, analogous, triadic and more.</p></span>
+    </a>
+    <a class="card" href="shape-shading.html">
+      <span class="art">
+        <svg viewBox="0 0 160 160" aria-hidden="true">
+          <path d="M80 140L112 152L154 132L118 122Z" fill="#b3b0a9"/>
+          <path d="M80 20L130 45L80 70L30 45Z" fill="#f2f0ea"/>
+          <path d="M30 45L80 70L80 140L30 115Z" fill="#cfccc5"/>
+          <path d="M80 70L130 45L130 115L80 140Z" fill="#6e6c68"/>
+          <path d="M80 20L130 45L130 115L80 140L30 115L30 45Z M30 45L80 70L130 45 M80 70V140" fill="none" stroke="#1d1d1f" stroke-width="2.5" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="txt"><h2>3D shape shading</h2><p>Turn 3D shapes in a playbox, see them from every side, and learn to draw and shade them with a pencil.</p></span>
+    </a>
+  </div>
+</main>
+<script src="site.js"></script>
 </body>
 </html>

@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>3D Shape Shading</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
+<style>
+/* ---------- Layout ---------- */
+.wrap { max-width: 1180px; margin: 0 auto; padding: 24px 24px 64px; }
+.intro h1 { font-size: clamp(28px, 4.5vw, 40px); font-weight: 800; letter-spacing: .01em; margin: 12px 0 6px; }
+.intro p { margin: 0; color: var(--muted); font-size: 16px; max-width: 68ch; }
+.jump { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; }
+.jump a {
+  display: flex; align-items: center; min-height: 40px; padding: 0 14px;
+  border: 2px solid var(--border); border-radius: 999px;
+  color: var(--ink); text-decoration: none; font-weight: 600; font-size: 13px;
+}
+.jump a:hover { border-color: var(--ink); }
+
+section { margin-top: 44px; scroll-margin-top: 16px; }
+.sec-title { font-size: 22px; font-weight: 800; margin: 0 0 4px; }
+.sec-lead { margin: 0 0 16px; color: var(--muted); max-width: 72ch; }
+
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+/* Drawing surfaces are always white paper with pencil-grey ink, in light and dark mode. */
+.paper {
+  background: #fbfaf6; color: #141414;
+  border: 1px solid #cfcbc2; border-radius: 14px;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, .14);
+  overflow: hidden;
+}
+.label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 16px 0 8px; }
+.label:first-child { margin-top: 0; }
+
+/* Buttons */
+.bgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.tbtn {
+  min-height: 44px; padding: 6px 8px;
+  background: var(--panel); color: var(--ink);
+  border: 2px solid var(--border); border-radius: 9px;
+  font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.tbtn:hover { border-color: var(--ink); }
+.tbtn[aria-pressed="true"], .tbtn[aria-selected="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--panel)); }
+.btn {
+  min-height: 44px; padding: 8px 16px; border-radius: 10px;
+  font: inherit; font-weight: 700; font-size: 14px; cursor: pointer;
+}
+.btn.primary { background: var(--accent); color: var(--accent-ink); border: 2px solid var(--accent); }
+.btn.ghost { background: transparent; color: var(--ink); border: 2px solid var(--accent); }
+.btn:hover { border-color: var(--ink); }
+.btn:disabled { opacity: .45; cursor: default; }
+
+.check { display: flex; align-items: center; gap: 10px; min-height: 40px; cursor: pointer; font-size: 14px; }
+.check input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); flex: none; }
+.range { display: grid; gap: 4px; margin-bottom: 8px; font-size: 13px; }
+.range span { display: flex; justify-content: space-between; }
+.range output { color: var(--muted); }
+.range input { width: 100%; accent-color: var(--accent); min-height: 32px; }
+.hint { margin: 10px 0 0; font-size: 12px; color: var(--muted); }
+
+/* ---------- Playbox ---------- */
+.play { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+.stage { position: relative; aspect-ratio: 5 / 4; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+.stage canvas:active { cursor: grabbing; }
+.stage-badge {
+  position: absolute; left: 12px; top: 12px;
+  background: rgba(251, 250, 246, .9); border: 1px solid #d8d4cb; border-radius: 8px;
+  padding: 4px 10px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  pointer-events: none;
+}
+.stage-foot { border-top: 1px solid #e1ded6; padding: 12px 16px 14px; min-height: 76px; }
+.stage-foot b { display: block; font-size: 14px; }
+.stage-foot p { margin: 4px 0 0; font-size: 14px; color: #333; }
+.legend { display: flex; gap: 4px; align-items: center; margin-top: 10px; font-size: 11px; color: #555; flex-wrap: wrap; }
+.legend i { width: 22px; height: 14px; border: 1px solid #141414; display: inline-block; }
+
+/* ---------- Views ---------- */
+.views { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.vcard {
+  display: flex; flex-direction: column; text-align: left;
+  padding: 0; font: inherit; cursor: pointer;
+  border: 2px solid #cfcbc2;
+}
+.vcard:hover { border-color: #141414; }
+.vcard[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.vcard canvas { width: 100%; aspect-ratio: 1; display: block; }
+
+.vcard .vtxt { display: block; padding: 8px 10px 12px; border-top: 1px solid #e1ded6; }
+
+.vcard b { display: block; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
+.vcard .vd { display: block; margin: 3px 0 0; font-size: 12.5px; color: #333; }
+
+/* ---------- Step-by-step guide ---------- */
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.tabs .tbtn { padding: 6px 16px; }
+.guide { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: stretch; }
+.gstage svg { display: block; width: 100%; height: auto; }
+.gpanel { display: flex; flex-direction: column; }
+.gcount { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.gtext { font-size: 18px; line-height: 1.45; margin: 8px 0 16px; min-height: 5.8em; }
+.gbtns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
+.dots { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 14px; }
+.dots button {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid var(--border); background: var(--panel); color: var(--ink);
+  font: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.dots button.done { background: color-mix(in srgb, var(--accent) 18%, var(--panel)); border-color: color-mix(in srgb, var(--accent) 50%, var(--border)); }
+.dots button[aria-current="step"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+/* Drawing marks inside the guide and diagrams */
+.ln { fill: none; stroke: #1d1d1f; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.cn { fill: none; stroke: #8b8882; stroke-width: 1.3; stroke-dasharray: 5 4; stroke-linecap: round; }
+.hl { fill: none; stroke: #2a2a2e; stroke-opacity: .5; stroke-width: 1; stroke-linecap: round; }
+.dot { fill: #1d1d1f; }
+
+.now .ln, .now .hl, .play-on .draw {
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  animation: draw .8s ease-in-out forwards;
+  animation-delay: calc(var(--i, 0) * .45s + var(--j, 0) * .04s);
+}
+.now .hl { animation-duration: .35s; }
+.now .cn, .now .fd, .now .dot {
+  opacity: 0;
+  animation: fade .6s ease forwards;
+  animation-delay: calc(var(--i, 0) * .45s);
+}
+.now .sh {
+  clip-path: inset(0 100% 0 0);
+  animation: wipe 1.2s ease-in-out forwards;
+  animation-delay: calc(var(--i, 0) * .45s);
+}
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes fade { to { opacity: 1; } }
+@keyframes wipe { to { clip-path: inset(0 0 0 0); } }
+
+/* ---------- Pencil section ---------- */
+.zones { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.zones svg { display: block; width: 100%; height: auto; }
+.zones text { font-family: var(--font); font-size: 15px; font-weight: 700; fill: #141414; }
+.zones text.sub { font-size: 12px; font-weight: 400; fill: #444; }
+.zones .lead-line { stroke: #141414; stroke-width: 1.2; fill: none; }
+.vscale { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.vscale li { display: grid; grid-template-columns: 54px 1fr; gap: 12px; align-items: center; }
+.vscale i { height: 40px; border: 1.5px solid #141414; border-radius: 4px; display: block; }
+.vscale b { display: block; font-size: 14px; }
+.vscale span { font-size: 13px; color: var(--muted); }
+
+.tech { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin-top: 20px; }
+.tcard { display: flex; flex-direction: column; }
+.tcard svg { display: block; width: 100%; height: auto; border-bottom: 1px solid #e1ded6; }
+.tcard .ttxt { padding: 10px 14px 12px; flex: 1; }
+.tcard h3 { margin: 0; font-size: 15px; }
+.tcard p { margin: 4px 0 0; font-size: 13px; color: #333; }
+.tcard button {
+  margin: 0 14px 12px; align-self: flex-start;
+  min-height: 36px; padding: 0 12px; border-radius: 8px;
+  border: 1.5px solid #bdb9b0; background: #fff; color: #141414;
+  font: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.tcard button:hover { border-color: #141414; }
+.tcard g:not(.play-on) .draw { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.tcard g:not(.play-on) .dotm { opacity: 0; }
+.tcard g:not(.play-on) .wipe { clip-path: inset(0 100% 0 0); }
+.play-on .dotm { opacity: 0; animation: fade .3s ease forwards; }
+.play-on .wipe { clip-path: inset(0 100% 0 0); animation: wipe 1.6s ease-in-out forwards; }
+
+.tips { margin: 20px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.tips li { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+.tips b { display: block; margin-bottom: 2px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 960px) {
+  .play { grid-template-columns: 1fr; }
+  .views { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .guide, .zones { grid-template-columns: 1fr; }
+  .gtext { min-height: 0; }
+}
+@media (max-width: 560px) {
+  .wrap { padding: 16px 16px 48px; }
+  .views { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stage { aspect-ratio: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001s !important; animation-delay: 0s !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li><a href="colour-schemes.html">Colour schemes</a></li>
+      <li><a href="shape-shading.html" aria-current="page">3D shape shading</a></li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
+
+<!-- Shared SVG paint: hatching patterns and shading gradients used by the guide and diagrams. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="p1" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="7" height="7" fill="#f2f0ea"/><line x1="1" y1="0" x2="1" y2="7" stroke="#2a2a2e" stroke-opacity=".3" stroke-width="1"/>
+    </pattern>
+    <pattern id="p2" width="4.5" height="4.5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="4.5" height="4.5" fill="#d6d3cc"/><line x1="1" y1="0" x2="1" y2="4.5" stroke="#2a2a2e" stroke-opacity=".45" stroke-width="1"/>
+    </pattern>
+    <pattern id="p3" width="4.5" height="4.5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="4.5" height="4.5" fill="#a9a6a0"/><line x1="1" y1="0" x2="1" y2="4.5" stroke="#2a2a2e" stroke-opacity=".55" stroke-width="1"/><line x1="0" y1="1" x2="4.5" y2="1" stroke="#2a2a2e" stroke-opacity=".45" stroke-width="1"/>
+    </pattern>
+    <pattern id="p4" width="3.5" height="3.5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="3.5" height="3.5" fill="#75736f"/><line x1="1" y1="0" x2="1" y2="3.5" stroke="#1d1d1f" stroke-opacity=".6" stroke-width="1"/><line x1="0" y1="1" x2="3.5" y2="1" stroke="#1d1d1f" stroke-opacity=".5" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="cylG" gradientUnits="userSpaceOnUse" x1="80" y1="0" x2="220" y2="0">
+      <stop offset="0" stop-color="#a9a6a0"/><stop offset=".3" stop-color="#f3f1eb"/><stop offset=".55" stop-color="#bdbab3"/><stop offset=".86" stop-color="#6e6c68"/><stop offset="1" stop-color="#8d8b86"/>
+    </linearGradient>
+    <linearGradient id="coneG" gradientUnits="userSpaceOnUse" x1="76" y1="0" x2="224" y2="0">
+      <stop offset="0" stop-color="#b0ada6"/><stop offset=".3" stop-color="#f3f1eb"/><stop offset=".55" stop-color="#bdbab3"/><stop offset=".88" stop-color="#6c6a66"/><stop offset="1" stop-color="#86847f"/>
+    </linearGradient>
+    <radialGradient id="sphA" gradientUnits="userSpaceOnUse" cx="118" cy="93" r="130">
+      <stop offset="0" stop-color="#fbfaf6"/><stop offset=".16" stop-color="#f4f2ec"/><stop offset=".5" stop-color="#c9c6bf"/><stop offset="1" stop-color="#a19e98"/>
+    </radialGradient>
+    <radialGradient id="sphB" gradientUnits="userSpaceOnUse" cx="118" cy="93" r="130">
+      <stop offset="0" stop-color="#2a2a2e" stop-opacity="0"/><stop offset=".55" stop-color="#2a2a2e" stop-opacity="0"/><stop offset=".8" stop-color="#2a2a2e" stop-opacity=".55"/><stop offset="1" stop-color="#2a2a2e" stop-opacity=".68"/>
+    </radialGradient>
+    <radialGradient id="sphC" gradientUnits="userSpaceOnUse" cx="118" cy="93" r="130">
+      <stop offset="0" stop-color="#fbfaf6" stop-opacity="0"/><stop offset=".85" stop-color="#fbfaf6" stop-opacity="0"/><stop offset="1" stop-color="#fbfaf6" stop-opacity=".6"/>
+    </radialGradient>
+    <radialGradient id="shadowG">
+      <stop offset="0" stop-color="#3a3a3e" stop-opacity=".6"/><stop offset=".7" stop-color="#3a3a3e" stop-opacity=".35"/><stop offset="1" stop-color="#3a3a3e" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="occG">
+      <stop offset="0" stop-color="#1d1d1f" stop-opacity=".9"/><stop offset="1" stop-color="#1d1d1f" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="blendG" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fbfaf6"/><stop offset="1" stop-color="#3a3a3e"/>
+    </linearGradient>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 -1.1 .75" result="w"/>
+      <feComposite in="w" in2="SourceGraphic" operator="in" result="speck"/>
+      <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="speck"/></feMerge>
+    </filter>
+  </defs>
+</svg>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>3D shape shading</h1>
+    <p>Learn how cubes, cylinders, cones, spheres, pyramids and prisms look from different angles, then shade them with a pencil so they look solid.</p>
+    <ul class="jump">
+      <li><a href="#playbox">3D playbox</a></li>
+      <li><a href="#views">Five views</a></li>
+      <li><a href="#guide">Draw it step by step</a></li>
+      <li><a href="#pencil">Pencil shading</a></li>
+    </ul>
+  </div>
+
+  <!-- ---------- Playbox ---------- -->
+  <section id="playbox" aria-labelledby="playTitle">
+    <h2 class="sec-title" id="playTitle">3D playbox</h2>
+    <p class="sec-lead">Drag the shape to turn it. Drag the sun to move the light. Watch how the light and dark parts change, and where the shadow falls.</p>
+    <div class="play">
+      <div class="paper">
+        <div class="stage">
+          <canvas id="pbox" tabindex="0" role="img" aria-label="3D shape. Drag to rotate, or use the arrow keys."></canvas>
+          <div class="stage-badge" id="badge">Three-quarter view</div>
+        </div>
+        <div class="stage-foot" aria-live="polite">
+          <b id="tipTitle">Cube from an angle</b>
+          <p id="tipText"></p>
+          <div class="legend" id="legend" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <div class="panel" aria-label="Playbox controls">
+        <h3 class="label" id="shapeLbl">Shape</h3>
+        <div class="bgrid" role="group" aria-labelledby="shapeLbl" id="shapeBtns"></div>
+
+        <h3 class="label" id="viewLbl">Look from</h3>
+        <div class="bgrid" role="group" aria-labelledby="viewLbl" id="viewBtns"></div>
+
+        <h3 class="label" id="styleLbl">Shading style</h3>
+        <div class="bgrid" role="group" aria-labelledby="styleLbl" id="styleBtns"></div>
+
+        <h3 class="label">Light</h3>
+        <label class="range"><span>Comes from <output id="aOut"></output></span><input type="range" id="aIn" min="0" max="359" step="1"></label>
+        <label class="range"><span>Towards you <output id="eOut"></output></span><input type="range" id="eIn" min="0" max="80" step="1"></label>
+
+        <h3 class="label">Show</h3>
+        <label class="check"><input type="checkbox" id="oEdges" checked> Outlines</label>
+        <label class="check"><input type="checkbox" id="oHidden"> Hidden edges (dashed)</label>
+        <label class="check"><input type="checkbox" id="oShadow" checked> Cast shadow</label>
+        <label class="check"><input type="checkbox" id="oPersp" checked> Perspective</label>
+        <label class="check"><input type="checkbox" id="oSpin"> Spin slowly</label>
+        <p class="hint">Keyboard: focus the drawing and use the arrow keys to turn it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Views ---------- -->
+  <section id="views" aria-labelledby="viewsTitle">
+    <h2 class="sec-title" id="viewsTitle">One shape, five views</h2>
+    <p class="sec-lead">The same <strong id="viewsShape">cube</strong> seen from the top, front, side, bottom and at an angle. Pick a shape in the playbox above to change it, or tap a view to jump the playbox there.</p>
+    <div class="views" id="viewCards"></div>
+  </section>
+
+  <!-- ---------- Guide ---------- -->
+  <section id="guide" aria-labelledby="guideTitle">
+    <h2 class="sec-title" id="guideTitle">Draw it step by step</h2>
+    <p class="sec-lead">Follow along with a pencil. Each step draws itself. Press <em>Next</em> when you're ready, or <em>Play all</em> to watch the whole drawing.</p>
+    <div class="tabs" role="tablist" aria-label="Shape to draw" id="gTabs"></div>
+    <div class="guide">
+      <div class="paper gstage">
+        <svg id="gsvg" viewBox="0 0 300 260" role="img" aria-labelledby="gText">
+          <g id="gBack"></g><g id="gFill"></g><g id="gLine"></g>
+        </svg>
+      </div>
+      <div class="panel gpanel">
+        <div class="gcount" id="gCount">Step 1 of 7</div>
+        <p class="gtext" id="gText" aria-live="polite"></p>
+        <div class="dots" id="gDots" aria-label="Steps"></div>
+        <div class="gbtns">
+          <button type="button" class="btn ghost" id="gPrev">Back</button>
+          <button type="button" class="btn primary" id="gNext">Next</button>
+          <button type="button" class="btn ghost" id="gPlay">Play all</button>
+          <button type="button" class="btn ghost" id="gAgain">Replay step</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Pencil ---------- -->
+  <section id="pencil" aria-labelledby="pencilTitle">
+    <h2 class="sec-title" id="pencilTitle">Shading with a pencil</h2>
+    <p class="sec-lead">Every shaded shape has the same parts of light and shadow. Learn their names, then use a value scale to match your pencil pressure to them.</p>
+
+    <div class="zones">
+      <div class="paper">
+        <svg viewBox="0 0 560 300" role="img" aria-label="A shaded ball with labels: highlight, half-tone, core shadow, reflected light, cast shadow and occlusion shadow.">
+          <g transform="translate(130 10)">
+            <ellipse cx="190" cy="212" rx="88" ry="16" fill="url(#shadowG)"/>
+            <ellipse cx="150" cy="209" rx="32" ry="6" fill="url(#occG)"/>
+            <circle cx="150" cy="125" r="85" fill="url(#sphA)"/>
+            <circle cx="150" cy="125" r="85" fill="url(#sphB)"/>
+            <circle cx="150" cy="125" r="85" fill="url(#sphC)"/>
+          </g>
+          <g transform="translate(40 34)"><circle r="11" fill="#f2b632" stroke="#141414" stroke-width="1.5"/><path d="M0-19v-6M0 19v6M-19 0h-6M19 0h6M-13.4-13.4l-4.3-4.3M13.4 13.4l4.3 4.3M-13.4 13.4l-4.3 4.3M13.4-13.4l4.3-4.3" stroke="#141414" stroke-width="2" stroke-linecap="round"/></g>
+          <text x="68" y="38" class="sub">Light</text>
+          <path class="lead-line" d="M150 92H236L248 103"/><circle cx="248" cy="103" r="3"/>
+          <text x="54" y="88">Highlight</text><text x="54" y="104" class="sub">Brightest spot</text>
+          <path class="lead-line" d="M150 170H222"/><circle cx="222" cy="170" r="3"/>
+          <text x="40" y="166">Half-tone</text><text x="40" y="182" class="sub">Mid-tones</text>
+          <path class="lead-line" d="M412 118H362L322 176"/><circle cx="322" cy="176" r="3"/>
+          <text x="418" y="114">Core shadow</text><text x="418" y="130" class="sub">Darkest part of the ball</text>
+          <path class="lead-line" d="M412 176H372L337 192"/><circle cx="337" cy="192" r="3"/>
+          <text x="418" y="172">Reflected light</text><text x="418" y="188" class="sub">Bounced up from the table</text>
+          <path class="lead-line" d="M412 250H380V228"/><circle cx="380" cy="228" r="3"/>
+          <text x="418" y="246">Cast shadow</text><text x="418" y="262" class="sub">Falls away from the light</text>
+          <path class="lead-line" d="M150 262H270L280 223"/><circle cx="280" cy="223" r="3"/>
+          <text x="20" y="258">Occlusion shadow</text><text x="20" y="274" class="sub">Darkest, where it touches</text>
+        </svg>
+      </div>
+      <div class="panel">
+        <h3 class="label">Value scale</h3>
+        <ol class="vscale">
+          <li><i style="background:#fbfaf6"></i><div><b>1 · Paper white</b><span>Highlights. Don't shade at all.</span></div></li>
+          <li><i style="background:#dcd9d2"></i><div><b>2 · Light</b><span>Faces the light. 2H or H, very gentle.</span></div></li>
+          <li><i style="background:#b3b0a9"></i><div><b>3 · Mid-tone</b><span>Turning away. HB, even pressure.</span></div></li>
+          <li><i style="background:#83817c"></i><div><b>4 · Dark</b><span>In shadow. 2B, layers of hatching.</span></div></li>
+          <li><i style="background:#4f4e4b"></i><div><b>5 · Darkest</b><span>Core and cast shadow. 4B–6B.</span></div></li>
+        </ol>
+        <p class="hint">H pencils are hard and light. B pencils are soft and dark: the bigger the number, the darker. HB is in the middle.</p>
+      </div>
+    </div>
+
+    <div class="tech" id="tech"></div>
+
+    <ul class="tips">
+      <li><b>Start light</b>Sketch with a 2H or HB and hardly any pressure. You can always go darker, but it's hard to go lighter.</li>
+      <li><b>One light source</b>Decide where the light comes from before you shade, and keep it the same for the whole drawing.</li>
+      <li><b>Build in layers</b>Get dark areas by going over them a few times, not by pressing really hard straight away.</li>
+      <li><b>Follow the form</b>Straight strokes for flat faces, curved strokes that wrap around round shapes.</li>
+      <li><b>Save the white</b>Leave the paper white for highlights, or lift them back out with a putty rubber.</li>
+      <li><b>Squint</b>Squinting hides the detail so you can see if your lights and darks are right.</li>
+      <li><b>Don't smudge</b>Rest your hand on a scrap of paper. Blend with a tissue or blending stump, not your finger.</li>
+      <li><b>Edges meet</b>Where a light face meets a dark face, make the dark side darkest right at the edge. It makes the corner pop.</li>
+    </ul>
+  </section>
+</main>
+
+<script src="site.js"></script>
+<script>
+(function () {
+'use strict';
+
+const RAD = Math.PI / 180;
+const PAPER = '#fbfaf6';
+const INK = '#1d1d1f';
+const TONES = ['#fbfaf6', '#dcd9d2', '#b3b0a9', '#83817c', '#4f4e4b'];
+const GROUND = '#efece5';
+
+/* ================= Meshes ================= */
+// Faces carry a smoothing group: edges between faces of the same group are soft
+// (only drawn on the silhouette), edges between groups are hard (always drawn).
+
+function finish(m) {
+  const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
+  m.v.forEach(p => { for (let k = 0; k < 3; k++) { lo[k] = Math.min(lo[k], p[k]); hi[k] = Math.max(hi[k], p[k]); } });
+  const mid = [0, 1, 2].map(k => (lo[k] + hi[k]) / 2);
+  m.gy = lo[1];
+  m.f.forEach(f => {
+    const pts = f.i.map(k => m.v[k]);
+    let nx = 0, ny = 0, nz = 0;
+    for (let k = 0; k < pts.length; k++) {
+      const a = pts[k], b = pts[(k + 1) % pts.length];
+      nx += (a[1] - b[1]) * (a[2] + b[2]);
+      ny += (a[2] - b[2]) * (a[0] + b[0]);
+      nz += (a[0] - b[0]) * (a[1] + b[1]);
+    }
+    const c = [0, 1, 2].map(k => pts.reduce((s, p) => s + p[k], 0) / pts.length);
+    const len = Math.hypot(nx, ny, nz) || 1;
+    let n = [nx / len, ny / len, nz / len];
+    if (n[0] * (c[0] - mid[0]) + n[1] * (c[1] - mid[1]) + n[2] * (c[2] - mid[2]) < 0) n = n.map(x => -x);
+    f.n = n; f.c = c;
+  });
+  const map = new Map();
+  m.f.forEach((f, fi) => {
+    for (let k = 0; k < f.i.length; k++) {
+      const a = f.i[k], b = f.i[(k + 1) % f.i.length];
+      if (a === b) continue;
+      const key = a < b ? a + ',' + b : b + ',' + a;
+      if (!map.has(key)) map.set(key, [a, b, []]);
+      map.get(key)[2].push(fi);
+    }
+  });
+  m.e = [...map.values()];
+  return m;
+}
+
+function cube() {
+  const s = .85, v = [];
+  for (let i = 0; i < 8; i++) v.push([i & 1 ? s : -s, i & 2 ? s : -s, i & 4 ? s : -s]);
+  const f = [[0, 2, 6, 4], [1, 3, 7, 5], [0, 1, 5, 4], [2, 3, 7, 6], [0, 1, 3, 2], [4, 5, 7, 6]];
+  return finish({ v, f: f.map((i, g) => ({ i, g })) });
+}
+function cylinder() {
+  const N = 48, r = .9, v = [], f = [];
+  for (let y of [-1, 1]) for (let i = 0; i < N; i++) v.push([r * Math.cos(i / N * 2 * Math.PI), y, r * Math.sin(i / N * 2 * Math.PI)]);
+  for (let i = 0; i < N; i++) { const j = (i + 1) % N; f.push({ i: [i, j, N + j, N + i], g: 'side' }); }
+  f.push({ i: [...Array(N).keys()], g: 'bot' });
+  f.push({ i: [...Array(N).keys()].map(i => N + i), g: 'top' });
+  return finish({ v, f });
+}
+function cone() {
+  const N = 48, v = [], f = [];
+  for (let i = 0; i < N; i++) v.push([Math.cos(i / N * 2 * Math.PI), -1, Math.sin(i / N * 2 * Math.PI)]);
+  v.push([0, 1, 0]);
+  for (let i = 0; i < N; i++) f.push({ i: [i, (i + 1) % N, N], g: 'side' });
+  f.push({ i: [...Array(N).keys()], g: 'base' });
+  return finish({ v, f });
+}
+function sphere() {
+  const ST = 30, SL = 60, v = [[0, 1, 0]], f = [];
+  for (let k = 1; k < ST; k++) {
+    const t = k / ST * Math.PI;
+    for (let j = 0; j < SL; j++) { const p = j / SL * 2 * Math.PI; v.push([Math.sin(t) * Math.cos(p), Math.cos(t), Math.sin(t) * Math.sin(p)]); }
+  }
+  v.push([0, -1, 0]);
+  const ring = (k, j) => 1 + (k - 1) * SL + (j % SL);
+  const last = v.length - 1;
+  for (let j = 0; j < SL; j++) f.push({ i: [0, ring(1, j + 1), ring(1, j)], g: 's' });
+  for (let k = 1; k < ST - 1; k++) for (let j = 0; j < SL; j++) f.push({ i: [ring(k, j), ring(k, j + 1), ring(k + 1, j + 1), ring(k + 1, j)], g: 's' });
+  for (let j = 0; j < SL; j++) f.push({ i: [last, ring(ST - 1, j), ring(ST - 1, j + 1)], g: 's' });
+  return finish({ v, f });
+}
+function pyramid() {
+  const v = [[-1, -1, -1], [1, -1, -1], [1, -1, 1], [-1, -1, 1], [0, 1, 0]];
+  const f = [[0, 1, 2, 3], [0, 1, 4], [1, 2, 4], [2, 3, 4], [3, 0, 4]];
+  return finish({ v, f: f.map((i, g) => ({ i, g })) });
+}
+function prism() {
+  const tri = [[-1, -.85], [1, -.85], [0, .9]], v = [];
+  for (let z of [-1.1, 1.1]) tri.forEach(p => v.push([p[0], p[1], z]));
+  const f = [[0, 1, 2], [3, 4, 5], [0, 1, 4, 3], [1, 2, 5, 4], [2, 0, 3, 5]];
+  return finish({ v, f: f.map((i, g) => ({ i, g })) });
+}
+
+const SHAPES = {
+  cube:     { name: 'Cube',     mesh: cube() },
+  cylinder: { name: 'Cylinder', mesh: cylinder() },
+  cone:     { name: 'Cone',     mesh: cone() },
+  sphere:   { name: 'Sphere',   mesh: sphere() },
+  pyramid:  { name: 'Pyramid',  mesh: pyramid() },
+  prism:    { name: 'Prism',    mesh: prism() },
+};
+
+const VIEWS = {
+  top:    { name: 'Top',           yaw: 0,  pitch: 90 },
+  front:  { name: 'Front',         yaw: 0,  pitch: 0 },
+  side:   { name: 'Side',          yaw: 90, pitch: 0 },
+  bottom: { name: 'Bottom',        yaw: 0,  pitch: -90 },
+  angle:  { name: 'Three-quarter', yaw: 35, pitch: 25 },
+};
+
+const TIPS = {
+  cube: {
+    top: 'A plain square. Only the top face shows, so it is all one tone.',
+    front: 'A square. You only see the front face, so shade it evenly.',
+    side: 'Also a square. A cube looks the same from the front and the side.',
+    bottom: 'A square again. Things usually sit on their bottom face, so you will rarely draw this view.',
+    angle: 'You can see three faces. Give each face its own tone: lightest facing the light, darkest facing away.',
+  },
+  cylinder: {
+    top: 'A circle. Looking straight down you only see the round top.',
+    front: 'A rectangle! The curved side goes from light to dark across its width, in soft vertical bands.',
+    side: 'The same rectangle. A cylinder is round, so every side looks the same.',
+    bottom: 'A circle: the base.',
+    angle: 'Two ellipses joined by straight lines. Shade the side in vertical bands: highlight, mid-tone, then dark.',
+  },
+  cone: {
+    top: 'A circle with the point right in the middle. The shading spreads out like spokes on a wheel.',
+    front: 'A triangle. Shade the side away from the light darker, with strokes that fan out from the tip.',
+    side: 'Also a triangle. A cone looks the same all the way round.',
+    bottom: 'Just a circle. The base hides the point.',
+    angle: 'An ellipse for the base, with two straight lines meeting at the tip. The lines just touch the sides of the ellipse.',
+  },
+  sphere: {
+    top: 'A circle. A sphere looks the same from every angle!',
+    front: 'A circle. Only the shading tells you where the light comes from.',
+    side: 'Still a circle. Notice the band of dark (the core shadow) on the side away from the light.',
+    bottom: 'A circle again. Move the sun and watch the highlight and core shadow slide around it.',
+    angle: 'Always a circle. Shade in curved strokes around the highlight, getting darker as you go.',
+  },
+  pyramid: {
+    top: 'A square with an X: four triangles meeting at the point in the middle.',
+    front: 'A triangle.',
+    side: 'A triangle again. A square pyramid looks the same from the front and the side.',
+    bottom: 'A square. The base hides the point.',
+    angle: 'Two triangle faces show. Shade the one facing away from the light darker.',
+  },
+  prism: {
+    top: 'A rectangle with a line down the middle. That line is the ridge along the top.',
+    front: 'A triangle: the end of the prism.',
+    side: 'A rectangle. You see one sloping face.',
+    bottom: 'A rectangle: the flat face it sits on.',
+    angle: 'A triangle at the front joined to the back by parallel lines. Each flat face gets its own tone.',
+  },
+};
+
+/* ================= Renderer ================= */
+
+const patCache = new WeakMap();
+function patterns(ctx, dpr) {
+  const hit = patCache.get(ctx);
+  if (hit && hit.dpr === dpr) return hit.p;
+  const T = 12;
+  const spec = [null, [6, false, .45, .9], [4, false, .6, 1], [4, true, .7, 1], [3, true, .85, 1.2]];
+  const p = spec.map(s => {
+    const c = document.createElement('canvas');
+    c.width = c.height = Math.round(T * dpr);
+    const g = c.getContext('2d');
+    g.scale(c.width / T, c.height / T);
+    g.fillStyle = PAPER; g.fillRect(0, 0, T, T);
+    if (s) {
+      const [gap, cross, alpha, w] = s;
+      g.strokeStyle = 'rgba(30,30,34,' + alpha + ')'; g.lineWidth = w;
+      g.beginPath();
+      for (let c0 = 0; c0 <= 2 * T; c0 += gap) {
+        g.moveTo(c0, 0); g.lineTo(c0 - T, T);
+        if (cross) { g.moveTo(c0 - T, 0); g.lineTo(c0, T); }
+      }
+      g.stroke();
+    }
+    const pat = ctx.createPattern(c, 'repeat');
+    if (pat.setTransform) pat.setTransform(new DOMMatrix().scale(T / c.width));
+    return pat;
+  });
+  patCache.set(ctx, { dpr, p });
+  return p;
+}
+
+function level(v) { return v > .75 ? 0 : v > .55 ? 1 : v > .38 ? 2 : v > .2 ? 3 : 4; }
+
+function mix(a, b, t) {
+  const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+  const ch = s => Math.round(((pa >> s) & 255) * (1 - t) + ((pb >> s) & 255) * t);
+  return 'rgb(' + ch(16) + ',' + ch(8) + ',' + ch(0) + ')';
+}
+
+function hull(pts) {
+  pts = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lo = [], up = [];
+  for (const p of pts) { while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+  for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (up.length >= 2 && cross(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); }
+  up.pop(); lo.pop();
+  return lo.concat(up);
+}
+
+function poly(ctx, pts) {
+  ctx.beginPath();
+  pts.forEach((p, k) => k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+  ctx.closePath();
+}
+
+// Draws one shape. cam = {shape, yaw, pitch}; o = display options. Returns the sun's screen position.
+function render(ctx, W, H, dpr, cam, o) {
+  const m = SHAPES[cam.shape].mesh;
+  const cy = Math.cos(-cam.yaw * RAD), sy = Math.sin(-cam.yaw * RAD);
+  const cp = Math.cos(cam.pitch * RAD), sp = Math.sin(cam.pitch * RAD);
+  const rot = p => { const x1 = p[0] * cy + p[2] * sy, z1 = -p[0] * sy + p[2] * cy; return [x1, p[1] * cp - z1 * sp, p[1] * sp + z1 * cp]; };
+  const unrot = q => { const y1 = q[1] * cp + q[2] * sp, z1 = -q[1] * sp + q[2] * cp; return [q[0] * cy - z1 * sy, y1, q[0] * sy + z1 * cy]; };
+  const D = o.persp ? 7 : 0;
+  const sc = Math.min(W, H) * (o.small ? .3 : .25);
+  const ox = W / 2, oy = H / 2;
+  const proj = q => { const s = D ? D / (D - q[2]) : 1; return [ox + q[0] * s * sc, oy - q[1] * s * sc]; };
+
+  const Lv = [Math.cos(o.a * RAD) * Math.cos(o.e * RAD), Math.sin(o.a * RAD) * Math.cos(o.e * RAD), Math.sin(o.e * RAD)];
+  const pats = o.style === 'pencil' ? patterns(ctx, dpr) : null;
+
+  ctx.fillStyle = PAPER;
+  ctx.fillRect(0, 0, W, H);
+
+  const cv = m.v.map(rot);
+  const sv = cv.map(proj);
+
+  // Ground and cast shadow (only when looking from above the ground)
+  if (o.shadow && cam.pitch > 1) {
+    const G = 2.4;
+    const ground = [[-G, m.gy, -G], [G, m.gy, -G], [G, m.gy, G], [-G, m.gy, G]].map(p => proj(rot(p)));
+    ctx.save();
+    poly(ctx, ground);
+    ctx.fillStyle = GROUND; ctx.fill();
+    ctx.clip();
+    const Lw = unrot(Lv);
+    if (Lw[1] > .02) {
+      const ly = Math.max(Lw[1], .22);
+      const pts = m.v.map(p => { const t = (p[1] - m.gy) / ly; return proj(rot([p[0] - Lw[0] * t, m.gy, p[2] - Lw[2] * t])); });
+      poly(ctx, hull(pts));
+      ctx.fillStyle = pats ? pats[3] : o.style === 'steps' ? TONES[3] : 'rgba(60,58,55,.5)';
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // Faces (all shapes are convex, so back-face culling alone hides the far side)
+  const vis = m.f.map(f => {
+    const n = rot(f.n), c = rot(f.c);
+    f.cn = n;
+    return D ? n[0] * -c[0] + n[1] * -c[1] + n[2] * (D - c[2]) > 1e-6 : n[2] > 1e-6;
+  });
+  ctx.lineJoin = 'round';
+  m.f.forEach((f, k) => {
+    if (!vis[k]) return;
+    const n = f.cn;
+    const v = .12 + .88 * Math.max(0, n[0] * Lv[0] + n[1] * Lv[1] + n[2] * Lv[2]);
+    const fill = pats ? pats[level(v)] : o.style === 'steps' ? TONES[level(v)] : mix('#2a2a2e', PAPER, Math.pow(v, .85));
+    poly(ctx, f.i.map(i => sv[i]));
+    ctx.fillStyle = fill; ctx.fill();
+    ctx.strokeStyle = fill; ctx.lineWidth = .8; ctx.stroke();
+  });
+
+  // Edges: hard edges when a neighbouring face is visible, soft edges only on the silhouette
+  if (o.edges) {
+    const solid = [], dashed = [];
+    m.e.forEach(([a, b, fs]) => {
+      const hard = fs.length < 2 || m.f[fs[0]].g !== m.f[fs[1]].g;
+      const shown = fs.map(fi => vis[fi]);
+      if (hard) {
+        if (shown.some(Boolean)) solid.push([a, b]);
+        else if (o.hidden) dashed.push([a, b]);
+      } else if (shown[0] !== shown[1]) solid.push([a, b]);
+    });
+    const stroke = (list, style, w, dash) => {
+      if (!list.length) return;
+      ctx.beginPath();
+      list.forEach(([a, b]) => { ctx.moveTo(sv[a][0], sv[a][1]); ctx.lineTo(sv[b][0], sv[b][1]); });
+      ctx.setLineDash(dash); ctx.strokeStyle = style; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.stroke();
+      ctx.setLineDash([]);
+    };
+    stroke(dashed, '#8b8882', 1.3, [5, 4]);
+    stroke(solid, INK, o.small ? 1.6 : 2.2, []);
+  }
+
+  if (!o.sun) return null;
+  const R = Math.min(W, H) * .43;
+  const sx = ox + Math.cos(o.a * RAD) * R, syy = oy - Math.sin(o.a * RAD) * R;
+  ctx.save();
+  ctx.translate(sx, syy);
+  ctx.strokeStyle = '#141414'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (let k = 0; k < 8; k++) { const t = k * Math.PI / 4; ctx.moveTo(Math.cos(t) * 17, Math.sin(t) * 17); ctx.lineTo(Math.cos(t) * 23, Math.sin(t) * 23); }
+  ctx.stroke();
+  ctx.beginPath(); ctx.arc(0, 0, 11, 0, 2 * Math.PI);
+  ctx.fillStyle = '#f2b632'; ctx.fill(); ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.restore();
+  return [sx, syy];
+}
+
+function fit(canvas) {
+  const r = canvas.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(r.width ? w / r.width : dpr, 0, 0, r.height ? h / r.height : dpr, 0, 0);
+  return { ctx, W: r.width, H: r.height, dpr };
+}
+
+/* ================= Playbox ================= */
+
+const S = { shape: 'cube', yaw: 35, pitch: 25, style: 'steps', a: 135, e: 35, edges: true, hidden: false, shadow: true, persp: true, spin: false };
+try {
+  const saved = JSON.parse(localStorage.getItem('shapeShading') || '{}');
+  if (SHAPES[saved.shape]) S.shape = saved.shape;
+  if (['smooth', 'steps', 'pencil'].includes(saved.style)) S.style = saved.style;
+} catch (e) { /* storage unavailable */ }
+function save() { try { localStorage.setItem('shapeShading', JSON.stringify({ shape: S.shape, style: S.style })); } catch (e) { /* ignore */ } }
+
+const $ = id => document.getElementById(id);
+const pbox = $('pbox');
+let shownTip = '', sunAt = null, tween = null, raf = 0, lastT = 0, viewsDirty = true;
+
+function viewName(yaw, pitch) {
+  const y = ((yaw % 360) + 360) % 360;
+  const near = t => Math.min(Math.abs(y - t), 360 - Math.abs(y - t)) <= 12;
+  if (pitch >= 65) return 'top';
+  if (pitch <= -65) return 'bottom';
+  if (Math.abs(pitch) <= 12) {
+    if (near(0) || near(180)) return 'front';
+    if (near(90) || near(270)) return 'side';
+  }
+  return 'angle';
+}
+
+function drawPlaybox() {
+  const { ctx, W, H, dpr } = fit(pbox);
+  sunAt = render(ctx, W, H, dpr, S, { ...S, sun: true });
+  const vn = viewName(S.yaw, S.pitch);
+  $('badge').textContent = VIEWS[vn].name + ' view';
+  const title = SHAPES[S.shape].name + (vn === 'angle' ? ' from an angle' : ' from the ' + VIEWS[vn].name.toLowerCase());
+  if (shownTip !== title) {
+    shownTip = title;
+    $('tipTitle').textContent = title;
+    $('tipText').textContent = TIPS[S.shape][vn];
+  }
+  document.querySelectorAll('#viewBtns .tbtn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === vn && !tween)));
+  document.querySelectorAll('#viewCards .vcard').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === vn)));
+}
+
+function drawViews() {
+  document.querySelectorAll('#viewCards canvas').forEach(c => {
+    const v = VIEWS[c.dataset.v];
+    const { ctx, W, H, dpr } = fit(c);
+    render(ctx, W, H, dpr, { shape: S.shape, yaw: v.yaw, pitch: v.pitch }, { ...S, persp: false, shadow: false, sun: false, small: true });
+    c.nextElementSibling.querySelector('.vd').textContent = TIPS[S.shape][c.dataset.v].split('. ')[0].replace(/\.$/, '') + '.';
+  });
+  $('viewsShape').textContent = SHAPES[S.shape].name.toLowerCase();
+  viewsDirty = false;
+}
+
+function loop(t) {
+  raf = 0;
+  const dt = lastT ? Math.min(.05, (t - lastT) / 1000) : 0;
+  lastT = t;
+  if (tween) {
+    const k = Math.min(1, (t - tween.t0) / 650);
+    const ease = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    S.yaw = tween.y0 + tween.dy * ease;
+    S.pitch = tween.p0 + tween.dp * ease;
+    if (k >= 1) tween = null;
+  } else if (S.spin && !dragging) {
+    S.yaw = (S.yaw - dt * 20 + 360) % 360;
+  }
+  drawPlaybox();
+  if (viewsDirty) drawViews();
+  if (tween || (S.spin && !dragging)) kick(); else lastT = 0;
+}
+function kick() { if (!raf) raf = requestAnimationFrame(loop); }
+function redraw(all) { if (all) viewsDirty = true; kick(); }
+
+function goView(key) {
+  const v = VIEWS[key];
+  const dy = ((v.yaw - S.yaw) % 360 + 540) % 360 - 180;
+  tween = { t0: performance.now(), y0: S.yaw, dy, p0: S.pitch, dp: v.pitch - S.pitch };
+  kick();
+}
+
+// Controls
+function buttons(el, items, current, onPick) {
+  el.innerHTML = '';
+  items.forEach(([key, label]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tbtn'; b.dataset.v = key; b.textContent = label;
+    b.setAttribute('aria-pressed', String(key === current));
+    b.addEventListener('click', () => {
+      onPick(key);
+      if (el.id !== 'viewBtns') el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    });
+    el.appendChild(b);
+  });
+}
+buttons($('shapeBtns'), Object.entries(SHAPES).map(([k, s]) => [k, s.name]), S.shape, k => { S.shape = k; save(); redraw(true); });
+buttons($('viewBtns'), [['top', 'Top'], ['front', 'Front'], ['side', 'Side'], ['bottom', 'Bottom'], ['angle', '3/4 angle']], '', goView);
+buttons($('styleBtns'), [['smooth', 'Smooth'], ['steps', '5 values'], ['pencil', 'Pencil']], S.style, k => { S.style = k; save(); legend(); redraw(true); });
+
+function legend() {
+  const el = $('legend');
+  if (S.style === 'smooth') { el.innerHTML = ''; return; }
+  el.innerHTML = 'Value scale: ' + TONES.map((t, k) => '<i style="background:' + t + '"></i>' + (k + 1)).join(' ') + (S.style === 'pencil' ? ' (hatching gets denser as it gets darker)' : '');
+}
+legend();
+
+const compass = a => ['right', 'top-right', 'top', 'top-left', 'left', 'bottom-left', 'bottom', 'bottom-right'][Math.round(a / 45) % 8];
+function syncLight() {
+  $('aIn').value = Math.round(S.a); $('eIn').value = Math.round(S.e);
+  $('aOut').textContent = compass(S.a);
+  $('eOut').textContent = S.e < 15 ? 'from the side' : S.e < 45 ? 'a little' : 'a lot';
+}
+syncLight();
+$('aIn').addEventListener('input', e => { S.a = +e.target.value; syncLight(); redraw(true); });
+$('eIn').addEventListener('input', e => { S.e = +e.target.value; syncLight(); redraw(true); });
+[['oEdges', 'edges'], ['oHidden', 'hidden'], ['oShadow', 'shadow'], ['oPersp', 'persp'], ['oSpin', 'spin']].forEach(([id, key]) => {
+  const el = $(id);
+  el.checked = S[key];
+  el.addEventListener('change', () => { S[key] = el.checked; redraw(key === 'edges' || key === 'hidden'); });
+});
+
+// Dragging: the sun sets the light, anywhere else turns the shape
+let dragging = null;
+pbox.addEventListener('pointerdown', e => {
+  const r = pbox.getBoundingClientRect();
+  const x = e.clientX - r.left, y = e.clientY - r.top;
+  dragging = { mode: sunAt && Math.hypot(x - sunAt[0], y - sunAt[1]) < 28 ? 'sun' : 'turn', x: e.clientX, y: e.clientY };
+  tween = null;
+  pbox.setPointerCapture(e.pointerId);
+});
+pbox.addEventListener('pointermove', e => {
+  if (!dragging) return;
+  const r = pbox.getBoundingClientRect();
+  if (dragging.mode === 'sun') {
+    const a = Math.atan2(-(e.clientY - r.top - r.height / 2), e.clientX - r.left - r.width / 2) / RAD;
+    S.a = (a + 360) % 360;
+    syncLight();
+    viewsDirty = true;
+  } else {
+    S.yaw -= (e.clientX - dragging.x) * .5;
+    S.pitch = Math.max(-90, Math.min(90, S.pitch + (e.clientY - dragging.y) * .5));
+    dragging.x = e.clientX; dragging.y = e.clientY;
+  }
+  kick();
+});
+const endDrag = () => { if (dragging) { dragging = null; kick(); } };
+pbox.addEventListener('pointerup', endDrag);
+pbox.addEventListener('pointercancel', endDrag);
+pbox.addEventListener('keydown', e => {
+  const step = e.shiftKey ? 2 : 10;
+  if (e.key === 'ArrowLeft') S.yaw += step;
+  else if (e.key === 'ArrowRight') S.yaw -= step;
+  else if (e.key === 'ArrowUp') S.pitch = Math.min(90, S.pitch + step);
+  else if (e.key === 'ArrowDown') S.pitch = Math.max(-90, S.pitch - step);
+  else return;
+  e.preventDefault(); tween = null; kick();
+});
+
+// View cards
+const vc = $('viewCards');
+Object.entries(VIEWS).forEach(([key, v]) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'vcard paper'; b.dataset.v = key;
+  b.innerHTML = '<canvas data-v="' + key + '" aria-hidden="true"></canvas><span class="vtxt"><b>' + v.name + '</b><span class="vd"></span></span>';
+  b.addEventListener('click', () => { goView(key); document.getElementById('playbox').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  vc.appendChild(b);
+});
+
+new ResizeObserver(() => redraw(true)).observe(document.querySelector('.wrap'));
+redraw(true);
+
+/* ================= Step-by-step guide ================= */
+
+// Drawn lines get pathLength="1" for the draw-on animation; dashed construction lines must not,
+// because pathLength would rescale their dash pattern into a solid line.
+const pl = c => c === 'cn' ? '' : ' pathLength="1"';
+const ln = (d, c = 'ln') => '<path class="' + c + '"' + pl(c) + ' d="' + d + '"/>';
+const L = (x1, y1, x2, y2, c) => ln('M' + x1 + ' ' + y1 + 'L' + x2 + ' ' + y2, c);
+const ell = (cx, cy, rx, ry, c = 'ln') => '<ellipse class="' + c + '"' + pl(c) + ' cx="' + cx + '" cy="' + cy + '" rx="' + rx + '" ry="' + ry + '"/>';
+const circ = (cx, cy, r, c = 'ln') => '<circle class="' + c + '"' + pl(c) + ' cx="' + cx + '" cy="' + cy + '" r="' + r + '"/>';
+const shade = (d, fill) => '<path class="sh" d="' + d + '" fill="' + fill + '"/>';
+const dot = (x, y) => '<circle class="dot" cx="' + x + '" cy="' + y + '" r="3.2"/>';
+const SUN = '<g class="fd" transform="translate(34 32)"><circle r="10" fill="#f2b632" stroke="#141414" stroke-width="1.5"/><path d="M0-16v-5M0 16v5M-16 0h-5M16 0h5M-11.3-11.3l-3.5-3.5M11.3 11.3l3.5 3.5M-11.3 11.3l-3.5 3.5M11.3-11.3l3.5-3.5" stroke="#141414" stroke-width="1.8" stroke-linecap="round"/></g>';
+// Layer helpers: b = behind everything (cast shadows), f = shading fills, strings = lines on top
+const b = s => ({ l: 'b', s }), f = s => ({ l: 'f', s });
+
+function hatchLines(xs, top, bot, from) {
+  // Vertical (or fanned) hatching strokes, each with its own stagger index
+  return xs.map((x, j) => {
+    const y1 = top(x), y2 = bot(x);
+    const start = from ? from(x) : [x, y1];
+    return '<path class="hl" pathLength="1" style="--j:' + j + '" d="M' + start[0].toFixed(1) + ' ' + start[1].toFixed(1) + 'L' + x.toFixed(1) + ' ' + y2.toFixed(1) + '"/>';
+  }).join('');
+}
+const range = (a, z, s) => { const r = []; for (let x = a; x <= z; x += s) r.push(x); return r; };
+
+const cylSide = 'M80 60L80 210A70 26 0 0 0 220 210L220 60A70 24 0 0 1 80 60Z';
+const coneSide = 'M150 40L75.8 206.3A75 25 0 1 0 224.2 206.3Z';
+
+const GUIDE = {
+  cube: { name: 'Cube', steps: [
+    { t: 'Draw a diamond for the top. It is a square seen from above at an angle, so it looks squashed.', e: [ln('M150 50L230 90L150 130L70 90Z')] },
+    { t: 'Drop three straight, vertical lines from the left, front and right corners. Keep them all the same length.', e: [L(70, 90, 70, 190), L(150, 130, 150, 230), L(230, 90, 230, 190)] },
+    { t: 'Join the bottom ends. These lines slope the same way as the top edges above them.', e: [ln('M70 190L150 230L230 190')] },
+    { t: 'Pick where the light comes from. Here it is the top-left. The top faces the light, so it is the lightest: shade it very gently or leave it white.', e: [SUN, f(shade('M150 50L230 90L150 130L70 90Z', 'url(#p1)'))] },
+    { t: 'The left face gets some light, so give it a mid-tone. Use even hatching lines that all go the same way.', e: [f(shade('M70 90L150 130L150 230L70 190Z', 'url(#p2)'))] },
+    { t: 'The right face points away from the light, so it is darkest. Cross-hatch it, or press harder with a soft pencil (2B to 4B).', e: [f(shade('M150 130L230 90L230 190L150 230Z', 'url(#p4)'))] },
+    { t: 'Add the cast shadow on the ground, falling away from the light. Make it darkest right up against the box.', e: [b(shade('M150 230L205 250L294 212L230 190Z', 'url(#p3)'))] },
+  ] },
+  cylinder: { name: 'Cylinder', steps: [
+    { t: 'Draw an ellipse (a squashed circle) for the top. Seen from a bit above, a circle looks flatter.', e: [ell(150, 60, 70, 24)] },
+    { t: 'Draw two straight, parallel lines down from the widest points of the ellipse.', e: [L(80, 60, 80, 210), L(220, 60, 220, 210)] },
+    { t: 'Draw the bottom as a curve. Sketch the hidden back half lightly to check it. It is a little rounder than the top because it is further below your eye.', e: [ln('M80 210A70 26 0 0 1 220 210', 'cn'), ln('M80 210A70 26 0 0 0 220 210')] },
+    { t: 'Light from the top-left. Shade the side in vertical bands: leave a light strip just left of the middle, mid-tone either side, darkest on the right.', e: [SUN, f(shade(cylSide, 'url(#cylG)'))] },
+    { t: 'Build up the dark side with vertical strokes. Leave a thin, slightly lighter edge on the far right: that is reflected light.', e: [f(hatchLines(range(172, 212, 4), x => 60 + 24 * Math.sqrt(1 - Math.pow((x - 150) / 70, 2)) + 2, x => 210 + 26 * Math.sqrt(1 - Math.pow((x - 150) / 70, 2)) - 2))] },
+    { t: 'The top faces the light, so it only needs a very light tone.', e: [f(shade('M80 60A70 24 0 1 1 220 60A70 24 0 1 1 80 60Z', 'url(#p1)'))] },
+    { t: 'Add the cast shadow on the ground to the right. Darken it most where the cylinder meets the ground.', e: [b(shade('M100 226C150 252 250 246 294 226C280 206 250 200 215 202Z', 'url(#p3)'))] },
+  ] },
+  cone: { name: 'Cone', steps: [
+    { t: 'Lightly draw an ellipse for the base.', e: [ell(150, 210, 75, 25, 'cn')] },
+    { t: 'Find the middle of the ellipse and go straight up to mark the tip.', e: [L(150, 210, 150, 40, 'cn'), dot(150, 40)] },
+    { t: 'Draw two straight lines from the tip down to the sides of the ellipse. They should just touch its edges.', e: [L(150, 40, 75.8, 206.3), L(150, 40, 224.2, 206.3)] },
+    { t: 'Go over the front curve firmly. The back half is hidden, so keep it light or rub it out.', e: [ln('M75.8 206.3A75 25 0 1 0 224.2 206.3')] },
+    { t: 'Light from the top-left. Shade in a fan shape: light just left of the middle, getting darker towards the right.', e: [SUN, f(shade(coneSide, 'url(#coneG)'))] },
+    { t: 'Pencil strokes on a cone fan out from the tip, like spokes. Use them to build up the dark side.', e: [f(hatchLines(range(168, 220, 4), () => 0, x => 210 + 25 * Math.sqrt(1 - Math.pow((x - 150) / 75, 2)) - 2, x => [150 + (x - 150) * .12, 40 + (170 * .12)]))] },
+    { t: 'The cast shadow is a pointed shape stretching away from the light.', e: [b(shade('M110 228C160 246 230 240 294 222L212 196Z', 'url(#p3)'))] },
+  ] },
+  sphere: { name: 'Sphere', steps: [
+    { t: 'Draw a circle. Sketch lightly and go round a few times until it looks smooth, then firm it up.', e: [circ(150, 125, 85)] },
+    { t: 'Decide where the light comes from (top-left). Mark the highlight, the brightest spot, on that side.', e: [SUN, circ(118, 93, 12, 'cn')] },
+    { t: 'Shade gently all over, leaving the highlight white. Get darker the further you go from it, with curved strokes that follow the round shape.', e: [f(shade('M65 125A85 85 0 1 1 235 125A85 85 0 1 1 65 125Z', 'url(#sphA)'))] },
+    { t: 'Add the core shadow: a darker crescent on the side facing away from the light.', e: [f(shade('M65 125A85 85 0 1 1 235 125A85 85 0 1 1 65 125Z', 'url(#sphB)'))] },
+    { t: 'Leave (or rub out with an eraser) a thin lighter rim along the bottom-right edge. That is reflected light bouncing up from the table.', e: [f(shade('M65 125A85 85 0 1 1 235 125A85 85 0 1 1 65 125Z', 'url(#sphC)'))] },
+    { t: 'Add the cast shadow on the ground, stretching away from the light. It is darkest right under the ball, where it touches.', e: [b('<ellipse class="fd" cx="190" cy="212" rx="88" ry="16" fill="url(#shadowG)"/>'), b('<ellipse class="fd" cx="150" cy="209" rx="32" ry="6" fill="url(#occG)"/>')] },
+  ] },
+  pyramid: { name: 'Pyramid', steps: [
+    { t: 'Lightly draw the base as a diamond: a square seen at an angle.', e: [ln('M60 190L150 225L240 190L150 160Z', 'cn')] },
+    { t: 'Draw the two diagonals to find the centre, then go straight up to mark the tip.', e: [L(60, 190, 240, 190, 'cn'), L(150, 160, 150, 225, 'cn'), L(150, 190, 150, 40, 'cn'), dot(150, 40)] },
+    { t: 'Join the tip to the left, front and right corners.', e: [L(150, 40, 60, 190), L(150, 40, 150, 225), L(150, 40, 240, 190)] },
+    { t: 'Go over the front base edges firmly. The back corner is hidden, so keep those lines light.', e: [ln('M60 190L150 225L240 190')] },
+    { t: 'Light from the top-left: the left face gets a light mid-tone.', e: [SUN, f(shade('M150 40L60 190L150 225Z', 'url(#p2)'))] },
+    { t: 'The right face points away from the light, so make it darkest. Press hardest near the front edge where the faces meet: it makes the edge pop.', e: [f(shade('M150 40L150 225L240 190Z', 'url(#p4)'))] },
+    { t: 'Add the cast shadow: a triangle pointing away from the light.', e: [b(shade('M150 225L294 216L240 190Z', 'url(#p3)'))] },
+  ] },
+};
+
+const G = { shape: 'cube', i: 0, timer: 0 };
+const gTabs = $('gTabs');
+Object.entries(GUIDE).forEach(([key, g]) => {
+  const t = document.createElement('button');
+  t.type = 'button'; t.className = 'tbtn'; t.setAttribute('role', 'tab'); t.dataset.v = key; t.textContent = g.name;
+  t.setAttribute('aria-selected', String(key === G.shape));
+  t.addEventListener('click', () => { stopPlay(); G.shape = key; G.i = 0; gTabs.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-selected', String(x === t))); drawGuide(); });
+  gTabs.appendChild(t);
+});
+
+function drawGuide() {
+  const steps = GUIDE[G.shape].steps;
+  const out = { b: '', f: '', l: '' };
+  steps.slice(0, G.i + 1).forEach((st, k) => {
+    const cur = k === G.i;
+    st.e.forEach((el, n) => {
+      const it = typeof el === 'string' ? { l: 'l', s: el } : el;
+      out[it.l] += '<g' + (cur ? ' class="now" style="--i:' + n + '"' : '') + '>' + it.s + '</g>';
+    });
+  });
+  $('gBack').innerHTML = out.b; $('gFill').innerHTML = out.f; $('gLine').innerHTML = out.l;
+  $('gCount').textContent = 'Step ' + (G.i + 1) + ' of ' + steps.length;
+  $('gText').textContent = steps[G.i].t;
+  $('gPrev').disabled = G.i === 0;
+  $('gNext').disabled = G.i === steps.length - 1;
+  const dots = $('gDots');
+  dots.innerHTML = '';
+  steps.forEach((_, k) => {
+    const d = document.createElement('button');
+    d.type = 'button'; d.textContent = k + 1;
+    d.setAttribute('aria-label', 'Step ' + (k + 1));
+    if (k === G.i) d.setAttribute('aria-current', 'step'); else if (k < G.i) d.className = 'done';
+    d.addEventListener('click', () => { stopPlay(); G.i = k; drawGuide(); });
+    dots.appendChild(d);
+  });
+}
+function stopPlay() { clearTimeout(G.timer); G.timer = 0; $('gPlay').textContent = 'Play all'; }
+$('gPrev').addEventListener('click', () => { stopPlay(); if (G.i > 0) { G.i--; drawGuide(); } });
+$('gNext').addEventListener('click', () => { stopPlay(); if (G.i < GUIDE[G.shape].steps.length - 1) { G.i++; drawGuide(); } });
+$('gAgain').addEventListener('click', () => { drawGuide(); });
+$('gPlay').addEventListener('click', () => {
+  if (G.timer) { stopPlay(); return; }
+  const steps = GUIDE[G.shape].steps;
+  $('gPlay').textContent = 'Pause';
+  G.i = 0; drawGuide();
+  const next = () => {
+    if (G.i >= steps.length - 1) { stopPlay(); return; }
+    G.i++; drawGuide();
+    G.timer = setTimeout(next, 3200);
+  };
+  G.timer = setTimeout(next, 3200);
+});
+drawGuide();
+
+/* ================= Technique swatches ================= */
+
+let seed = 7;
+const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+const j = (n) => (rnd() - .5) * n;
+const sLine = (x1, y1, x2, y2, k, op = .7, w = 1.1) => '<path class="draw" pathLength="1" style="animation-delay:' + (k * .018).toFixed(3) + 's;animation-duration:.25s" d="M' + x1.toFixed(1) + ' ' + y1.toFixed(1) + 'L' + x2.toFixed(1) + ' ' + y2.toFixed(1) + '" stroke="#2a2a2e" stroke-opacity="' + op + '" stroke-width="' + w + '" stroke-linecap="round" fill="none"/>';
+
+function hatchSwatch() {
+  let s = '', k = 0, x = 12;
+  while (x < 186) { s += sLine(x + j(1), 106 + j(4), x + 16 + j(1), 14 + j(4), k++); x += 9 - 6.2 * (x - 12) / 174; }
+  return s;
+}
+function crossSwatch() {
+  let s = '', k = 0;
+  const zones = [[10, 68, 1], [68, 128, 2], [128, 190, 3]];
+  zones.forEach(([a, z, layers]) => {
+    for (let x = a - 30; x < z; x += 4.5) s += sLine(Math.max(a, x), 106 - (Math.max(a, x) - x) * 3, Math.min(z, x + 30), 106 - (Math.min(z, x + 30) - x) * 3, k++, .6);
+    if (layers > 1) for (let x = a; x < z + 30; x += 4.5) s += sLine(Math.max(a, x - 30), 106 - (x - Math.max(a, x - 30)) * 3, Math.min(z, x), 106 - (x - Math.min(z, x)) * 3, k++, .6);
+    if (layers > 2) for (let y = 14; y < 108; y += 4.5) s += sLine(a, y, z, y + j(1), k++, .5);
+  });
+  return s;
+}
+function contourSwatch() {
+  let s = '', k = 0;
+  for (let y = 16; y < 104; y += 6) {
+    const bow = 16;
+    s += '<path class="draw" pathLength="1" style="animation-delay:' + (k++ * .07).toFixed(2) + 's" d="M12 ' + y + 'Q100 ' + (y + bow) + ' 188 ' + y + '" stroke="#2a2a2e" stroke-opacity=".7" stroke-width="1.1" fill="none" stroke-linecap="round"/>';
+  }
+  return s;
+}
+function stippleSwatch() {
+  let s = '';
+  for (let k = 0; k < 520; k++) {
+    const x = 12 + 176 * Math.sqrt(rnd()), y = 12 + 96 * rnd();
+    s += '<circle class="dotm" style="animation-delay:' + (k * .003).toFixed(3) + 's" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="1" fill="#2a2a2e"/>';
+  }
+  return s;
+}
+function blendSwatch() {
+  return '<rect class="wipe" x="12" y="12" width="176" height="96" rx="4" fill="url(#blendG)" filter="url(#grain)"/>';
+}
+function scumbleSwatch() {
+  let s = '', k = 0;
+  for (let n = 0; n < 150; n++) {
+    const x = 16 + 168 * Math.sqrt(rnd()), y = 16 + 88 * rnd(), r = 2.5 + rnd() * 2.5;
+    s += '<path class="draw" pathLength="1" style="animation-delay:' + (k++ * .012).toFixed(3) + 's;animation-duration:.3s" d="M' + (x - r).toFixed(1) + ' ' + y.toFixed(1) + 'a' + r.toFixed(1) + ' ' + (r * .8).toFixed(1) + ' 0 1 0 ' + (2 * r).toFixed(1) + ' 0a' + r.toFixed(1) + ' ' + (r * .8).toFixed(1) + ' 0 1 0 ' + (-2 * r + 1).toFixed(1) + ' 1" stroke="#2a2a2e" stroke-opacity=".55" stroke-width=".9" fill="none"/>';
+  }
+  return s;
+}
+
+const TECH = [
+  ['Hatching', 'Lots of parallel lines. Put them closer together to make it darker. Best for flat faces like a cube.', hatchSwatch],
+  ['Cross-hatching', 'Add a second (and third) layer of lines at a different angle. Each layer makes it darker.', crossSwatch],
+  ['Contour hatching', 'Curved lines that wrap around the shape, like stripes on a can. Great for cylinders and cones.', contourSwatch],
+  ['Stippling', 'Lots of little dots. More dots packed closer together looks darker. Slow, but lovely.', stippleSwatch],
+  ['Blending', 'Shade smoothly with the side of the pencil, then soften it with a tissue or blending stump. Perfect for spheres.', blendSwatch],
+  ['Scumbling', 'Tiny scribbly circles, layered up. Gives a soft, textured look.', scumbleSwatch],
+];
+const tech = $('tech');
+TECH.forEach(([name, text, fn]) => {
+  const card = document.createElement('article');
+  card.className = 'tcard paper';
+  card.innerHTML = '<svg viewBox="0 0 200 120" role="img" aria-label="' + name + ' example"><g>' + fn() + '</g></svg>' +
+    '<div class="ttxt"><h3>' + name + '</h3><p>' + text + '</p></div><button type="button">Replay</button>';
+  const g = card.querySelector('svg g');
+  card.querySelector('button').addEventListener('click', () => { g.classList.remove('play-on'); void g.getBoundingClientRect(); g.classList.add('play-on'); });
+  tech.appendChild(card);
+});
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver(entries => entries.forEach(en => {
+    if (en.isIntersecting) { en.target.querySelector('svg g').classList.add('play-on'); io.unobserve(en.target); }
+  }), { threshold: .4 });
+  tech.querySelectorAll('.tcard').forEach(c => io.observe(c));
+} else {
+  tech.querySelectorAll('svg g').forEach(g => g.classList.add('play-on'));
+}
+
+})();
+</script>
+</body>
+</html>

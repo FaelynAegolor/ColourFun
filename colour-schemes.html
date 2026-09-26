@@ -8,39 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
 <style>
-/* ---------- Theme ---------- */
-:root {
-  color-scheme: light dark;
-  --bg: #f1efe9;
-  --panel: #ffffff;
-  --ink: #141414;
-  --muted: #5f5d58;
-  --border: #d8d4cb;
-  --ring: #141414;
-  --accent: #1F5FBF;
-  --accent-ink: #ffffff;
-  --font: "Archivo", Helvetica, Arial, sans-serif;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #161616;
-    --panel: #242424;
-    --ink: #f2f0ea;
-    --muted: #b4b0a6;
-    --border: #464646;
-    --ring: #ffffff;
-  }
-}
-
-/* ---------- Base ---------- */
-* { box-sizing: border-box; }
-html, body { margin: 0; }
-body { font-family: var(--font); background: var(--bg); color: var(--ink); line-height: 1.35; }
-[hidden] { display: none !important; }
-.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
-
 /* ---------- Layout ---------- */
 .app {
   display: grid;
@@ -197,6 +166,25 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); line-
 </style>
 </head>
 <body>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li><a href="colour-schemes.html" aria-current="page">Colour schemes</a></li>
+      <li><a href="shape-shading.html">3D shape shading</a></li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
 <div class="app">
 
   <aside class="controls" aria-label="Worksheet controls">
@@ -871,5 +859,6 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); line-
   renderAll();
 })();
 </script>
+<script src="site.js"></script>
 </body>
 </html>

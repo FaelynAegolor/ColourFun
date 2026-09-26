@@ -1,0 +1,97 @@
+/* Shared styles for every ColourFun page: theme tokens, base rules and the site header. */
+
+/* ---------- Theme ---------- */
+:root {
+  color-scheme: light dark;
+  --bg: #f1efe9;
+  --panel: #ffffff;
+  --ink: #141414;
+  --muted: #5f5d58;
+  --border: #d8d4cb;
+  --ring: #141414;
+  --accent: #1F5FBF;
+  --accent-ink: #ffffff;
+  --font: "Archivo", Helvetica, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161616;
+    --panel: #242424;
+    --ink: #f2f0ea;
+    --muted: #b4b0a6;
+    --border: #464646;
+    --ring: #ffffff;
+  }
+}
+
+/* ---------- Base ---------- */
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--ink); line-height: 1.35; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+
+/* ---------- Site header ---------- */
+.site-head {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 24px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  min-height: 44px;
+  color: var(--ink); text-decoration: none;
+  font-weight: 800; font-size: 15px; letter-spacing: .08em; text-transform: uppercase;
+  flex: none;
+}
+.brand svg { width: 26px; height: 26px; display: block; }
+.site-nav ul { list-style: none; display: flex; gap: 4px; margin: 0; padding: 0; }
+.site-nav a {
+  display: flex; align-items: center;
+  min-height: 44px; padding: 0 14px;
+  border-radius: 10px;
+  color: var(--ink); text-decoration: none; font-weight: 600; font-size: 14px;
+}
+.site-nav a:hover { background: var(--bg); }
+.site-nav a[aria-current="page"] { background: var(--accent); color: var(--accent-ink); }
+.head-end { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.for-z {
+  display: flex; align-items: center;
+  min-height: 36px; padding: 0 14px;
+  border: 2px solid var(--ink); border-radius: 999px;
+  font-weight: 800; font-size: 15px; letter-spacing: .04em; white-space: nowrap;
+}
+.menu-btn {
+  display: none;
+  align-items: center; gap: 8px;
+  min-height: 44px; padding: 0 12px;
+  background: transparent; color: var(--ink);
+  border: 2px solid var(--border); border-radius: 10px;
+  font: inherit; font-weight: 700; font-size: 14px; cursor: pointer;
+}
+.menu-btn svg { width: 18px; height: 18px; }
+
+@media (max-width: 720px) {
+  .site-head { padding: 8px 16px; gap: 10px; }
+  .menu-btn { display: flex; }
+  .site-nav {
+    display: none;
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px 12px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .12);
+  }
+  .site-head.open .site-nav { display: block; }
+  .site-nav ul { flex-direction: column; }
+}
+
+@media print {
+  .site-head { display: none !important; }
+}
