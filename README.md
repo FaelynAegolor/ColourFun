@@ -75,6 +75,16 @@ The wheel is fully keyboard accessible: Tab to a segment, arrow keys step around
 - **Plan it step by step**: an animated guide to value bands, then colour temperature.
 - **Exercise sheet**: a printable A4 value-band study from the current scene, with targets on a 1–9 scale (1 = paper white).
 
+## Paint Mixing
+
+`paint-mixing.html` is a subtractive paint-mixing simulator. It uses a per-channel Kubelka–Munk approximation, so results are directional, not colour-accurate.
+
+- **Paint is not light**: additive vs subtractive mixing, and the key vocabulary.
+- **Mixer**: parts of 18 common artists' pigments. Readouts for hex, hue name, value (L*/10), chroma and a greyscale check.
+- **Match a target**: scored with CIEDE2000, with hints and a recipe suggester.
+- **Tints, tones, shades and neutralising**: ladders for the current mix, plus warm/cool split-primary pairs.
+- **Printable A4 sheets**: a mixing grid or a tint and shade ladder sheet for 3–6 chosen paints.
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
