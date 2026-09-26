@@ -10,10 +10,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
 <link rel="stylesheet" href="site.css">
 <style>
-.wrap { max-width: 1000px; margin: 0 auto; padding: 32px 24px 64px; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 32px 24px 64px; }
 h1 { font-size: clamp(28px, 4.5vw, 40px); font-weight: 800; margin: 0 0 6px; }
-.lead { margin: 0 0 28px; color: var(--muted); font-size: 16px; max-width: 60ch; }
-.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.lead { margin: 0 0 8px; color: var(--muted); font-size: 16px; max-width: 60ch; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
 .card {
   display: flex; flex-direction: column;
   background: var(--panel); border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
@@ -21,9 +21,10 @@ h1 { font-size: clamp(28px, 4.5vw, 40px); font-weight: 800; margin: 0 0 6px; }
 }
 .card:hover { border-color: var(--ink); }
 .card .art { background: #fbfaf6; border-bottom: 1px solid var(--border); display: flex; justify-content: center; padding: 18px; }
-.card svg { width: 160px; height: 160px; display: block; }
+.card svg { width: 130px; height: 130px; display: block; }
 .card .txt { padding: 14px 18px 18px; }
-.card h2 { margin: 0; font-size: 18px; }
+.card h3 { margin: 0; font-size: 18px; }
+.group { margin: 28px 0 12px; font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 .card p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
 @media (max-width: 560px) { .wrap { padding: 20px 16px 48px; } }
 </style>
@@ -36,9 +37,17 @@ h1 { font-size: clamp(28px, 4.5vw, 40px); font-weight: 800; margin: 0 0 6px; }
   </a>
   <nav class="site-nav" id="siteNav" aria-label="Pages">
     <ul>
-      <li><a href="colour-schemes.html">Colour schemes</a></li>
-      <li><a href="shape-shading.html">3D shape shading</a></li>
-      <li><a href="perspective.html">Perspective</a></li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Colour</button>
+        <ul>
+          <li><a href="colour-schemes.html">Colour schemes</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Form &amp; space</button>
+        <ul>
+          <li><a href="shape-shading.html">3D shape shading</a></li>
+          <li><a href="perspective.html">Perspective</a></li>
+        </ul>
+      </li>
     </ul>
   </nav>
   <div class="head-end">
@@ -52,39 +61,23 @@ h1 { font-size: clamp(28px, 4.5vw, 40px); font-weight: 800; margin: 0 0 6px; }
 
 <main class="wrap">
   <h1>ColourFun</h1>
-  <p class="lead">Art tools for learning about colour, shape and shading.</p>
+  <p class="lead">Studio techniques: tools and exercises for colour, form, space and observational drawing.</p>
+  <h2 class="group">Colour</h2>
   <div class="cards">
     <a class="card" href="colour-schemes.html">
-      <span class="art">
-        <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/><circle cx="13" cy="13" r="5" fill="#fbfaf6"/></svg>
-      </span>
-      <span class="txt"><h2>Colour schemes</h2><p>Build a printable worksheet of colour wheel schemes: complementary, analogous, triadic and more.</p></span>
+      <span class="art"><svg aria-hidden="true" viewBox="0 0 26 26"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/><circle cx="13" cy="13" r="5" fill="#fbfaf6"/></svg></span>
+      <span class="txt"><h3>Colour schemes</h3><p>Build a printable worksheet of colour wheel schemes: complementary, analogous, triadic and more.</p></span>
     </a>
+  </div>
+  <h2 class="group">Form &amp; space</h2>
+  <div class="cards">
     <a class="card" href="shape-shading.html">
-      <span class="art">
-        <svg viewBox="0 0 160 160" aria-hidden="true">
-          <path d="M80 140L112 152L154 132L118 122Z" fill="#b3b0a9"/>
-          <path d="M80 20L130 45L80 70L30 45Z" fill="#f2f0ea"/>
-          <path d="M30 45L80 70L80 140L30 115Z" fill="#cfccc5"/>
-          <path d="M80 70L130 45L130 115L80 140Z" fill="#6e6c68"/>
-          <path d="M80 20L130 45L130 115L80 140L30 115L30 45Z M30 45L80 70L130 45 M80 70V140" fill="none" stroke="#1d1d1f" stroke-width="2.5" stroke-linejoin="round"/>
-        </svg>
-      </span>
-      <span class="txt"><h2>3D shape shading</h2><p>Turn 3D shapes in a playbox, see them from every side, and learn to draw and shade them with a pencil.</p></span>
+      <span class="art"><svg aria-hidden="true" viewBox="0 0 160 160"><path d="M80 140L112 152L154 132L118 122Z" fill="#b3b0a9"/><path d="M80 20L130 45L80 70L30 45Z" fill="#f2f0ea"/><path d="M30 45L80 70L80 140L30 115Z" fill="#cfccc5"/><path d="M80 70L130 45L130 115L80 140Z" fill="#6e6c68"/><path d="M80 20L130 45L130 115L80 140L30 115L30 45Z M30 45L80 70L130 45 M80 70V140" fill="none" stroke="#1d1d1f" stroke-width="2.5" stroke-linejoin="round"/></svg></span>
+      <span class="txt"><h3>3D shape shading</h3><p>Turn 3D shapes in a playbox, see them from every side, and learn to draw and shade them with a pencil.</p></span>
     </a>
     <a class="card" href="perspective.html">
-      <span class="art">
-        <svg viewBox="0 0 160 160" aria-hidden="true">
-          <path d="M0 40H160" stroke="#1d1d1f" stroke-width="1.5"/>
-          <path d="M80 80L10 40M80 140L10 40M80 80L150 40M80 140L150 40M59 68L150 40M101 68L10 40" stroke="#1F5FBF" stroke-opacity=".45" stroke-width="1.1"/>
-          <path d="M80 80L59 68L80 61.5L101 68Z" fill="#fefdfa"/>
-          <path d="M80 80L59 68V110L80 140Z" fill="#d6d3cc"/>
-          <path d="M80 80L101 68V110L80 140Z" fill="#a5a29c"/>
-          <path d="M80 80L59 68L80 61.5L101 68ZM80 80V140M59 68V110L80 140L101 110V68" fill="none" stroke="#1d1d1f" stroke-width="2.2" stroke-linejoin="round"/>
-          <circle cx="10" cy="40" r="4.5" fill="#1F5FBF"/><circle cx="150" cy="40" r="4.5" fill="#D2402A"/>
-        </svg>
-      </span>
-      <span class="txt"><h2>Perspective</h2><p>Learn one-, two- and three-point perspective, play with vanishing points, find them in practice pictures, and print a practice sheet.</p></span>
+      <span class="art"><svg aria-hidden="true" viewBox="0 0 160 160"><path d="M0 50H160" stroke="#1d1d1f" stroke-width="1.5"/><path d="M80 90L10 50M80 128L10 50M80 90L150 50M80 128L150 50M59 78L150 50M101 78L10 50" stroke="#1F5FBF" stroke-opacity=".45" stroke-width="1.1"/><path d="M80 90L59 78L80 71.5L101 78Z" fill="#fefdfa"/><path d="M80 90L59 78V104.6L80 128Z" fill="#d6d3cc"/><path d="M80 90L101 78V104.6L80 128Z" fill="#a5a29c"/><path d="M80 90L59 78L80 71.5L101 78ZM80 90V128M59 78V104.6L80 128L101 104.6V78" fill="none" stroke="#1d1d1f" stroke-width="2.2" stroke-linejoin="round"/><circle cx="10" cy="50" r="4.5" fill="#1F5FBF"/><circle cx="150" cy="50" r="4.5" fill="#D2402A"/></svg></span>
+      <span class="txt"><h3>Perspective</h3><p>Learn one-, two- and three-point perspective, move vanishing points around, find them in practice pictures, and print a practice sheet.</p></span>
     </a>
   </div>
 </main>
