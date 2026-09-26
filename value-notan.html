@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Value &amp; Notan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="lesson.css">
+<style>
+/* ---------- Why value ---------- */
+.why { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.why .panel p { margin: 0 0 10px; font-size: 15px; line-height: 1.5; }
+.why .panel p:last-child { margin-bottom: 0; }
+.demo { padding: 16px; }
+.swatches { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.swatches span { aspect-ratio: 1; border-radius: 8px; transition: background-color .5s ease; }
+.demo-foot { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
+.demo-foot p { margin: 0; flex: 1 1 220px; font-size: 13px; color: #333; }
+.notan-demo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+.notan-demo figure { margin: 0; }
+.notan-demo svg { display: block; width: 100%; height: auto; border-radius: 6px; }
+.notan-demo figcaption { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #55534e; margin-top: 4px; }
+
+/* ---------- Tool ---------- */
+.vt { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 20px; align-items: start; }
+.stage { display: grid; gap: 10px; padding: 12px; position: relative; }
+.stage.side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.stage.drop { outline: 3px dashed #1F5FBF; outline-offset: -8px; }
+.stage figure { margin: 0; min-width: 0; }
+.stage figcaption { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #55534e; margin: 0 0 6px; }
+.cv { position: relative; cursor: crosshair; line-height: 0; }
+.cv canvas { display: block; width: 100%; height: auto; border-radius: 4px; touch-action: none; }
+.cv:focus-visible { outline: 3px solid #1F5FBF; outline-offset: 2px; }
+.probe {
+  position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px;
+  border: 2px solid #fff; border-radius: 50%;
+  box-shadow: 0 0 0 2px #E4252C, 0 0 6px rgba(0, 0, 0, .5);
+  pointer-events: none;
+}
+.vfoot { border-top: 1px solid #e1ded6; padding: 12px 14px 14px; display: grid; gap: 12px; }
+.readout { display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 14px; color: #141414; }
+.readout i { flex: none; width: 40px; height: 40px; border-radius: 8px; border: 1px solid #cfcbc2; }
+.readout b { font-size: 20px; }
+.readout span { color: #444; }
+.key { display: flex; border: 1px solid #b9b5ac; border-radius: 6px; overflow: hidden; }
+.key span { flex: 1; min-width: 0; padding: 6px 4px; text-align: center; font-size: 11px; line-height: 1.25; font-weight: 600; }
+.key span.on { box-shadow: inset 0 0 0 3px #E4252C; }
+.key small { display: block; font-weight: 400; opacity: .85; }
+.hist-wrap { position: relative; }
+.hist-wrap canvas { display: block; width: 100%; height: 150px; touch-action: none; cursor: ew-resize; }
+.hist-cap { display: flex; justify-content: space-between; font-size: 11px; color: #55534e; margin-top: 2px; }
+.bgrid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.file-btn { display: flex; align-items: center; justify-content: center; text-align: center; }
+#file:focus-visible + .file-btn { outline: 3px solid var(--ring); outline-offset: 2px; }
+.actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.actions.one { grid-template-columns: 1fr; margin-top: 12px; }
+#thWrap .label { margin-top: 16px; }
+.th-row { display: flex; gap: 6px; margin-top: 4px; }
+.th-row .tbtn { flex: 1; }
+.check.dis { opacity: .5; }
+.src-note { font-size: 12px; color: var(--muted); margin: 8px 0 0; min-height: 1.3em; }
+
+/* ---------- Tips ---------- */
+.tips { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; counter-reset: tip; }
+.tips li { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px; font-size: 14px; line-height: 1.45; }
+.tips svg { display: block; width: 100%; max-width: 180px; height: auto; margin-bottom: 10px; border-radius: 6px; }
+.tips b { display: block; font-size: 15px; margin-bottom: 4px; }
+.tips b::before { counter-increment: tip; content: counter(tip) ". "; color: var(--accent); }
+
+/* ---------- Printable thumbnail sheet ---------- */
+.sheet-ctl { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: flex-end; margin-bottom: 16px; }
+.sheet-ctl .grp { display: grid; gap: 6px; }
+.sheet-ctl .grp .label { margin: 0; }
+.sheet-ctl .bgrid { display: flex; flex-wrap: wrap; gap: 6px; }
+.sheet-ctl .bgrid .tbtn { padding: 6px 12px; }
+.sheet-ctl .btn { margin-left: auto; }
+.tsheet {
+  page: thumbs;
+  background: #fff; color: #141414;
+  max-width: 720px; margin: 0 auto;
+  aspect-ratio: 210 / 297;
+  padding: 26px 30px 20px;
+  border: 1px solid #cfcbc2; box-shadow: 0 2px 14px rgba(0, 0, 0, .18);
+  display: flex; flex-direction: column;
+}
+.shead { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 20px; border-bottom: 2px solid #141414; padding-bottom: 8px; }
+.shead h3 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: .12em; }
+.shead .sub { margin: 2px 0 0; font-size: 12px; color: #333; }
+.shead .who { margin-left: auto; display: flex; gap: 8px; align-items: flex-end; font-weight: 700; font-size: 11px; letter-spacing: .06em; }
+.shead .who i { display: inline-block; border-bottom: 1px solid #141414; width: 130px; height: 14px; }
+.shead .who i.short { width: 80px; }
+.tsheet svg { display: block; width: 100%; flex: 1; min-height: 0; margin: 10px 0; }
+.tsheet ol { margin: 0; padding: 0 0 0 18px; display: grid; gap: 3px; font-size: 11.5px; }
+
+/* ---------- Printed value study (only exists on paper) ---------- */
+.pstudy { display: none; }
+
+@media (max-width: 960px) {
+  .vt, .why { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .stage.side { grid-template-columns: 1fr; }
+  .swatches { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tsheet { padding: 14px; }
+  .shead .who { margin-left: 0; }
+}
+
+@page { size: A4 portrait; margin: 10mm; }
+@page study { size: A4 landscape; margin: 10mm; }
+@media print {
+  html, body { background: #fff; }
+  main > *:not(#sheetSec), #sheetSec > *:not(.tsheet) { display: none !important; }
+  .wrap { padding: 0; max-width: none; }
+  #sheetSec { margin: 0; }
+  .tsheet { box-shadow: none; border: 0; padding: 0; max-width: none; width: 100%; height: 276mm; aspect-ratio: auto; }
+  body.print-study main { display: none !important; }
+  body.print-study .pstudy {
+    page: study;
+    display: flex; flex-direction: column; gap: 4mm;
+    width: 100%; height: 188mm; color: #141414; font-family: var(--font);
+  }
+  .pstudy .shead h3 { font-size: 20px; }
+  .ps-imgs { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+  .ps-imgs figure { margin: 0; display: flex; flex-direction: column; min-height: 0; }
+  .ps-imgs figcaption { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 2mm; }
+  .ps-imgs img { flex: 1; min-height: 0; width: 100%; object-fit: contain; object-position: top left; }
+  .ps-info { font-size: 11px; margin: 0; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Colour</button>
+        <ul>
+          <li><a href="colour-schemes.html">Colour schemes</a></li>
+          <li><a href="colour-interaction.html">Colour interaction</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Form &amp; space</button>
+        <ul>
+          <li><a href="shape-shading.html">3D shape shading</a></li>
+          <li><a href="perspective.html">Perspective</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Reference tools</button>
+        <ul>
+          <li><a href="value-notan.html" aria-current="page">Value &amp; notan</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>Value &amp; notan</h1>
+    <p>Analyse the light–dark structure of a reference photo. Reduce it to greyscale, to two, three or more values, blur it as if squinting, and read the value of any point, then plan your own compositions as notan thumbnails.</p>
+    <ul class="jump">
+      <li><a href="#why">Why value</a></li>
+      <li><a href="#tool">Value analyser</a></li>
+      <li><a href="#tips">Using it for a study</a></li>
+      <li><a href="#sheetSec">Thumbnail sheet</a></li>
+    </ul>
+  </div>
+
+  <!-- ---------- Why value ---------- -->
+  <section id="why" aria-labelledby="whyTitle">
+    <h2 class="sec-title" id="whyTitle">Value before hue</h2>
+    <div class="why">
+      <div class="panel">
+        <p><strong>Value</strong> is the lightness of a colour, independent of its hue (red, blue…) and its chroma (how intense it is). We read form, light direction and spatial depth almost entirely through value: a drawing with correct values and wrong colours still looks solid, but correct colours at wrong values look flat or confused. This is why a greyscale photo of a painting is such a strong test.</p>
+        <p>Hue is a poor guide to value. Saturated yellow is far lighter than saturated blue, and the swatches on the right are all different hues at the <em>same</em> value: turn them into greyscale and they become one grey.</p>
+        <p><strong>Notan</strong> (濃淡, Japanese for “dark–light”) is the arrangement of light and dark shapes in a picture, independent of what they represent. Introduced to Western art teaching by Arthur Wesley Dow around 1900, it is used for small thumbnail studies that plan a composition in two or three flat values before any detail or colour is added.</p>
+      </div>
+      <div class="paper demo">
+        <div class="swatches" id="swatches" aria-label="Six colours of different hue but equal value"></div>
+        <div class="demo-foot">
+          <button type="button" class="btn ghost" id="swGrey" aria-pressed="false">Show as greyscale</button>
+          <p>Six hues, all at CIELAB L* 62 (value 6.6 on the 1–10 scale used below).</p>
+        </div>
+        <div class="notan-demo" aria-hidden="true">
+          <figure><svg viewBox="0 0 120 84" id="nd0"></svg><figcaption>Tonal</figcaption></figure>
+          <figure><svg viewBox="0 0 120 84" id="nd3"></svg><figcaption>3-value</figcaption></figure>
+          <figure><svg viewBox="0 0 120 84" id="nd2"></svg><figcaption>2-value notan</figcaption></figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Tool ---------- -->
+  <section id="tool" aria-labelledby="toolTitle">
+    <h2 class="sec-title" id="toolTitle">Value analyser</h2>
+    <p class="sec-lead">Load a reference photo (it stays on this device: nothing is uploaded) or use the sample still life. Choose a view, adjust the thresholds on the sliders or by dragging the handles on the histogram, and click or hover on the image to read a value.</p>
+    <div class="vt">
+      <div class="paper">
+        <div class="stage side" id="stage">
+          <figure id="origFig">
+            <figcaption>Original</figcaption>
+            <div class="cv"><canvas id="origC" aria-label="Original image"></canvas><div class="probe" hidden></div></div>
+          </figure>
+          <figure>
+            <figcaption id="studyCap">Study</figcaption>
+            <div class="cv" id="studyCv" tabindex="0" role="img" aria-label="Value study. Click to read the value at a point; with focus, arrow keys move the reading point.">
+              <canvas id="studyC"></canvas><div class="probe" hidden></div>
+            </div>
+          </figure>
+        </div>
+        <div class="vfoot">
+          <div class="readout" id="readout" aria-live="polite"><i id="roSw" style="background:#fbfaf6"></i><div><b id="roVal">–</b> <span id="roTxt">Click or hover on the image to read a value.</span></div></div>
+          <div class="key" id="key" aria-label="Value key"></div>
+          <div>
+            <div class="hist-wrap"><canvas id="hist" aria-hidden="true"></canvas></div>
+            <div class="hist-cap"><span>Black (L* 0)</span><span id="histMid">Luminance histogram</span><span>White (L* 100)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" aria-label="Analyser controls">
+        <h3 class="label">Image</h3>
+        <div class="actions">
+          <input type="file" id="file" accept="image/*" class="sr-only">
+          <label for="file" class="btn primary file-btn">Load photo</label>
+          <button type="button" class="btn ghost" id="useSample">Sample</button>
+        </div>
+        <p class="src-note" id="srcNote" aria-live="polite"></p>
+
+        <h3 class="label" id="modeLbl">View</h3>
+        <div class="bgrid" role="group" aria-labelledby="modeLbl" id="modeBtns"></div>
+        <div id="nWrap" hidden>
+          <label class="range" style="margin-top:10px"><span>Number of values <output id="nOut"></output></span><input type="range" id="nIn" min="2" max="9" step="1"></label>
+        </div>
+
+        <div id="thWrap">
+          <h3 class="label">Thresholds (L*)</h3>
+          <div id="thSliders"></div>
+          <div class="th-row">
+            <button type="button" class="tbtn" id="thAuto">Auto (fit image)</button>
+            <button type="button" class="tbtn" id="thEven">Even steps</button>
+          </div>
+        </div>
+
+        <h3 class="label">Squint</h3>
+        <label class="range"><span>Blur <output id="blurOut"></output></span><input type="range" id="blurIn" min="0" max="10" step="1" value="0"></label>
+        <label class="check" id="colourWrap"><input type="checkbox" id="colourIn"> Keep hue (posterised colour)</label>
+
+        <h3 class="label" id="layLbl">Layout</h3>
+        <div class="bgrid two" role="group" aria-labelledby="layLbl" id="layBtns"></div>
+
+        <div class="actions one">
+          <button type="button" class="btn ghost" id="dlBtn">Download PNG</button>
+          <button type="button" class="btn ghost" id="prBtn">Print study</button>
+        </div>
+        <p class="hint">Greyscale is CIELAB L* computed from sRGB (Rec. 709 primaries, D65) relative luminance, shown as a neutral grey of the same luminance. Value on the 1–10 scale = 1 + 9 × L*/100 (1 black, 10 white). Large images are reduced to 1600 px on the long side for processing.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Tips ---------- -->
+  <section id="tips" aria-labelledby="tipsTitle">
+    <h2 class="sec-title" id="tipsTitle">Using it for a study</h2>
+    <p class="sec-lead">The analyser is a check, not a tracing aid. Look first, commit to your own reading of the values, then compare.</p>
+    <ul class="tips">
+      <li>
+        <svg viewBox="0 0 180 64" aria-hidden="true"><rect width="180" height="64" fill="#fbfaf6"/><rect x="6" y="6" width="78" height="52" fill="#e9e6de" stroke="#141414"/><path d="M6 40 Q30 26 50 38 T84 34 V58 H6Z" fill="#141414"/><circle cx="60" cy="20" r="8" fill="#141414"/><rect x="96" y="6" width="78" height="52" fill="#e9e6de" stroke="#141414"/><path d="M96 44 Q120 34 140 44 T174 40 V58 H96Z" fill="#141414"/><circle cx="150" cy="20" r="8" fill="#141414"/><circle cx="150" cy="44" r="13" fill="none" stroke="#E4252C" stroke-width="2"/></svg>
+        <b>Compare notans, not details</b>Set 2- or 3-value mode, then photograph your drawing and load it too. Differences in the big shapes (a dark mass too small, a light that leaks out) matter more than any edge or texture.
+      </li>
+      <li>
+        <svg viewBox="0 0 180 64" aria-hidden="true"><defs><filter id="tb" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="4"/></filter></defs><rect width="180" height="64" fill="#fbfaf6"/><g><rect x="6" y="6" width="78" height="52" fill="#b9b5ac"/><circle cx="44" cy="32" r="16" fill="#e9e6de"/><circle cx="50" cy="38" r="9" fill="#55534e"/><path d="M10 12h6M20 12h3M70 50h8M12 50l6-4" stroke="#141414" stroke-width="1"/></g><g filter="url(#tb)"><rect x="96" y="6" width="78" height="52" fill="#b9b5ac"/><circle cx="134" cy="32" r="16" fill="#e9e6de"/><circle cx="140" cy="38" r="9" fill="#55534e"/></g></svg>
+        <b>Squint to see masses</b>Half-closing your eyes suppresses detail and local texture so only the large value shapes remain. The blur slider does the same; raise it until small marks disappear and judge the design from what survives.
+      </li>
+      <li>
+        <svg viewBox="0 0 180 64" aria-hidden="true"><rect width="180" height="64" fill="#fbfaf6"/><rect x="6" y="6" width="78" height="52" fill="#e9e6de" stroke="#141414"/><circle cx="20" cy="20" r="6" fill="#141414"/><circle cx="60" cy="16" r="5" fill="#141414"/><circle cx="40" cy="44" r="7" fill="#141414"/><circle cx="72" cy="46" r="5" fill="#141414"/><rect x="96" y="6" width="78" height="52" fill="#e9e6de" stroke="#141414"/><path d="M96 58 V36 Q110 30 118 40 Q128 20 146 26 Q160 30 174 20 V58Z" fill="#141414"/></svg>
+        <b>Keep the darks connected</b>Scattered dark spots read as noise; linked darks form one strong shape that holds the picture together. If your notan breaks into islands, look for shadows and dark objects that can join up.
+      </li>
+      <li>
+        <svg viewBox="0 0 180 64" aria-hidden="true"><rect width="180" height="64" fill="#fbfaf6"/><rect x="6" y="14" width="50" height="36" fill="#fbfaf6" stroke="#141414"/><rect x="65" y="14" width="50" height="36" fill="#8c8a85" stroke="#141414"/><rect x="124" y="14" width="50" height="36" fill="#141414" stroke="#141414"/></svg>
+        <b>Decide a value for each shape</b>Before shading, assign every major shape to light, mid or dark and keep the groups separate: lights in shadow stay darker than darks in light. Set the thresholds so the key matches the families you intend to use.
+      </li>
+    </ul>
+  </section>
+
+  <!-- ---------- Printable thumbnail sheet ---------- -->
+  <section id="sheetSec" aria-labelledby="sheetTitle">
+    <h2 class="sec-title" id="sheetTitle">Notan thumbnail sheet</h2>
+    <p class="sec-lead">An A4 sheet of empty frames for planning compositions by hand in three values. Work small and fast with a marker or soft pencil: white paper for light, hatching or a grey marker for mid, solid black for dark.</p>
+    <div class="sheet-ctl">
+      <div class="grp"><h3 class="label" id="shCountLbl">Frames</h3><div class="bgrid" role="group" aria-labelledby="shCountLbl" id="shCount"></div></div>
+      <div class="grp"><h3 class="label" id="shAspLbl">Aspect ratio</h3><div class="bgrid" role="group" aria-labelledby="shAspLbl" id="shAsp"></div></div>
+      <button type="button" class="btn primary" id="shPrint">Print sheet</button>
+    </div>
+    <div class="tsheet" id="tsheet">
+      <div class="shead">
+        <div><h3>NOTAN THUMBNAILS</h3><p class="sub" id="shSub"></p></div>
+        <div class="who">NAME <i></i> DATE <i class="short"></i></div>
+      </div>
+      <svg id="shv" viewBox="0 0 1000 1250" aria-label="Empty thumbnail frames, each with a three-value key"></svg>
+      <ol>
+        <li>Block in only the largest shapes: no outlines of detail, no gradients.</li>
+        <li>Give every shape one of the three values in the key, and keep to three.</li>
+        <li>Try several arrangements of the same subject; pick the one that reads clearly from across the room.</li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<!-- Printed value study: filled in by the Print study button -->
+<div class="pstudy" id="pstudy" aria-hidden="true">
+  <div class="shead">
+    <div><h3>VALUE STUDY</h3><p class="sub" id="psInfo"></p></div>
+    <div class="who">NAME <i></i> DATE <i class="short"></i></div>
+  </div>
+  <div class="ps-imgs">
+    <figure><figcaption>Original</figcaption><img id="psOrig" alt=""></figure>
+    <figure><figcaption id="psCap">Value study</figcaption><img id="psStudy" alt=""></figure>
+  </div>
+  <div class="key" id="psKey"></div>
+</div>
+
+<script src="site.js"></script>
+<script>
+(function () {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const MAXPX = 1600;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const r1 = n => Math.round(n * 10) / 10;
+
+/* ================= Colour maths (sRGB, D65) ================= */
+// Lookup tables: 8-bit sRGB to linear light, and linear light back to 8-bit
+const LIN = new Float32Array(256);
+for (let i = 0; i < 256; i++) { const c = i / 255; LIN[i] = c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+const ENC = new Uint8ClampedArray(4097);
+for (let i = 0; i <= 4096; i++) { const c = i / 4096; ENC[i] = Math.round(255 * (c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055)); }
+const enc = y => ENC[Math.round(clamp(y, 0, 1) * 4096)];
+const yToL = y => y > 0.008856 ? 116 * Math.cbrt(y) - 16 : 903.3 * y;
+const lToY = L => L > 8 ? Math.pow((L + 16) / 116, 3) : L / 903.3;
+// Neutral grey (8-bit) with the given L*, tabulated in 0.1 steps
+const GREY = new Uint8ClampedArray(1001);
+for (let i = 0; i <= 1000; i++) GREY[i] = enc(lToY(i / 10));
+const greyOf = L => GREY[Math.round(clamp(L, 0, 100) * 10)];
+const greyHex = L => { const g = greyOf(L).toString(16).padStart(2, '0'); return '#' + g + g + g; };
+const valueOf = L => 1 + 9 * L / 100;
+const inkOn = L => L > 55 ? '#141414' : '#fbfaf6';
+
+// CIE LCh(ab) to hex, reducing chroma until the colour fits in sRGB (used by the demo swatches)
+function lchHex(L, C, h) {
+  for (let c = C; c >= 0; c -= 1) {
+    const a = c * Math.cos(h * Math.PI / 180), b = c * Math.sin(h * Math.PI / 180);
+    const fy = (L + 16) / 116, fx = fy + a / 500, fz = fy - b / 200;
+    const fi = t => t * t * t > 0.008856 ? t * t * t : (t - 16 / 116) / 7.787;
+    const X = 0.95047 * fi(fx), Y = fi(fy), Z = 1.08883 * fi(fz);
+    const rgb = [3.2406 * X - 1.5372 * Y - 0.4986 * Z, -0.9689 * X + 1.8758 * Y + 0.0415 * Z, 0.0557 * X - 0.2040 * Y + 1.0570 * Z];
+    if (rgb.every(v => v >= -1e-4 && v <= 1.0001)) return '#' + rgb.map(v => enc(v).toString(16).padStart(2, '0')).join('');
+  }
+  return greyHex(L);
+}
+
+/* ================= Hue vs value demo ================= */
+const SW_L = 62, swHues = [30, 85, 140, 200, 265, 320];
+$('swatches').innerHTML = swHues.map(h => '<span style="background:' + lchHex(SW_L, 60, h) + '"></span>').join('');
+$('swGrey').addEventListener('click', e => {
+  const on = e.currentTarget.getAttribute('aria-pressed') !== 'true';
+  e.currentTarget.setAttribute('aria-pressed', String(on));
+  e.currentTarget.textContent = on ? 'Show colour' : 'Show as greyscale';
+  $('swatches').querySelectorAll('span').forEach((s, i) => { s.style.background = on ? greyHex(SW_L) : lchHex(SW_L, 60, swHues[i]); });
+});
+
+// A small landscape shown tonally, in three values and in two
+(function notanDemo() {
+  const scene = t => '<rect width="120" height="84" fill="' + t.sky + '"/>' +
+    '<path d="M0 50 Q30 34 58 46 T120 40 V84 H0Z" fill="' + t.hill + '"/>' +
+    '<path d="M0 64 Q40 56 80 66 T120 62 V84 H0Z" fill="' + t.field + '"/>' +
+    '<rect x="84" y="30" width="4" height="30" fill="' + t.trunk + '"/><circle cx="86" cy="28" r="13" fill="' + t.tree + '"/>' +
+    '<path d="M24 58 l10 -9 10 9 v10 h-20z" fill="' + t.house + '"/><path d="M34 49 l10 9 v10 h-10z" fill="' + t.houseSh + '"/>';
+  $('nd0').innerHTML = scene({ sky: '#d9d6cc', hill: '#8f8b80', field: '#b3ae9f', trunk: '#3a3833', tree: '#4d4a43', house: '#efece4', houseSh: '#9d998f' });
+  $('nd3').innerHTML = scene({ sky: '#fbfaf6', hill: '#8c8a85', field: '#8c8a85', trunk: '#141414', tree: '#141414', house: '#fbfaf6', houseSh: '#8c8a85' });
+  $('nd2').innerHTML = scene({ sky: '#fbfaf6', hill: '#141414', field: '#fbfaf6', trunk: '#141414', tree: '#141414', house: '#fbfaf6', houseSh: '#141414' });
+})();
+
+/* ================= Built-in sample still life ================= */
+// Sphere, cube and a cylinder on a table with drapery, lit from the upper left.
+function drawSample(W, H) {
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  const s = W / 1200;
+  x.scale(s, s);
+  const poly = (pts, fill) => { x.beginPath(); pts.forEach((p, i) => i ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1])); x.closePath(); x.fillStyle = fill; x.fill(); };
+
+  // Wall: a pool of light at upper left falling off into shadow
+  let g = x.createRadialGradient(260, 120, 40, 360, 260, 1000);
+  g.addColorStop(0, '#7f7b6a'); g.addColorStop(.5, '#4f4d42'); g.addColorStop(1, '#2a2924');
+  x.fillStyle = g; x.fillRect(0, 0, 1200, 900);
+
+  // Hanging drapery at the back right, with vertical folds
+  x.save();
+  x.beginPath();
+  x.moveTo(720, 0); x.lineTo(1200, 0); x.lineTo(1200, 580);
+  x.bezierCurveTo(1060, 600, 900, 570, 760, 590);
+  x.bezierCurveTo(740, 420, 700, 200, 720, 0);
+  x.clip();
+  g = x.createLinearGradient(700, 0, 1200, 0);
+  const folds = [['#4a6a9f', 0], ['#2f4a78', .08], ['#5373a8', .2], ['#2a4370', .32], ['#44649a', .45], ['#263d66', .58], ['#3b5a8e', .7], ['#223760', .84], ['#2e4a78', 1]];
+  folds.forEach(([col, p]) => g.addColorStop(p, col));
+  x.fillStyle = g; x.fillRect(700, 0, 500, 620);
+  g = x.createLinearGradient(0, 0, 0, 600);
+  g.addColorStop(0, 'rgba(255,255,255,.08)'); g.addColorStop(1, 'rgba(0,0,0,.35)');
+  x.fillStyle = g; x.fillRect(700, 0, 500, 620);
+  x.restore();
+
+  // Table top
+  g = x.createLinearGradient(0, 560, 0, 900);
+  g.addColorStop(0, '#9c7a4c'); g.addColorStop(.25, '#c7a26c'); g.addColorStop(1, '#8a6a3f');
+  x.fillStyle = g; x.fillRect(0, 560, 1200, 340);
+  g = x.createLinearGradient(0, 0, 1200, 0);
+  g.addColorStop(0, 'rgba(255,245,220,.18)'); g.addColorStop(1, 'rgba(0,0,0,.35)');
+  x.fillStyle = g; x.fillRect(0, 560, 1200, 340);
+
+  // Cloth spilling across the table, with diagonal folds
+  x.save();
+  x.beginPath();
+  x.moveTo(760, 585); x.bezierCurveTo(900, 575, 1060, 600, 1200, 580);
+  x.lineTo(1200, 900); x.lineTo(640, 900);
+  x.bezierCurveTo(660, 820, 700, 700, 760, 585);
+  x.clip();
+  g = x.createLinearGradient(700, 600, 1150, 880);
+  [['#7393c8', 0], ['#51709f', .16], ['#7c9bcf', .3], ['#44628f', .46], ['#6687bb', .6], ['#3d5a88', .78], ['#4f6d9f', 1]].forEach(([col, p]) => g.addColorStop(p, col));
+  x.fillStyle = g; x.fillRect(620, 560, 600, 360);
+  x.restore();
+
+  // Cast shadows, drawn opaque on a layer and composited once so overlaps don't double up
+  const sh = document.createElement('canvas');
+  sh.width = W; sh.height = H;
+  const y = sh.getContext('2d');
+  y.scale(s, s);
+  y.fillStyle = '#000';
+  const quad = pts => { y.beginPath(); pts.forEach((p, i) => i ? y.lineTo(p[0], p[1]) : y.moveTo(p[0], p[1])); y.closePath(); y.fill(); };
+  // Cube shadow: the base swept along the light direction
+  const base = [[500, 830], [360, 775], [520, 735], [660, 790]], d = [250, 18];
+  for (let i = 0; i < 4; i++) {
+    const a = base[i], b = base[(i + 1) % 4];
+    quad([a, b, [b[0] + d[0], b[1] + d[1]], [a[0] + d[0], a[1] + d[1]]]);
+  }
+  // Sphere and cylinder shadows
+  y.beginPath(); y.ellipse(930, 770, 170, 42, -0.05, 0, Math.PI * 2); y.fill();
+  y.beginPath(); y.ellipse(360, 700, 150, 30, 0, 0, Math.PI * 2); y.fill();
+  x.save(); x.setTransform(1, 0, 0, 1, 0, 0);
+  x.globalAlpha = .55; x.drawImage(sh, 0, 0); x.restore();
+  // Occlusion shadows where the objects touch the table
+  x.fillStyle = 'rgba(0,0,0,.6)';
+  x.beginPath(); x.ellipse(830, 778, 70, 12, 0, 0, Math.PI * 2); x.fill();
+
+  // Cylinder (a green jar), left and behind
+  g = x.createLinearGradient(170, 0, 320, 0);
+  g.addColorStop(0, '#5e8b58'); g.addColorStop(.25, '#9cc493'); g.addColorStop(.6, '#3f6a3b'); g.addColorStop(.9, '#16301a'); g.addColorStop(1, '#23422a');
+  x.fillStyle = g;
+  x.beginPath(); x.moveTo(170, 460); x.lineTo(170, 690); x.ellipse(245, 690, 75, 18, 0, Math.PI, 0, true); x.lineTo(320, 460); x.closePath(); x.fill();
+  g = x.createLinearGradient(170, 440, 320, 480);
+  g.addColorStop(0, '#d6ecc9'); g.addColorStop(1, '#7fa877');
+  x.fillStyle = g; x.beginPath(); x.ellipse(245, 460, 75, 18, 0, 0, Math.PI * 2); x.fill();
+  x.fillStyle = '#0f1f12'; x.beginPath(); x.ellipse(245, 460, 52, 11, 0, 0, Math.PI * 2); x.fill();
+
+  // Cube (cream): top lightest, left face lit, right face in shadow
+  poly([[360, 605], [520, 565], [660, 620], [500, 660]], '#f4eedd');
+  g = x.createLinearGradient(360, 600, 500, 830);
+  g.addColorStop(0, '#d9cfb3'); g.addColorStop(1, '#bcb194');
+  poly([[360, 605], [500, 660], [500, 830], [360, 775]], g);
+  g = x.createLinearGradient(500, 700, 660, 700);
+  g.addColorStop(0, '#5a5445'); g.addColorStop(1, '#756d5a');
+  poly([[500, 660], [660, 620], [660, 790], [500, 830]], g);
+
+  // Sphere (red): highlight, light, core shadow, reflected light
+  const cx = 830, cy = 655, r = 125;
+  g = x.createRadialGradient(cx - 50, cy - 55, 4, cx + 10, cy + 10, r * 1.08);
+  g.addColorStop(0, '#ffe2d6'); g.addColorStop(.07, '#f58a6c'); g.addColorStop(.35, '#d23b25'); g.addColorStop(.7, '#6e150c'); g.addColorStop(.86, '#3a0905'); g.addColorStop(1, '#7a2b1c');
+  x.fillStyle = g; x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.fill();
+
+  // Gentle vignette
+  g = x.createRadialGradient(600, 450, 350, 600, 450, 850);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.35)');
+  x.fillStyle = g; x.fillRect(0, 0, 1200, 900);
+  return c;
+}
+
+/* ================= Analyser state ================= */
+const MODES = [['orig', 'Original'], ['grey', 'Greyscale'], ['n2', '2-value notan'], ['n3', '3-value notan'], ['n5', '5 values'], ['nN', 'N values']];
+const S = { mode: 'n3', n: 4, blur: 0, side: true, colour: false };
+try { Object.assign(S, JSON.parse(localStorage.getItem('vn-prefs') || '{}')); } catch (e) { /* no storage */ }
+const save = () => { try { localStorage.setItem('vn-prefs', JSON.stringify(S)); } catch (e) { /* no storage */ } };
+if (!MODES.some(m => m[0] === S.mode)) S.mode = 'n3';
+
+// P holds the image being analysed, at processing resolution
+const P = { w: 0, h: 0, src: null, img: null, L: null, hist: new Float64Array(200), name: 'sample', sample: true };
+let TH = [];              // thresholds in L*, ascending
+let probe = null;         // pinned reading point {x, y} as fractions of the image
+let onLoaded = null;      // set by the thumbnail sheet
+const origC = $('origC'), studyC = $('studyC');
+const octx = origC.getContext('2d', { willReadFrequently: true }), sctx = studyC.getContext('2d');
+
+const bandsN = () => ({ n2: 2, n3: 3, n5: 5, nN: S.n })[S.mode] || 0;
+const bandNames = N => N === 2 ? ['Dark', 'Light'] : N === 3 ? ['Dark', 'Mid', 'Light'] : N === 5 ? ['Dark', 'Mid-dark', 'Mid', 'Mid-light', 'Light'] : null;
+const modeName = () => S.mode === 'orig' ? 'Original' : S.mode === 'grey' ? 'Greyscale (L*)' : S.mode === 'n2' ? '2-value notan' : S.mode === 'n3' ? '3-value notan' : bandsN() + '-value study';
+const toneOf = (k, N) => 100 * k / (N - 1);
+
+/* ---------- Loading ---------- */
+function loadSource(img, w, h, name, sample) {
+  const k = Math.min(1, MAXPX / Math.max(w, h));
+  P.w = Math.max(1, Math.round(w * k)); P.h = Math.max(1, Math.round(h * k));
+  origC.width = studyC.width = P.w; origC.height = studyC.height = P.h;
+  octx.fillStyle = '#fff'; octx.fillRect(0, 0, P.w, P.h);
+  octx.drawImage(img, 0, 0, P.w, P.h);
+  P.src = octx.getImageData(0, 0, P.w, P.h).data;
+  P.name = name; P.sample = sample;
+  probe = null;
+  $('srcNote').textContent = sample ? 'Showing the sample still life.' : name + ' (' + w + ' × ' + h + (k < 1 ? ', analysed at ' + P.w + ' × ' + P.h : '') + ')';
+  process(true);
+  if (onLoaded) onLoaded();
+}
+function useSample() { const c = drawSample(1200, 900); loadSource(c, 1200, 900, 'sample', true); }
+
+function loadFile(file) {
+  if (!file || !/^image\//.test(file.type)) { $('srcNote').textContent = 'That file is not an image.'; return; }
+  const url = URL.createObjectURL(file), img = new Image();
+  img.onload = () => { loadSource(img, img.naturalWidth, img.naturalHeight, file.name, false); URL.revokeObjectURL(url); };
+  img.onerror = () => { $('srcNote').textContent = 'This browser could not read that image. Try a JPEG or PNG.'; URL.revokeObjectURL(url); };
+  img.src = url;
+}
+$('file').addEventListener('change', e => { loadFile(e.target.files[0]); e.target.value = ''; });
+$('useSample').addEventListener('click', useSample);
+const stage = $('stage');
+stage.addEventListener('dragover', e => { e.preventDefault(); stage.classList.add('drop'); });
+stage.addEventListener('dragleave', e => { if (!stage.contains(e.relatedTarget)) stage.classList.remove('drop'); });
+stage.addEventListener('drop', e => { e.preventDefault(); stage.classList.remove('drop'); loadFile(e.dataTransfer.files[0]); });
+
+/* ---------- Processing ---------- */
+// Separable box blur on RGB, run twice (close to a Gaussian); r in pixels
+function boxBlur(src, w, h, r) {
+  const n = w * h, a = new Float32Array(n * 3), b = new Float32Array(n * 3);
+  for (let i = 0, j = 0; i < n * 3; i += 3, j += 4) { a[i] = src[j]; a[i + 1] = src[j + 1]; a[i + 2] = src[j + 2]; }
+  const pass = (s, d, len, lines, step, lineStep) => {
+    const k = 1 / (2 * r + 1);
+    for (let l = 0; l < lines; l++) {
+      const o = l * lineStep;
+      let sr = 0, sg = 0, sb = 0;
+      for (let t = -r; t <= r; t++) { const q = o + clamp(t, 0, len - 1) * step; sr += s[q]; sg += s[q + 1]; sb += s[q + 2]; }
+      for (let t = 0; t < len; t++) {
+        const q = o + t * step;
+        d[q] = sr * k; d[q + 1] = sg * k; d[q + 2] = sb * k;
+        const ad = o + Math.min(len - 1, t + r + 1) * step, rm = o + Math.max(0, t - r) * step;
+        sr += s[ad] - s[rm]; sg += s[ad + 1] - s[rm + 1]; sb += s[ad + 2] - s[rm + 2];
+      }
+    }
+  };
+  for (let it = 0; it < 2; it++) { pass(a, b, w, h, 3, w * 3); pass(b, a, h, w, w * 3, 3); }
+  const out = new Uint8ClampedArray(n * 4);
+  for (let i = 0, j = 0; i < n * 3; i += 3, j += 4) { out[j] = a[i]; out[j + 1] = a[i + 1]; out[j + 2] = a[i + 2]; out[j + 3] = 255; }
+  return out;
+}
+
+// Blur (if any), then L* for every pixel and the histogram
+function process(newImage) {
+  const r = Math.round(S.blur * Math.max(P.w, P.h) / 400);
+  P.img = r > 0 ? boxBlur(P.src, P.w, P.h, r) : P.src;
+  const n = P.w * P.h, d = P.img;
+  P.L = new Float32Array(n);
+  P.hist.fill(0);
+  for (let i = 0, j = 0; i < n; i++, j += 4) {
+    const l = yToL(0.2126 * LIN[d[j]] + 0.7152 * LIN[d[j + 1]] + 0.0722 * LIN[d[j + 2]]);
+    P.L[i] = l;
+    P.hist[Math.min(199, (l * 2) | 0)]++;
+  }
+  if (newImage || TH.length !== Math.max(0, bandsN() - 1)) autoThresholds();
+  render();
+}
+
+// Thresholds that fit the image: 1-D k-means on the histogram (for two values this is close to Otsu's method)
+function autoThresholds() {
+  const N = bandsN();
+  if (N < 2) { TH = []; buildSliders(); return; }
+  const H = P.hist, total = H.reduce((a, b) => a + b, 0) || 1;
+  const centres = [];
+  let cum = 0, k = 0;
+  for (let i = 0; i < 200 && k < N; i++) {
+    cum += H[i];
+    while (k < N && cum / total >= (k + .5) / N) { centres.push(i / 2 + .25); k++; }
+  }
+  while (centres.length < N) centres.push(100 * (centres.length + .5) / N);
+  for (let it = 0; it < 40; it++) {
+    const th = centres.slice(1).map((c, i) => (centres[i] + c) / 2);
+    const sum = new Float64Array(N), cnt = new Float64Array(N);
+    for (let i = 0; i < 200; i++) {
+      const L = i / 2 + .25;
+      let b = 0; while (b < N - 1 && L >= th[b]) b++;
+      sum[b] += H[i] * L; cnt[b] += H[i];
+    }
+    for (let b = 0; b < N; b++) if (cnt[b]) centres[b] = sum[b] / cnt[b];
+    centres.sort((a, b) => a - b);
+  }
+  TH = centres.slice(1).map((c, i) => Math.round((centres[i] + c)) / 2);
+  tidyThresholds();
+  buildSliders();
+}
+function evenThresholds() {
+  const N = bandsN();
+  TH = [];
+  for (let k = 1; k < N; k++) TH.push(Math.round(200 * k / N) / 2);
+  buildSliders();
+}
+// Keep thresholds ascending, at least 1 L* apart
+function tidyThresholds(fixed) {
+  for (let i = 0; i < TH.length; i++) TH[i] = clamp(TH[i], 1 + i, 99 - (TH.length - 1 - i));
+  for (let i = 1; i < TH.length; i++) if (TH[i] < TH[i - 1] + 1) {
+    if (fixed === i) TH[i - 1] = TH[i] - 1; else TH[i] = TH[i - 1] + 1;
+  }
+  for (let i = TH.length - 2; i >= 0; i--) if (TH[i] > TH[i + 1] - 1) TH[i] = TH[i + 1] - 1;
+}
+
+// Band index for each L* in 0.1 steps
+function bandLUT() {
+  const lut = new Uint8Array(1001);
+  for (let i = 0; i <= 1000; i++) { const L = i / 10; let b = 0; while (b < TH.length && L >= TH[b]) b++; lut[i] = b; }
+  return lut;
+}
+// Mean L* of the pixels in each band (the tone kept in posterised colour)
+function bandMeans(N) {
+  const sum = new Float64Array(N), cnt = new Float64Array(N);
+  for (let i = 0; i < 200; i++) {
+    const L = i / 2 + .25; let b = 0; while (b < TH.length && L >= TH[b]) b++;
+    sum[b] += P.hist[i] * L; cnt[b] += P.hist[i];
+  }
+  return [...sum].map((s, b) => cnt[b] ? s / cnt[b] : ((b ? TH[b - 1] : 0) + (b < TH.length ? TH[b] : 100)) / 2);
+}
+
+function render() {
+  if (!P.L) return;
+  const n = P.w * P.h, out = sctx.createImageData(P.w, P.h), o = out.data, L = P.L, d = P.img;
+  const N = bandsN();
+  if (S.mode === 'orig') o.set(d);
+  else if (S.mode === 'grey') {
+    for (let i = 0, j = 0; i < n; i++, j += 4) { const g = GREY[(L[i] * 10 + .5) | 0]; o[j] = o[j + 1] = o[j + 2] = g; o[j + 3] = 255; }
+  } else {
+    const lut = bandLUT();
+    if (S.colour) {
+      // Scale each pixel in linear light to its band's luminance (keeps chromaticity); if a channel
+      // overflows, desaturate towards the grey of that luminance, which keeps luminance exact.
+      const bY = bandMeans(N).map(lToY);
+      for (let i = 0, j = 0; i < n; i++, j += 4) {
+        const Yt = bY[lut[(L[i] * 10 + .5) | 0]];
+        let r = LIN[d[j]], g = LIN[d[j + 1]], b = LIN[d[j + 2]];
+        const Y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        if (Y < 1e-5) r = g = b = Yt;
+        else {
+          const k = Yt / Y; r *= k; g *= k; b *= k;
+          const m = Math.max(r, g, b);
+          if (m > 1) { const t = (1 - Yt) / (m - Yt); r = Yt + (r - Yt) * t; g = Yt + (g - Yt) * t; b = Yt + (b - Yt) * t; }
+        }
+        o[j] = ENC[(r * 4096 + .5) | 0]; o[j + 1] = ENC[(g * 4096 + .5) | 0]; o[j + 2] = ENC[(b * 4096 + .5) | 0]; o[j + 3] = 255;
+      }
+    } else {
+      const tone = []; for (let k = 0; k < N; k++) tone.push(greyOf(toneOf(k, N)));
+      for (let i = 0, j = 0; i < n; i++, j += 4) { const g = tone[lut[(L[i] * 10 + .5) | 0]]; o[j] = o[j + 1] = o[j + 2] = g; o[j + 3] = 255; }
+    }
+  }
+  sctx.putImageData(out, 0, 0);
+  $('studyCap').textContent = modeName() + (S.colour && N ? ', colour' : '') + (S.blur ? ' · squint ' + S.blur : '');
+  drawKey();
+  drawHist();
+  showProbe(probe);
+}
+
+/* ---------- Value key ---------- */
+function keyCells() {
+  const N = bandsN();
+  if (!N) {
+    // 10-step scale for original and greyscale views
+    return Array.from({ length: 10 }, (_, k) => {
+      const L = k / 9 * 100;
+      return { L, lo: k ? (k - .5) / 9 * 100 : 0, hi: k < 9 ? (k + .5) / 9 * 100 : 100, name: String(k + 1), sub: 'L* ' + Math.round(L) };
+    });
+  }
+  const names = bandNames(N), means = S.colour ? bandMeans(N) : null;
+  return Array.from({ length: N }, (_, k) => {
+    const lo = k ? TH[k - 1] : 0, hi = k < N - 1 ? TH[k] : 100;
+    const L = means ? means[k] : toneOf(k, N);
+    return { L, lo, hi, name: names ? names[k] : 'Value ' + (k + 1), sub: r1(valueOf(lo)) + '–' + r1(valueOf(hi)) };
+  });
+}
+function drawKey(activeL) {
+  const cells = keyCells();
+  $('key').innerHTML = cells.map(c => {
+    const on = activeL !== undefined && activeL >= c.lo && (activeL < c.hi || c.hi === 100);
+    return '<span' + (on ? ' class="on"' : '') + ' style="background:' + greyHex(c.L) + ';color:' + inkOn(c.L) + '">' + c.name + '<small>' + c.sub + '</small></span>';
+  }).join('');
+}
+
+/* ---------- Histogram with threshold handles ---------- */
+const hist = $('hist'), hctx = hist.getContext('2d');
+const HP = 12;  // side padding in CSS px
+function drawHist() {
+  const dpr = window.devicePixelRatio || 1, W = hist.clientWidth || 300, H = 150;
+  if (hist.width !== Math.round(W * dpr)) { hist.width = Math.round(W * dpr); hist.height = H * dpr; }
+  hctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  hctx.clearRect(0, 0, W, H);
+  const x0 = HP, x1 = W - HP, bw = (x1 - x0) / 200, top = 22, bot = H - 22;
+  const xOf = L => x0 + (x1 - x0) * L / 100;
+  // Tone strip along the bottom: the output tone of each band, or a continuous ramp
+  const N = bandsN(), tones = N ? keyCells().map(c => c.L) : null;
+  for (let i = 0; i < 200; i++) {
+    const L = i / 2 + .25;
+    let t = L;
+    if (N) { let b = 0; while (b < TH.length && L >= TH[b]) b++; t = tones[b]; }
+    hctx.fillStyle = greyHex(t);
+    hctx.fillRect(x0 + i * bw, bot + 4, bw + .6, 14);
+  }
+  hctx.strokeStyle = '#b9b5ac'; hctx.lineWidth = 1; hctx.strokeRect(x0 + .5, bot + 4.5, x1 - x0 - 1, 13);
+  // Bars (square-root scale so small peaks stay visible)
+  let max = 0; for (let i = 0; i < 200; i++) max = Math.max(max, Math.sqrt(P.hist[i]));
+  hctx.fillStyle = '#55534e';
+  for (let i = 0; i < 200; i++) {
+    const hgt = max ? Math.sqrt(P.hist[i]) / max * (bot - top) : 0;
+    hctx.fillRect(x0 + i * bw, bot - hgt, Math.max(1, bw - .3), hgt);
+  }
+  hctx.fillStyle = '#b9b5ac'; hctx.fillRect(x0, bot, x1 - x0, 1);
+  // Threshold handles
+  TH.forEach((t, i) => {
+    const x = Math.round(xOf(t)) + .5;
+    hctx.strokeStyle = '#1F5FBF'; hctx.lineWidth = 2;
+    hctx.beginPath(); hctx.moveTo(x, 14); hctx.lineTo(x, bot + 18); hctx.stroke();
+    hctx.fillStyle = '#1F5FBF';
+    hctx.beginPath(); hctx.arc(x, 10, 8, 0, Math.PI * 2); hctx.fill();
+    hctx.fillStyle = '#fff'; hctx.font = '700 10px Archivo, Arial, sans-serif'; hctx.textAlign = 'center'; hctx.textBaseline = 'middle';
+    hctx.fillText(String(i + 1), x, 10.5);
+  });
+  $('histMid').textContent = N ? 'Drag the blue handles' : 'Luminance histogram';
+}
+let hDrag = -1;
+const histL = e => { const r = hist.getBoundingClientRect(); return clamp((e.clientX - r.left - HP) / (r.width - 2 * HP) * 100, 0, 100); };
+hist.addEventListener('pointerdown', e => {
+  if (!TH.length) return;
+  const L = histL(e);
+  hDrag = TH.reduce((best, t, i) => Math.abs(t - L) < Math.abs(TH[best] - L) ? i : best, 0);
+  hist.setPointerCapture(e.pointerId);
+  moveHandle(L);
+  e.preventDefault();
+});
+hist.addEventListener('pointermove', e => { if (hDrag >= 0) moveHandle(histL(e)); });
+const endH = () => { hDrag = -1; };
+hist.addEventListener('pointerup', endH);
+hist.addEventListener('pointercancel', endH);
+function moveHandle(L) {
+  TH[hDrag] = Math.round(L * 2) / 2;
+  tidyThresholds(hDrag);
+  syncSliders();
+  schedule(render);
+}
+
+/* ---------- Threshold sliders ---------- */
+function buildSliders() {
+  const box = $('thSliders');
+  box.innerHTML = '';
+  $('thWrap').hidden = !TH.length;
+  TH.forEach((t, i) => {
+    const lab = document.createElement('label');
+    lab.className = 'range';
+    lab.innerHTML = '<span>Threshold ' + (i + 1) + ' <output></output></span><input type="range" min="0" max="100" step="0.5">';
+    const inp = lab.querySelector('input');
+    inp.value = t;
+    inp.addEventListener('input', () => { TH[i] = +inp.value; tidyThresholds(i); syncSliders(); schedule(render); });
+    box.appendChild(lab);
+  });
+  syncSliders();
+}
+function syncSliders() {
+  $('thSliders').querySelectorAll('.range').forEach((lab, i) => {
+    lab.querySelector('input').value = TH[i];
+    lab.querySelector('output').textContent = 'L* ' + TH[i] + ' · value ' + r1(valueOf(TH[i]));
+  });
+}
+$('thAuto').addEventListener('click', () => { autoThresholds(); render(); });
+$('thEven').addEventListener('click', () => { evenThresholds(); render(); });
+
+// Coalesce rapid slider input into one render per frame
+let pending = null;
+function schedule(fn) {
+  if (pending) { pending = fn === process || pending === process ? process : fn; return; }
+  pending = fn;
+  requestAnimationFrame(() => { const f = pending; pending = null; f(); });
+}
+
+/* ---------- Reading values ---------- */
+function readAt(pt) {
+  if (!pt || !P.L) return null;
+  const ix = clamp(Math.floor(pt.x * P.w), 0, P.w - 1), iy = clamp(Math.floor(pt.y * P.h), 0, P.h - 1);
+  return P.L[iy * P.w + ix];
+}
+function showProbe(pt, hover) {
+  document.querySelectorAll('.probe').forEach(m => {
+    m.hidden = !pt;
+    if (pt) { m.style.left = (pt.x * 100) + '%'; m.style.top = (pt.y * 100) + '%'; }
+  });
+  const L = readAt(pt);
+  if (L === null) {
+    $('roVal').textContent = '–'; $('roTxt').textContent = 'Click or hover on the image to read a value.';
+    $('roSw').style.background = '#fbfaf6';
+    drawKey();
+    return;
+  }
+  const N = bandsN();
+  let band = '';
+  if (N) {
+    let b = 0; while (b < TH.length && L >= TH[b]) b++;
+    const names = bandNames(N);
+    band = ' · ' + (names ? names[b] : 'band ' + (b + 1)) + ' (' + (b + 1) + ' of ' + N + ')';
+  }
+  $('roSw').style.background = greyHex(L);
+  $('roVal').textContent = r1(valueOf(L)) + ' / 10';
+  $('roTxt').textContent = 'L* ' + Math.round(L) + band + (hover ? '' : ' · pinned');
+  drawKey(L);
+}
+function ptFrom(e) {
+  const r = e.currentTarget.getBoundingClientRect();
+  return { x: clamp((e.clientX - r.left) / r.width, 0, .9999), y: clamp((e.clientY - r.top) / r.height, 0, .9999) };
+}
+document.querySelectorAll('.cv').forEach(cv => {
+  cv.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') showProbe(ptFrom(e), true); });
+  cv.addEventListener('pointerleave', () => showProbe(probe));
+  cv.addEventListener('pointerdown', e => { probe = ptFrom(e); showProbe(probe); });
+});
+$('studyCv').addEventListener('keydown', e => {
+  const k = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+  if (!k) return;
+  e.preventDefault();
+  const st = e.shiftKey ? .05 : .01;
+  probe = probe || { x: .5, y: .5 };
+  probe = { x: clamp(probe.x + k[0] * st, 0, .9999), y: clamp(probe.y + k[1] * st, 0, .9999) };
+  showProbe(probe);
+});
+
+/* ---------- Controls ---------- */
+function pickButtons(el, items, current, onPick) {
+  el.innerHTML = '';
+  items.forEach(([key, label]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tbtn'; b.textContent = label;
+    b.setAttribute('aria-pressed', String(key === current));
+    b.addEventListener('click', () => {
+      el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      onPick(key);
+    });
+    el.appendChild(b);
+  });
+}
+function syncControls() {
+  $('nWrap').hidden = S.mode !== 'nN';
+  $('nIn').value = S.n; $('nOut').textContent = S.n;
+  $('blurIn').value = S.blur; $('blurOut').textContent = S.blur ? S.blur + ' of 10' : 'off';
+  const canColour = bandsN() > 0;
+  $('colourIn').disabled = !canColour;
+  $('colourWrap').classList.toggle('dis', !canColour);
+  $('colourIn').checked = S.colour;
+  stage.classList.toggle('side', S.side);
+  $('origFig').hidden = !S.side;
+  save();
+}
+pickButtons($('modeBtns'), MODES, S.mode, k => {
+  S.mode = k; syncControls();
+  autoThresholds(); render();
+});
+$('nIn').addEventListener('input', e => { S.n = +e.target.value; syncControls(); autoThresholds(); schedule(render); });
+$('blurIn').addEventListener('input', e => { S.blur = +e.target.value; syncControls(); schedule(process); });
+$('colourIn').addEventListener('change', e => { S.colour = e.target.checked; syncControls(); render(); });
+pickButtons($('layBtns'), [[true, 'Side by side'], [false, 'Single']], S.side, k => { S.side = k; syncControls(); drawHist(); });
+window.addEventListener('resize', () => { if (P.L) drawHist(); });
+
+/* ---------- Download and print ---------- */
+const baseName = () => (P.sample ? 'sample' : P.name.replace(/\.[^.]+$/, '')) + '-' + S.mode.replace('nN', 'n' + S.n);
+function keyCanvasStrip(ctx, x, y, w, h) {
+  const cells = keyCells(), cw = w / cells.length;
+  cells.forEach((c, i) => {
+    ctx.fillStyle = greyHex(c.L); ctx.fillRect(x + i * cw, y, cw + .5, h);
+    ctx.fillStyle = inkOn(c.L); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '600 ' + Math.round(h * .3) + 'px Archivo, Arial, sans-serif';
+    ctx.fillText(c.name + '  ' + c.sub, x + i * cw + cw / 2, y + h / 2);
+  });
+}
+$('dlBtn').addEventListener('click', () => {
+  let c = studyC;
+  if (S.side) {
+    // Side by side: original, study and the value key on one image
+    const gap = Math.round(P.w * .03), kh = Math.max(40, Math.round(P.h * .07));
+    c = document.createElement('canvas');
+    c.width = P.w * 2 + gap * 3; c.height = P.h + kh + gap * 3;
+    const x = c.getContext('2d');
+    x.fillStyle = '#fbfaf6'; x.fillRect(0, 0, c.width, c.height);
+    x.drawImage(origC, gap, gap); x.drawImage(studyC, P.w + gap * 2, gap);
+    keyCanvasStrip(x, gap, P.h + gap * 2, c.width - gap * 2, kh);
+  }
+  c.toBlob(b => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b); a.download = baseName() + '.png';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }, 'image/png');
+});
+$('prBtn').addEventListener('click', async () => {
+  $('psOrig').src = origC.toDataURL('image/jpeg', .92);
+  $('psStudy').src = studyC.toDataURL('image/png');
+  $('psCap').textContent = $('studyCap').textContent;
+  $('psKey').innerHTML = $('key').innerHTML.replace(/ class="on"/g, '');
+  $('psInfo').textContent = (P.sample ? 'Sample still life' : P.name) + ' · ' + modeName() +
+    (TH.length ? ' · thresholds at L* ' + TH.join(', ') : '') + (S.blur ? ' · squint ' + S.blur + '/10' : '') + ' · value 1 = black, 10 = white';
+  try { await Promise.all([$('psOrig').decode(), $('psStudy').decode()]); } catch (e) { /* print anyway */ }
+  document.body.classList.add('print-study');
+  window.print();
+});
+window.addEventListener('afterprint', () => document.body.classList.remove('print-study'));
+
+syncControls();
+useSample();
+
+/* ================= Printable thumbnail sheet ================= */
+const SH = { count: 6, asp: '4:3' };
+try { Object.assign(SH, JSON.parse(localStorage.getItem('vn-sheet') || '{}')); } catch (e) { /* no storage */ }
+const ASPECTS = [['1:1', '1:1'], ['4:3', '4:3'], ['3:4', '3:4'], ['3:2', '3:2'], ['2:3', '2:3'], ['16:9', '16:9'], ['img', 'Match image']];
+function drawSheet() {
+  const cols = SH.count === 6 ? 2 : 3, rows = 3, W = 1000, H = 1250;
+  const ratio = SH.asp === 'img' ? P.w / P.h : (([a, b]) => a / b)(SH.asp.split(':').map(Number));
+  const cw = W / cols, ch = H / rows, pad = 18, keyH = 56;
+  const fw0 = cw - pad * 2, fh0 = ch - pad * 2 - keyH;
+  const fw = Math.min(fw0, fh0 * ratio), fh = fw / ratio;
+  let s = '';
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const n = r * cols + c + 1;
+    const x = c * cw + (cw - fw) / 2, y = r * ch + pad + (fh0 - fh) / 2;
+    s += '<rect x="' + r1(x) + '" y="' + r1(y) + '" width="' + r1(fw) + '" height="' + r1(fh) + '" fill="#fff" stroke="#141414" stroke-width="2.5"/>';
+    // Frame number and a three-value key under each frame
+    const ky = y + fh + 14, sq = 24;
+    s += '<text x="' + r1(x) + '" y="' + r1(ky + 18) + '" font-family="Archivo, Arial, sans-serif" font-size="20" font-weight="800" fill="#141414">' + n + '</text>';
+    const tones = [['#ffffff', 'L'], ['#8c8a85', 'M'], ['#141414', 'D']];
+    tones.forEach(([f, t], k) => {
+      const kx = x + fw - (3 - k) * (sq + 30);
+      s += '<rect x="' + r1(kx) + '" y="' + r1(ky) + '" width="' + sq + '" height="' + sq + '" fill="' + f + '" stroke="#141414" stroke-width="1.5"/>';
+      s += '<text x="' + r1(kx + sq + 5) + '" y="' + r1(ky + 18) + '" font-family="Archivo, Arial, sans-serif" font-size="17" font-weight="700" fill="#141414">' + t + '</text>';
+    });
+  }
+  $('shv').innerHTML = s;
+  const aspText = SH.asp === 'img' ? 'matching the loaded image (' + r1(ratio) + ':1)' : SH.asp;
+  $('shSub').textContent = SH.count + ' frames, ' + aspText + ' · key: L light, M mid, D dark';
+  try { localStorage.setItem('vn-sheet', JSON.stringify(SH)); } catch (e) { /* no storage */ }
+}
+pickButtons($('shCount'), [[6, '6'], [9, '9']], SH.count, k => { SH.count = k; drawSheet(); });
+pickButtons($('shAsp'), ASPECTS, SH.asp, k => { SH.asp = k; drawSheet(); });
+$('shPrint').addEventListener('click', () => { document.body.classList.remove('print-study'); window.print(); });
+// Redraw "match image" frames when a new image is loaded
+onLoaded = () => { if (SH.asp === 'img') drawSheet(); };
+drawSheet();
+})();
+</script>
+</body>
+</html>

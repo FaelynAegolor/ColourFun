@@ -45,6 +45,16 @@ The wheel is fully keyboard accessible: Tab to a segment, arrow keys step around
 - **Colour temperature**, **value vs hue** (greyscale check of equal-value pairs) and **vibrating edges**.
 - **Studio exercises**, with a printable A4 exercise sheet in three layouts.
 
+## Value & Notan
+
+`value-notan.html` analyses the light–dark structure of a reference photo. Photos stay in the browser; with none loaded it uses a procedurally drawn still life.
+
+- **Views**: original, greyscale (CIELAB L*), 2- and 3-value notan, 5 values or any 2–9 values.
+- **Thresholds**: set with sliders or by dragging handles on a live histogram, with auto-fit and even-step presets.
+- **Squint** blur, a hue-keeping posterised colour mode, side-by-side or single view, and click/hover value readings on a 1–10 scale.
+- **Output**: download the study as PNG or print it on an A4 landscape sheet with its value key.
+- **Notan thumbnail sheet**: printable A4 with 6 or 9 frames in a chosen aspect ratio.
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
