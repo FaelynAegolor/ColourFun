@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Grid &amp; Proportion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="lesson.css">
+<style>
+/* ---------- Method cards ---------- */
+.words { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; margin: 0; padding: 0; }
+.words li { list-style: none; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+.words b { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; font-size: 15px; }
+.words svg { width: 40px; height: 26px; flex: none; }
+
+/* ---------- Tool layout (grid tool and measuring) ---------- */
+.tool { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+.view {
+  display: flex; justify-content: center; align-items: center;
+  padding: 14px; background: #e6e3db; min-height: 260px;
+  position: relative;
+}
+.view canvas { display: block; max-width: 100%; box-shadow: 0 1px 6px rgba(0, 0, 0, .25); touch-action: none; user-select: none; -webkit-user-select: none; }
+#gv { cursor: grab; }
+#gv.nopan { cursor: default; }
+#gv.dragging { cursor: grabbing; }
+#mv { cursor: crosshair; }
+.view.drop-on { outline: 3px dashed var(--accent); outline-offset: -8px; }
+.view .drop-note {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  background: rgba(251, 250, 246, .95); border: 2px dashed #1F5FBF; border-radius: 12px;
+  padding: 14px 18px; font-weight: 700; font-size: 14px; pointer-events: none; display: none;
+}
+.view.drop-on .drop-note { display: block; }
+.vfoot { border-top: 1px solid #e1ded6; padding: 12px 16px 14px; min-height: 72px; }
+.vfoot b { display: block; font-size: 14px; }
+.vfoot p { margin: 4px 0 0; font-size: 14px; color: #333; }
+
+.bgrid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.bgrid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.bgrid + .bgrid { margin-top: 6px; }
+.actions { display: grid; gap: 8px; margin-top: 12px; }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.field { display: grid; gap: 4px; font-size: 13px; min-width: 0; }
+.field input, .field select {
+  width: 100%; min-height: 44px; padding: 0 10px;
+  background: var(--panel); color: var(--ink);
+  border: 2px solid var(--border); border-radius: 9px;
+  font: inherit; font-size: 15px;
+}
+.field input:focus, .field select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent); }
+.swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+.swatches .tbtn { width: 44px; padding: 0; display: grid; place-items: center; }
+.swatches i { width: 22px; height: 22px; border-radius: 50%; border: 1px solid #8b8882; display: block; }
+.readout { font-size: 14px; }
+.readout b { font-size: 15px; }
+
+/* ---------- Measurements list ---------- */
+.mlist { list-style: none; margin: 0; padding: 0; }
+.mlist li { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-top: 1px solid var(--border); font-size: 13.5px; }
+.mlist li:first-child { border-top: 0; }
+.mlist .mtxt { flex: 1; min-width: 0; }
+.mlist .mtxt b { display: block; font-size: 13px; }
+.mnum { width: 26px; height: 26px; border-radius: 50%; flex: none; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 12px; }
+.mini {
+  min-height: 44px; min-width: 44px; padding: 0 10px; border-radius: 9px;
+  border: 2px solid var(--border); background: var(--panel); color: var(--ink);
+  font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; flex: none;
+}
+.mini:hover { border-color: var(--ink); }
+.empty { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+
+/* ---------- Enlargement calculator ---------- */
+.calc { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 20px; align-items: start; }
+.calc svg { display: block; width: 100%; height: auto; }
+#ev .lbl { font-size: 14px; }
+.results { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; padding: 14px 16px 16px; border-top: 1px solid #e1ded6; }
+.results div { background: #f0ede6; border-radius: 10px; padding: 8px 10px; }
+.results b { display: block; font-size: 20px; font-weight: 800; }
+.results span { font-size: 12px; color: #444; }
+.cfoot { padding: 0 16px 14px; font-size: 13.5px; color: #333; margin: 0; }
+
+/* ---------- Printout (hidden on screen) ---------- */
+#printArea { display: none; }
+.pp { position: relative; overflow: hidden; background: #fff; color: #141414; font-family: var(--font); }
+.pp .ph { display: flex; justify-content: space-between; align-items: flex-end; gap: 10mm; border-bottom: .5mm solid #141414; padding-bottom: 2mm; margin-bottom: 4mm; }
+.pp h3 { margin: 0; font-size: 15pt; letter-spacing: .12em; font-weight: 800; }
+.pp .who { font-size: 8pt; font-weight: 700; letter-spacing: .06em; white-space: nowrap; }
+.pp .who i { display: inline-block; width: 38mm; border-bottom: .3mm solid #141414; margin: 0 3mm 0 1mm; }
+.pp img, .pp svg { display: block; }
+.pp ul { margin: 4mm 0 0; padding-left: 5mm; font-size: 9.5pt; line-height: 1.4; }
+.pp .cap { font-size: 9pt; margin: 2mm 0 0; }
+
+@media (max-width: 960px) {
+  .tool, .calc { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  .bgrid.four { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media print {
+  html, body { background: #fff; }
+  main > *:not(#printArea) { display: none !important; }
+  .wrap { padding: 0; margin: 0; max-width: none; }
+  #printArea { display: block; }
+  .pp { break-after: page; page-break-after: always; }
+  .pp:last-child { break-after: auto; page-break-after: auto; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+</style>
+<style id="pageRule">@page { size: A4 portrait; margin: 0; }</style>
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Colour</button>
+        <ul>
+          <li><a href="colour-schemes.html">Colour schemes</a></li>
+          <li><a href="colour-interaction.html">Colour interaction</a></li>
+          <li><a href="paint-mixing.html">Paint mixing</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Form &amp; space</button>
+        <ul>
+          <li><a href="shape-shading.html">3D shape shading</a></li>
+          <li><a href="ellipses.html">Ellipses</a></li>
+          <li><a href="perspective.html">Perspective</a></li>
+          <li><a href="atmospheric-perspective.html">Atmospheric perspective</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Reference tools</button>
+        <ul>
+          <li><a href="value-notan.html">Value &amp; notan</a></li>
+          <li><a href="grid-proportion.html" aria-current="page">Grid &amp; proportion</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Practice</button>
+        <ul>
+          <li><a href="gesture-timer.html">Gesture timer</a></li>
+          <li><a href="mark-making.html">Mark-making &amp; media</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="p2" width="4.5" height="4.5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="4.5" height="4.5" fill="#d6d3cc"/><line x1="1" y1="0" x2="1" y2="4.5" stroke="#2a2a2e" stroke-opacity=".45" stroke-width="1"/>
+    </pattern>
+  </defs>
+</svg>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>Grid &amp; proportion</h1>
+    <p>Two ways to get proportions right before you commit to tone and detail: the grid method, which transfers a reference square by square, and comparative measuring, which checks every length and angle against one unit taken from the subject itself.</p>
+    <ul class="jump">
+      <li><a href="#methods">The methods</a></li>
+      <li><a href="#guide">Step by step</a></li>
+      <li><a href="#gridTool">Grid tool</a></li>
+      <li><a href="#measure">Measuring tools</a></li>
+      <li><a href="#enlarge">Enlargement calculator</a></li>
+    </ul>
+  </div>
+
+  <!-- ---------- Methods ---------- -->
+  <section id="methods" aria-labelledby="methodsTitle">
+    <h2 class="sec-title" id="methodsTitle">The methods</h2>
+    <p class="sec-lead">The grid is a transfer technique for working from a flat reference. Measuring is an observational discipline that works from life or from a reference. Both replace guessing with comparison.</p>
+    <ul class="words">
+      <li><b><svg viewBox="0 0 40 26" aria-hidden="true"><path d="M2 2h36v22H2zM14 2v22M26 2v22M2 13h36" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Grid method</b>Rule the same number of square cells over the reference and the paper, then copy one cell at a time. Because every cell scales by the same factor, the whole image enlarges without distortion.</li>
+      <li><b><svg viewBox="0 0 40 26" aria-hidden="true"><path d="M8 2h30v23H8zM23 2v23M8 13.5h30" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 2l15 11.5M23 2L8 13.5M23 2l15 11.5M38 2L23 13.5" stroke="currentColor" stroke-width=".9" stroke-dasharray="2 1.5"/><text x="4" y="10" font-size="7" font-weight="700" fill="currentColor" text-anchor="middle">1</text><text x="15.5" y="23" font-size="7" font-weight="700" fill="currentColor" text-anchor="middle">A</text></svg>Diagonals and labels</b>Diagonals split each cell into triangles, giving extra reference lines where contours turn sharply. Lettered columns and numbered rows let you find your place again at once.</li>
+      <li><b><svg viewBox="0 0 40 26" aria-hidden="true"><rect x="3" y="4" width="14" height="18" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="23" y="4" width="14" height="18" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M0 4h40" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2"/></svg>Sight-size</b>Set the drawing beside the subject and stand where both appear the same size. Measurements then transfer at 1 : 1, and you compare drawing and subject from the same spot.</li>
+      <li><b><svg viewBox="0 0 40 26" aria-hidden="true"><ellipse cx="9" cy="5.5" rx="3" ry="4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M9 9.5v9M4 12h10M9 18l-3 7M9 18l3 7" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M24 1.5v23M21 1.5h6M21 9.5h6M21 17.5h6M21 24.5h6" stroke="#1F5FBF" stroke-width="1.4"/><text x="31" y="8" font-size="7" font-weight="700" fill="currentColor">1</text><text x="31" y="16" font-size="7" font-weight="700" fill="currentColor">2</text></svg>Comparative measuring</b>Choose one unit from the subject, such as a head height, and express every other length as a multiple of it. Proportion is about ratios, so the unit matters more than any absolute size.</li>
+      <li><b><svg viewBox="0 0 40 26" aria-hidden="true"><path d="M20 1v24" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/><path d="M1 13h38" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/><circle cx="20" cy="13" r="2.5" fill="#1F5FBF"/></svg>Plumb and level lines</b>A truly vertical (plumb) or horizontal (level) sight line shows what sits directly above, below or beside what: the pit of the neck over the standing ankle, or which shoulder is higher.</li>
+      <li><b><svg viewBox="0 0 40 26" aria-hidden="true"><path d="M6 23L32 5" stroke="currentColor" stroke-width="2"/><path d="M6 23h30" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2"/><path d="M18 23a12 12 0 0 0-2-7" fill="none" stroke="#E4252C" stroke-width="1.5"/></svg>Angles</b>Lay the pencil along an edge at arm's length, keep its tilt and bring it to the paper. Judge it against vertical or horizontal, never against the edge of the drawing board.</li>
+    </ul>
+  </section>
+
+  <!-- ---------- Step-by-step guide ---------- -->
+  <section id="guide" aria-labelledby="guideTitle">
+    <h2 class="sec-title" id="guideTitle">Step by step</h2>
+    <p class="sec-lead">Follow the grid transfer or the measuring sequence. Each step draws itself. Press <em>Next</em> to go on, or <em>Play all</em> to watch the whole sequence.</p>
+    <div class="tabs" role="tablist" aria-label="Method to follow" id="gTabs"></div>
+    <div class="guide">
+      <div class="paper gstage">
+        <svg id="gsvg" viewBox="0 0 400 260" role="img" aria-labelledby="gText">
+          <g id="gBack"></g><g id="gFill"></g><g id="gLine"></g>
+        </svg>
+      </div>
+      <div class="panel gpanel">
+        <div class="gcount" id="gCount"></div>
+        <p class="gtext" id="gText" aria-live="polite"></p>
+        <div class="dots" id="gDots" aria-label="Steps"></div>
+        <div class="gbtns">
+          <button type="button" class="btn ghost" id="gPrev">Back</button>
+          <button type="button" class="btn primary" id="gNext">Next</button>
+          <button type="button" class="btn ghost" id="gPlay">Play all</button>
+          <button type="button" class="btn ghost" id="gAgain">Replay step</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Grid tool ---------- -->
+  <section id="gridTool" aria-labelledby="gridTitle">
+    <h2 class="sec-title" id="gridTitle">Grid tool</h2>
+    <p class="sec-lead">Load a reference (it stays on this device; nothing is uploaded), choose the paper you will draw on, and set the grid. The image is cropped to the paper's proportions: drag it, or use the arrow keys, to choose the crop. Then print the gridded reference and a blank grid to rule from.</p>
+    <div class="tool">
+      <div class="paper">
+        <div class="view" id="gview">
+          <canvas id="gv" tabindex="0" role="img" aria-label="Reference image with grid. Drag or use the arrow keys to move the crop; plus and minus keys zoom."></canvas>
+          <div class="drop-note">Drop the image to load it</div>
+        </div>
+        <div class="vfoot" aria-live="polite"><b id="gTitle2"></b><p id="gInfo"></p></div>
+      </div>
+      <div class="panel" aria-label="Grid tool controls">
+        <h3 class="label">Reference image</h3>
+        <div class="actions" style="margin-top:0">
+          <button type="button" class="btn primary" id="loadBtn">Load an image…</button>
+          <input type="file" id="file" accept="image/*" hidden>
+        </div>
+        <div class="bgrid two" id="sampleBtns" role="group" aria-label="Built-in samples" style="margin-top:6px"></div>
+        <p class="hint" id="srcName"></p>
+
+        <h3 class="label" id="paperLbl">Target paper</h3>
+        <div class="bgrid four" id="paperBtns" role="group" aria-labelledby="paperLbl"></div>
+        <div class="bgrid two" id="orientBtns" role="group" aria-label="Orientation"></div>
+        <div class="fields" id="sqWrap" hidden>
+          <label class="field"><span>Side (cm)</span><input type="number" id="sqSide" min="5" max="200" step="0.5" inputmode="decimal"></label>
+        </div>
+        <div class="fields" id="customWrap" hidden>
+          <label class="field"><span>Width (cm)</span><input type="number" id="cW" min="5" max="300" step="0.5" inputmode="decimal"></label>
+          <label class="field"><span>Height (cm)</span><input type="number" id="cH" min="5" max="300" step="0.5" inputmode="decimal"></label>
+        </div>
+
+        <h3 class="label" id="fitLbl">Image on the paper</h3>
+        <div class="bgrid two" id="fitBtns" role="group" aria-labelledby="fitLbl"></div>
+        <div id="cropWrap">
+          <label class="range" style="margin-top:8px"><span>Crop zoom <output id="zoomOut"></output></span><input type="range" id="zoom" min="1" max="4" step="0.05"></label>
+          <button type="button" class="btn ghost" id="centreBtn" style="width:100%">Centre the crop</button>
+        </div>
+
+        <h3 class="label" id="gmodeLbl">Grid</h3>
+        <div class="bgrid two" id="gmodeBtns" role="group" aria-labelledby="gmodeLbl"></div>
+        <label class="range" id="acrossWrap" style="margin-top:8px"><span>Squares across <output id="acrossOut"></output></span><input type="range" id="across" min="2" max="30" step="1"></label>
+        <div class="fields" id="sizeWrap" hidden>
+          <label class="field"><span>Square size (cm)</span><input type="number" id="cell" min="0.5" max="30" step="0.5" inputmode="decimal"></label>
+        </div>
+
+        <h3 class="label">Options</h3>
+        <label class="check"><input type="checkbox" id="oDiag"> Diagonals in each cell</label>
+        <label class="check"><input type="checkbox" id="oLabels"> Letter and number the cells</label>
+        <label class="check"><input type="checkbox" id="oGrey"> Greyscale (judge values)</label>
+        <label class="check"><input type="checkbox" id="oMirror"> Mirror (fresh eyes)</label>
+        <h3 class="label" id="colLbl">Line colour</h3>
+        <div class="swatches" id="colBtns" role="group" aria-labelledby="colLbl"></div>
+        <label class="range" style="margin-top:10px"><span>Line weight <output id="weightOut"></output></span><input type="range" id="weight" min="0.5" max="5" step="0.5"></label>
+
+        <h3 class="label">Print</h3>
+        <button type="button" class="btn primary" id="printBtn" style="width:100%">Print reference + blank grid</button>
+        <p class="hint" id="printNote" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Measuring ---------- -->
+  <section id="measure" aria-labelledby="measureTitle">
+    <h2 class="sec-title" id="measureTitle">Measuring tools</h2>
+    <p class="sec-lead">The same checks you make with a pencil at arm's length, on the reference loaded above. Pick a tool, then click on the image. Every measurement is listed; remove any you no longer need.</p>
+    <div class="tool">
+      <div class="paper">
+        <div class="view" id="mview">
+          <canvas id="mv" tabindex="0" role="img" aria-label="Reference image for measuring. Keyboard: arrow keys move the cross-hair, Enter places a point, Escape cancels."></canvas>
+          <div class="drop-note">Drop the image to load it</div>
+        </div>
+        <div class="vfoot" aria-live="polite"><b id="mMsg"></b><p id="mSub"></p></div>
+      </div>
+      <div class="panel" aria-label="Measuring controls">
+        <h3 class="label" id="toolLbl">Tool</h3>
+        <div class="bgrid two" id="toolBtns" role="group" aria-labelledby="toolLbl"></div>
+        <div class="fields">
+          <label class="field" style="grid-column: 1 / -1"><span>Name of the unit (plural)</span><input type="text" id="unitName" maxlength="20" autocomplete="off"></label>
+        </div>
+        <h3 class="label">Measurements</h3>
+        <ol class="mlist" id="mList" aria-live="polite"></ol>
+        <p class="empty" id="mEmpty">None yet.</p>
+        <div class="actions">
+          <button type="button" class="btn ghost" id="mUndo">Undo last</button>
+          <button type="button" class="btn ghost" id="mClear">Clear all</button>
+        </div>
+        <p class="hint">Keyboard: focus the image, move the cross-hair with the arrow keys (Shift for bigger steps), press Enter to place a point and Escape to cancel.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Enlargement calculator ---------- -->
+  <section id="enlarge" aria-labelledby="enlargeTitle">
+    <h2 class="sec-title" id="enlargeTitle">Enlargement calculator</h2>
+    <p class="sec-lead">Scaling multiplies every length by the same factor <em>k</em>; area grows by <em>k</em>². A point measured from the top-left corner of the original lands at <em>k</em> times those distances on the target. The diagram overlays both at the same corner: the shared diagonal is why a proportional enlargement never distorts.</p>
+    <div class="calc">
+      <div class="panel" aria-label="Calculator inputs">
+        <h3 class="label" id="unitLbl">Units</h3>
+        <div class="bgrid" id="eUnitBtns" role="group" aria-labelledby="unitLbl"></div>
+        <h3 class="label">Original</h3>
+        <div class="fields" style="margin-top:0">
+          <label class="field"><span>Width</span><input type="number" id="eOW" min="0" step="any" inputmode="decimal"></label>
+          <label class="field"><span>Height</span><input type="number" id="eOH" min="0" step="any" inputmode="decimal"></label>
+        </div>
+        <h3 class="label" id="eModeLbl">Target set by</h3>
+        <div class="bgrid four" id="eModeBtns" role="group" aria-labelledby="eModeLbl"></div>
+        <div class="fields" id="eTvWrap">
+          <label class="field" style="grid-column: 1 / -1"><span id="eTvLbl">Target width</span><input type="number" id="eTV" min="0" step="any" inputmode="decimal"></label>
+        </div>
+        <div class="fields" id="ePaperWrap" hidden>
+          <label class="field"><span>Paper</span><select id="ePaper"><option>A5</option><option>A4</option><option>A3</option><option>A2</option><option>A1</option></select></label>
+          <label class="field"><span id="eMarLbl">Margin</span><input type="number" id="eMar" min="0" step="any" inputmode="decimal"></label>
+        </div>
+        <h3 class="label">Point on the original (from top-left)</h3>
+        <div class="fields" style="margin-top:0">
+          <label class="field"><span>Across</span><input type="number" id="ePX" min="0" step="any" inputmode="decimal"></label>
+          <label class="field"><span>Down</span><input type="number" id="ePY" min="0" step="any" inputmode="decimal"></label>
+        </div>
+        <h3 class="label">Grid on the original</h3>
+        <div class="fields" style="margin-top:0">
+          <label class="field" style="grid-column: 1 / -1"><span>Square size</span><input type="number" id="eGS" min="0" step="any" inputmode="decimal"></label>
+        </div>
+      </div>
+      <div class="paper">
+        <svg id="ev" viewBox="0 0 640 360" role="img" aria-label="Diagram of the original and the enlargement overlaid at the top-left corner"></svg>
+        <div class="results" id="eRes" aria-live="polite"></div>
+        <p class="cfoot" id="eNote"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Printout, built when printing ---------- -->
+  <div id="printArea" aria-hidden="true"></div>
+</main>
+
+<script src="site.js"></script>
+<script src="stepper.js"></script>
+<script>
+(function () {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const f1 = n => Math.round(n * 10) / 10;
+const pt = p => f1(p.x) + ' ' + f1(p.y);
+// Tidy number: fixed decimals with trailing zeros dropped
+const fmt = (n, d = 2) => (+n.toFixed(d)).toString();
+const PAPERS = { A5: [14.8, 21], A4: [21, 29.7], A3: [29.7, 42], A2: [42, 59.4], A1: [59.4, 84.1] };
+const PAL = ['#E4252C', '#1F5FBF', '#2E8B57', '#7B3F99', '#E07B00', '#0E8A8A'];
+
+function pickButtons(el, items, current, onPick) {
+  el.innerHTML = '';
+  items.forEach(([key, label, html]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tbtn'; b.dataset.k = key;
+    if (html) { b.innerHTML = html; b.setAttribute('aria-label', label); b.title = label; } else b.textContent = label;
+    b.setAttribute('aria-pressed', String(key === current));
+    b.addEventListener('click', () => {
+      el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      onPick(key);
+    });
+    el.appendChild(b);
+  });
+}
+const setPressed = (el, key) => el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.k === key)));
+
+/* ================= Figure landmarks =================
+   A standing figure about 7.5 heads tall with its weight on the viewer's right leg (contrapposto).
+   Coordinates are in the step-by-step guide's units (head = 29, top of head at y = 18);
+   the canvas sample reuses them at a larger scale. */
+const FIG = {
+  head: { x: 200, y: 32.5, rx: 10, ry: 14.5 },
+  neck: [{ x: 200, y: 46 }, { x: 200, y: 56 }],
+  torso: [{ x: 176, y: 56 }, { x: 224, y: 59 }, { x: 214, y: 100 }, { x: 221, y: 121 }, { x: 179, y: 125 }, { x: 186, y: 100 }],
+  armL: [{ x: 177, y: 58 }, { x: 171, y: 98 }, { x: 168, y: 132 }],
+  armR: [{ x: 223, y: 61 }, { x: 234, y: 98 }, { x: 238, y: 128 }],
+  legL: [{ x: 189, y: 124 }, { x: 186, y: 180 }, { x: 180, y: 228 }],
+  legR: [{ x: 211, y: 121 }, { x: 208, y: 178 }, { x: 201, y: 229 }],
+  footL: [{ x: 180, y: 228 }, { x: 170, y: 234 }],
+  footR: [{ x: 201, y: 229 }, { x: 211, y: 235 }],
+};
+
+/* ================= Built-in samples (drawn on canvas) ================= */
+
+function limb(ctx, a, b, r1, r2, c1, c2) {
+  const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1;
+  const nx = -dy / L, ny = dx / L;
+  const lightSide = { x: a.x + (nx < 0 ? nx : -nx) * r1, y: a.y + (nx < 0 ? ny : -ny) * r1 };
+  const darkSide = { x: a.x - (nx < 0 ? nx : -nx) * r1, y: a.y - (nx < 0 ? ny : -ny) * r1 };
+  const gr = ctx.createLinearGradient(lightSide.x, lightSide.y, darkSide.x, darkSide.y);
+  gr.addColorStop(0, c1); gr.addColorStop(.35, c1); gr.addColorStop(1, c2);
+  ctx.fillStyle = gr;
+  ctx.beginPath();
+  ctx.moveTo(a.x + nx * r1, a.y + ny * r1);
+  ctx.lineTo(b.x + nx * r2, b.y + ny * r2);
+  ctx.arc(b.x, b.y, r2, Math.atan2(ny, nx), Math.atan2(-ny, -nx));
+  ctx.lineTo(a.x - nx * r1, a.y - ny * r1);
+  ctx.arc(a.x, a.y, r1, Math.atan2(-ny, -nx), Math.atan2(ny, nx));
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(60,42,28,.3)'; ctx.lineWidth = 2; ctx.stroke();
+}
+
+function sampleFigure() {
+  const c = document.createElement('canvas');
+  c.width = 1000; c.height = 1500;
+  const ctx = c.getContext('2d');
+  const bg = ctx.createLinearGradient(0, 0, 0, 1500);
+  bg.addColorStop(0, '#b3ada2'); bg.addColorStop(.82, '#8f887b'); bg.addColorStop(.82, '#6f6759'); bg.addColorStop(1, '#5c5548');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, 1000, 1500);
+  const glow = ctx.createRadialGradient(260, 250, 50, 260, 250, 900);
+  glow.addColorStop(0, 'rgba(255,250,240,.3)'); glow.addColorStop(1, 'rgba(255,250,240,0)');
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, 1000, 1500);
+  const K = 5.8, P = p => ({ x: 500 + (p.x - 200) * K, y: 110 + (p.y - 18) * K });
+  const LIGHT = '#e9d9c6', DARK = '#8f7a66';
+  // Floor shadow, cast to the right
+  const sh = ctx.createRadialGradient(640, 1385, 20, 640, 1385, 260);
+  sh.addColorStop(0, 'rgba(40,30,20,.45)'); sh.addColorStop(1, 'rgba(40,30,20,0)');
+  ctx.save(); ctx.translate(640, 1385); ctx.scale(1, .16); ctx.translate(-640, -1385);
+  ctx.fillStyle = sh; ctx.beginPath(); ctx.arc(640, 1385, 260, 0, 7); ctx.fill(); ctx.restore();
+  const seg = (arr, r1, r2, r3) => { limb(ctx, P(arr[0]), P(arr[1]), r1 * K, r2 * K, LIGHT, DARK); limb(ctx, P(arr[1]), P(arr[2]), r2 * K, r3 * K, LIGHT, DARK); };
+  seg(FIG.legL, 6, 4.4, 2.8); seg(FIG.legR, 6.2, 4.5, 2.9);
+  limb(ctx, P(FIG.footL[0]), P(FIG.footL[1]), 2.8 * K, 2 * K, LIGHT, DARK);
+  limb(ctx, P(FIG.footR[0]), P(FIG.footR[1]), 2.9 * K, 2 * K, LIGHT, DARK);
+  // Torso: rib cage and pelvis as tilted ovals joined at the waist (contrapposto), light from the upper left
+  const tg = ctx.createLinearGradient(P({ x: 176, y: 0 }).x, 0, P({ x: 226, y: 0 }).x, 0);
+  tg.addColorStop(0, LIGHT); tg.addColorStop(.4, '#dcc8b2'); tg.addColorStop(1, DARK);
+  ctx.fillStyle = tg;
+  const oval = (x, y, rx, ry, rot) => { const c = P({ x, y }); ctx.beginPath(); ctx.ellipse(c.x, c.y, rx * K, ry * K, rot, 0, 7); ctx.fill(); ctx.strokeStyle = 'rgba(60,42,28,.3)'; ctx.lineWidth = 2; ctx.stroke(); };
+  limb(ctx, P({ x: 200, y: 90 }), P({ x: 200, y: 110 }), 12 * K, 14 * K, LIGHT, DARK);
+  ctx.fillStyle = tg; oval(200, 79, 18, 20, .06);
+  ctx.fillStyle = tg; oval(200, 117, 18.5, 10.5, -.08);
+  ctx.fillStyle = tg;
+  [FIG.armL[0], FIG.armR[0]].forEach(s => oval(s.x, s.y + 2, 5.5, 5.5, 0));
+  seg(FIG.armL, 4.2, 3.3, 2.4); seg(FIG.armR, 4.2, 3.3, 2.4);
+  [FIG.armL[2], FIG.armR[2]].forEach(w => { const p = P(w); ctx.fillStyle = '#c9b39b'; ctx.beginPath(); ctx.ellipse(p.x, p.y + 20, 16, 26, 0, 0, 7); ctx.fill(); });
+  limb(ctx, P(FIG.neck[0]), P(FIG.neck[1]), 4 * K, 4.4 * K, LIGHT, DARK);
+  const h = FIG.head, hc = P(h);
+  const hg = ctx.createRadialGradient(hc.x - 25, hc.y - 30, 10, hc.x, hc.y, h.ry * K * 1.1);
+  hg.addColorStop(0, '#f1e3d2'); hg.addColorStop(.6, '#d9c3ab'); hg.addColorStop(1, DARK);
+  ctx.fillStyle = hg; ctx.beginPath(); ctx.ellipse(hc.x, hc.y, h.rx * K, h.ry * K, 0, 0, 7); ctx.fill();
+  return c;
+}
+
+function sampleStill() {
+  const c = document.createElement('canvas');
+  c.width = 1600; c.height = 1200;
+  const ctx = c.getContext('2d');
+  // Wall and table
+  const wall = ctx.createLinearGradient(0, 0, 1600, 800);
+  wall.addColorStop(0, '#dcd6ca'); wall.addColorStop(1, '#a9a193');
+  ctx.fillStyle = wall; ctx.fillRect(0, 0, 1600, 780);
+  const tab = ctx.createLinearGradient(0, 780, 0, 1200);
+  tab.addColorStop(0, '#9c8466'); tab.addColorStop(1, '#6f5b44');
+  ctx.fillStyle = tab; ctx.fillRect(0, 780, 1600, 420);
+  ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(0, 780, 1600, 6);
+  const shadow = (x, y, rx, ry, a) => {
+    const g = ctx.createRadialGradient(x, y, 5, x, y, rx);
+    g.addColorStop(0, 'rgba(30,20,10,' + a + ')'); g.addColorStop(1, 'rgba(30,20,10,0)');
+    ctx.save(); ctx.translate(x, y); ctx.scale(1, ry / rx); ctx.translate(-x, -y);
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, rx, 0, 7); ctx.fill(); ctx.restore();
+  };
+  // Box (left), seen at an angle
+  shadow(560, 905, 300, 70, .5);
+  const poly = (pts, fill) => { ctx.fillStyle = fill; ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.fill(); };
+  poly([[210, 600], [430, 640], [430, 930], [210, 880]], '#d8cdb8');
+  poly([[430, 640], [620, 590], [620, 870], [430, 930]], '#9d917c');
+  poly([[210, 600], [400, 555], [620, 590], [430, 640]], '#efe8da');
+  // Bottle (centre right)
+  shadow(1030, 915, 250, 55, .5);
+  const bx = 890, bw = 190, top = 350, shoulder = 520, base = 900;
+  const bg = ctx.createLinearGradient(bx - bw / 2, 0, bx + bw / 2, 0);
+  bg.addColorStop(0, '#3f6b4e'); bg.addColorStop(.25, '#8fb49a'); bg.addColorStop(.4, '#4f7d5f'); bg.addColorStop(1, '#1d3527');
+  ctx.fillStyle = bg; ctx.beginPath();
+  ctx.moveTo(bx - 28, top); ctx.lineTo(bx + 28, top); ctx.lineTo(bx + 30, shoulder - 90);
+  ctx.bezierCurveTo(bx + 34, shoulder - 30, bx + bw / 2, shoulder - 30, bx + bw / 2, shoulder + 40);
+  ctx.lineTo(bx + bw / 2, base - 10); ctx.quadraticCurveTo(bx + bw / 2, base, bx + bw / 2 - 12, base);
+  ctx.lineTo(bx - bw / 2 + 12, base); ctx.quadraticCurveTo(bx - bw / 2, base, bx - bw / 2, base - 10);
+  ctx.lineTo(bx - bw / 2, shoulder + 40); ctx.bezierCurveTo(bx - bw / 2, shoulder - 30, bx - 34, shoulder - 30, bx - 30, shoulder - 90);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(bx - 55, shoulder + 30, 10, 300);
+  ctx.fillStyle = '#6d5a3e'; ctx.fillRect(bx - 30, top - 40, 60, 44);
+  // Apple (front)
+  shadow(760, 1025, 200, 42, .55);
+  const ax = 700, ay = 925, ar = 105;
+  const ag = ctx.createRadialGradient(ax - 40, ay - 45, 8, ax, ay, ar * 1.05);
+  ag.addColorStop(0, '#f4b39a'); ag.addColorStop(.25, '#c9452f'); ag.addColorStop(.8, '#7a1f16'); ag.addColorStop(1, '#4e140f');
+  ctx.fillStyle = ag; ctx.beginPath(); ctx.ellipse(ax, ay, ar * 1.06, ar, 0, 0, 7); ctx.fill();
+  ctx.strokeStyle = '#4a3320'; ctx.lineWidth = 9; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(ax + 4, ay - ar + 14); ctx.quadraticCurveTo(ax + 8, ay - ar - 18, ax + 26, ay - ar - 30); ctx.stroke();
+  // Cloth fold (right)
+  const cg = ctx.createLinearGradient(1150, 850, 1600, 1200);
+  cg.addColorStop(0, '#ece7dc'); cg.addColorStop(.5, '#c9c2b4'); cg.addColorStop(1, '#f3efe6');
+  ctx.fillStyle = cg; ctx.beginPath();
+  ctx.moveTo(1180, 1200); ctx.bezierCurveTo(1230, 1050, 1300, 960, 1420, 930); ctx.bezierCurveTo(1500, 915, 1560, 950, 1600, 940);
+  ctx.lineTo(1600, 1200); ctx.closePath(); ctx.fill();
+  return c;
+}
+
+const SAMPLES = { figure: ['Sample: standing figure', sampleFigure], still: ['Sample: still life', sampleStill] };
+
+/* ================= State ================= */
+
+const G = {
+  paper: 'A4', orient: 'port', sq: 30, cw: 40, ch: 50,
+  fit: 'fill', zoom: 1, cx: .5, cy: .5,
+  gmode: 'across', across: 6, size: 3,
+  diag: false, labels: true, grey: false, mirror: false, col: '#141414', weight: 2,
+};
+const SRC = { work: null, grey: null, name: '' };
+const PREF_KEYS = ['paper', 'orient', 'sq', 'cw', 'ch', 'fit', 'gmode', 'across', 'size', 'diag', 'labels', 'col', 'weight'];
+try {
+  const saved = JSON.parse(localStorage.getItem('gridProportion') || '{}');
+  PREF_KEYS.forEach(k => { if (saved[k] !== undefined && typeof saved[k] === typeof G[k]) G[k] = saved[k]; });
+} catch (e) { /* storage unavailable */ }
+function save() {
+  try {
+    const o = {}; PREF_KEYS.forEach(k => { o[k] = G[k]; });
+    o.unitName = M.unitName; o.E = E;
+    localStorage.setItem('gridProportion', JSON.stringify(o));
+  } catch (e) { /* ignore */ }
+}
+
+function paperCm() {
+  if (G.paper === 'sq') return { w: G.sq, h: G.sq, name: 'Square, ' + fmt(G.sq) + ' × ' + fmt(G.sq) + ' cm' };
+  if (G.paper === 'custom') return { w: G.cw, h: G.ch, name: 'Custom, ' + fmt(G.cw) + ' × ' + fmt(G.ch) + ' cm' };
+  let [w, h] = PAPERS[G.paper];
+  if (G.orient === 'land') [w, h] = [h, w];
+  return { w, h, name: G.paper + (G.orient === 'land' ? ' landscape' : ' portrait') + ', ' + fmt(w) + ' × ' + fmt(h) + ' cm' };
+}
+
+// Square cells measured from the top-left corner; the last column or row may be a part-cell
+function gridSpec(P) {
+  const cell = G.gmode === 'across' ? P.w / G.across : G.size;
+  const cols = P.w / cell, rows = P.h / cell;
+  return { cell, cols, rows, nc: Math.ceil(cols - 1e-6), nr: Math.ceil(rows - 1e-6) };
+}
+const colName = i => (i >= 26 ? colName(Math.floor(i / 26) - 1) : '') + String.fromCharCode(65 + (i % 26));
+
+function greySrc() {
+  if (!SRC.grey) {
+    const w = SRC.work, c = document.createElement('canvas');
+    c.width = w.width; c.height = w.height;
+    const x = c.getContext('2d');
+    x.drawImage(w, 0, 0);
+    const d = x.getImageData(0, 0, c.width, c.height), p = d.data;
+    for (let i = 0; i < p.length; i += 4) {
+      const y = .2126 * p[i] + .7152 * p[i + 1] + .0722 * p[i + 2];
+      p[i] = p[i + 1] = p[i + 2] = y;
+    }
+    x.putImageData(d, 0, 0);
+    SRC.grey = c;
+  }
+  return SRC.grey;
+}
+const curSrc = () => G.grey ? greySrc() : SRC.work;
+
+// The part of the source image shown on the paper when cropping to fill
+function cropRect(P) {
+  const sw = SRC.work.width, sh = SRC.work.height, A = P.w / P.h;
+  let bw, bh;
+  if (sw / sh > A) { bh = sh; bw = sh * A; } else { bw = sw; bh = sw / A; }
+  const w = bw / G.zoom, h = bh / G.zoom;
+  const x = clamp(G.cx * sw - w / 2, 0, sw - w), y = clamp(G.cy * sh - h / 2, 0, sh - h);
+  G.cx = (x + w / 2) / sw; G.cy = (y + h / 2) / sh;
+  return { x, y, w, h };
+}
+
+/* ================= Drawing the gridded reference ================= */
+
+// k scales line weights and label sizes to the output resolution
+function drawReference(ctx, W, H, P, k) {
+  const src = curSrc();
+  ctx.fillStyle = '#fbfaf6'; ctx.fillRect(0, 0, W, H);
+  ctx.save();
+  if (G.mirror) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  if (G.fit === 'fill') {
+    const r = cropRect(P);
+    ctx.drawImage(src, r.x, r.y, r.w, r.h, 0, 0, W, H);
+  } else {
+    const s = Math.min(W / src.width, H / src.height), dw = src.width * s, dh = src.height * s;
+    ctx.drawImage(src, (W - dw) / 2, (H - dh) / 2, dw, dh);
+  }
+  ctx.restore();
+  drawGrid(ctx, W, H, P, k);
+}
+
+function drawGrid(ctx, W, H, P, k) {
+  const g = gridSpec(P), c = W / P.w * g.cell;
+  ctx.save();
+  ctx.strokeStyle = G.col;
+  if (G.diag) {
+    ctx.globalAlpha = .6; ctx.lineWidth = Math.max(.6, G.weight * .5 * k);
+    ctx.setLineDash([4 * k, 3 * k]);
+    ctx.beginPath();
+    for (let i = 0; i < g.nc; i++) for (let j = 0; j < g.nr; j++) {
+      const x = i * c, y = j * c;
+      ctx.moveTo(x, y); ctx.lineTo(x + c, y + c); ctx.moveTo(x + c, y); ctx.lineTo(x, y + c);
+    }
+    ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+  }
+  ctx.lineWidth = Math.max(.8, G.weight * k);
+  ctx.beginPath();
+  for (let i = 1; i < g.nc; i++) { const x = Math.round(i * c) + .5; ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+  for (let j = 1; j < g.nr; j++) { const y = Math.round(j * c) + .5; ctx.moveTo(0, y); ctx.lineTo(W, y); }
+  ctx.stroke();
+  ctx.lineWidth = Math.max(1, G.weight * 1.5 * k);
+  ctx.strokeRect(ctx.lineWidth / 2, ctx.lineWidth / 2, W - ctx.lineWidth, H - ctx.lineWidth);
+  if (G.labels) {
+    const fs = clamp(c * .26, 9 * k, 15 * k);
+    ctx.font = '700 ' + fs + 'px Archivo, Helvetica, Arial, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const chip = (t, x, y) => {
+      const w = ctx.measureText(t).width + fs * .7, h = fs * 1.35;
+      ctx.fillStyle = 'rgba(251,250,246,.88)'; ctx.fillRect(x - w / 2, y - h / 2, w, h);
+      ctx.fillStyle = '#141414'; ctx.fillText(t, x, y + fs * .05);
+    };
+    const pad = fs * 1.1;
+    for (let i = 0; i < g.nc; i++) if ((i + .5) * c < W) chip(colName(i), Math.min(i * c + c / 2, W - pad), pad);
+    for (let j = c > fs * 4 ? 0 : 1; j < g.nr; j++) if ((j + .3) * c < H) chip(String(j + 1), pad, Math.min(j * c + c / 2, H - pad));
+  }
+  ctx.restore();
+}
+
+/* ================= Grid tool view ================= */
+
+const gv = $('gv'), gctx = gv.getContext('2d');
+let gCss = { w: 0, h: 0 };
+
+function renderGrid() {
+  if (!SRC.work) return;
+  const P = paperCm(), A = P.w / P.h;
+  const avail = Math.max(120, $('gview').clientWidth - 28);
+  const maxH = Math.min(760, Math.max(320, window.innerHeight * .75));
+  const cssW = Math.min(avail, maxH * A), cssH = cssW / A;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  gv.style.width = cssW + 'px'; gv.style.height = cssH + 'px';
+  gv.width = Math.round(cssW * dpr); gv.height = Math.round(cssH * dpr);
+  gCss = { w: cssW, h: cssH };
+  drawReference(gctx, gv.width, gv.height, P, dpr * clamp(cssW / 600, .7, 1.4));
+  gv.classList.toggle('nopan', G.fit !== 'fill');
+
+  const g = gridSpec(P);
+  $('gTitle2').textContent = P.name;
+  const whole = n => Math.abs(n - Math.round(n)) < 1e-6;
+  let t = fmt(g.cols, 2) + ' squares across × ' + fmt(g.rows, 2) + ' down. Each square is ' + fmt(g.cell, 2) + ' cm (' + fmt(g.cell * 10, 1) + ' mm).';
+  const parts = [];
+  if (!whole(g.cols)) parts.push('the right-hand column is ' + fmt((g.cols % 1) * g.cell, 2) + ' cm wide');
+  if (!whole(g.rows)) parts.push('the bottom row is ' + fmt((g.rows % 1) * g.cell, 2) + ' cm deep');
+  if (parts.length) t += ' Part-cells: ' + parts.join(' and ') + '.';
+  $('gInfo').textContent = t + (G.fit === 'fill' ? ' Drag the image to choose the crop.' : ' The whole image is fitted, leaving plain paper at the sides.');
+  $('printNote').textContent = printPlan().summary;
+}
+
+// Pan the crop by dragging or with the keyboard
+let gDrag = null;
+function panBy(dxCss, dyCss) {
+  const P = paperCm(), r = cropRect(P), s = r.w / gCss.w;
+  G.cx -= (G.mirror ? -dxCss : dxCss) * s / SRC.work.width;
+  G.cy -= dyCss * s / SRC.work.height;
+  renderGrid();
+}
+gv.addEventListener('pointerdown', e => {
+  if (G.fit !== 'fill') return;
+  gDrag = { x: e.clientX, y: e.clientY };
+  gv.setPointerCapture(e.pointerId); gv.classList.add('dragging'); e.preventDefault();
+});
+gv.addEventListener('pointermove', e => {
+  if (!gDrag) return;
+  panBy(e.clientX - gDrag.x, e.clientY - gDrag.y);
+  gDrag = { x: e.clientX, y: e.clientY };
+});
+const gEnd = () => { gDrag = null; gv.classList.remove('dragging'); };
+gv.addEventListener('pointerup', gEnd); gv.addEventListener('pointercancel', gEnd);
+gv.addEventListener('keydown', e => {
+  if (G.fit !== 'fill') return;
+  const step = (e.shiftKey ? .12 : .03) * gCss.w;
+  const k = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] }[e.key];
+  if (k) { e.preventDefault(); panBy(k[0], k[1]); return; }
+  if (e.key === '+' || e.key === '=') { e.preventDefault(); setZoom(G.zoom + .1); }
+  if (e.key === '-' || e.key === '_') { e.preventDefault(); setZoom(G.zoom - .1); }
+});
+function setZoom(z) { G.zoom = clamp(z, 1, 4); $('zoom').value = G.zoom; $('zoomOut').textContent = fmt(G.zoom, 2) + '×'; renderGrid(); }
+
+/* ---------- Controls ---------- */
+function syncPaperUI() {
+  $('orientBtns').hidden = G.paper === 'sq' || G.paper === 'custom';
+  $('sqWrap').hidden = G.paper !== 'sq';
+  $('customWrap').hidden = G.paper !== 'custom';
+  $('cropWrap').hidden = G.fit !== 'fill';
+  $('acrossWrap').hidden = G.gmode !== 'across';
+  $('sizeWrap').hidden = G.gmode !== 'size';
+}
+function changed() { syncPaperUI(); renderGrid(); save(); }
+
+pickButtons($('paperBtns'), [['A5', 'A5'], ['A4', 'A4'], ['A3', 'A3'], ['A2', 'A2'], ['A1', 'A1'], ['sq', 'Square'], ['custom', 'Custom']], G.paper, k => { G.paper = k; changed(); });
+pickButtons($('orientBtns'), [['port', 'Portrait'], ['land', 'Landscape']], G.orient, k => { G.orient = k; changed(); });
+pickButtons($('fitBtns'), [['fill', 'Crop to fill'], ['fit', 'Fit whole image']], G.fit, k => { G.fit = k; changed(); });
+pickButtons($('gmodeBtns'), [['across', 'Squares across'], ['size', 'Square size']], G.gmode, k => {
+  // Carry the current cell size across so the grid doesn't jump
+  const P = paperCm(), g = gridSpec(P);
+  if (k === 'size') { G.size = Math.max(.5, Math.round(g.cell * 2) / 2); $('cell').value = G.size; }
+  else { G.across = clamp(Math.round(P.w / G.size), 2, 30); $('across').value = G.across; $('acrossOut').textContent = G.across; }
+  G.gmode = k; changed();
+});
+const COLS = [['#141414', 'Black'], ['#ffffff', 'White'], ['#E4252C', 'Red'], ['#1F5FBF', 'Blue'], ['#FFE600', 'Yellow'], ['#2E8B57', 'Green']];
+pickButtons($('colBtns'), COLS.map(([c, n]) => [c, n + ' lines', '<i style="background:' + c + '"></i>']), G.col, k => { G.col = k; changed(); });
+
+function numInput(id, key, lo, hi) {
+  const el = $(id);
+  el.value = G[key];
+  el.addEventListener('input', () => {
+    const v = parseFloat(el.value);
+    if (!isFinite(v) || v < lo || v > hi) return;
+    G[key] = v; changed();
+  });
+  el.addEventListener('change', () => { el.value = G[key]; });
+}
+numInput('sqSide', 'sq', 5, 200); numInput('cW', 'cw', 5, 300); numInput('cH', 'ch', 5, 300); numInput('cell', 'size', .5, 30);
+$('across').value = G.across; $('acrossOut').textContent = G.across;
+$('across').addEventListener('input', e => { G.across = +e.target.value; $('acrossOut').textContent = G.across; changed(); });
+$('weight').value = G.weight; $('weightOut').textContent = G.weight;
+$('weight').addEventListener('input', e => { G.weight = +e.target.value; $('weightOut').textContent = G.weight; changed(); });
+$('zoom').value = G.zoom; $('zoomOut').textContent = '1×';
+$('zoom').addEventListener('input', e => setZoom(+e.target.value));
+$('centreBtn').addEventListener('click', () => { G.cx = G.cy = .5; setZoom(1); });
+[['oDiag', 'diag'], ['oLabels', 'labels'], ['oGrey', 'grey'], ['oMirror', 'mirror']].forEach(([id, key]) => {
+  $(id).checked = G[key];
+  $(id).addEventListener('change', () => { G[key] = $(id).checked; changed(); if (key === 'grey') renderMeasure(); });
+});
+
+/* ---------- Loading images ---------- */
+function setSource(canvas, name) {
+  SRC.work = canvas; SRC.grey = null; SRC.name = name;
+  G.zoom = 1; G.cx = G.cy = .5; $('zoom').value = 1; $('zoomOut').textContent = '1×';
+  $('srcName').textContent = name;
+  M.items = []; M.pending = null; M.unit = null; M.kb = null;
+  renderGrid(); renderMeasure(); renderList();
+}
+function loadFile(f) {
+  if (!f || !/^image\//.test(f.type)) { $('srcName').textContent = 'That file is not an image this browser can read.'; return; }
+  const url = URL.createObjectURL(f), img = new Image();
+  img.onload = () => {
+    // Work from a copy no larger than 2400 px on the long side
+    const s = Math.min(1, 2400 / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(img.naturalWidth * s)); c.height = Math.max(1, Math.round(img.naturalHeight * s));
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(url);
+    setPressed($('sampleBtns'), '');
+    setSource(c, 'Your image: ' + f.name + ' (' + img.naturalWidth + ' × ' + img.naturalHeight + ' px, kept on this device)');
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); $('srcName').textContent = 'Sorry, that image could not be opened.'; };
+  img.src = url;
+}
+$('loadBtn').addEventListener('click', () => $('file').click());
+$('file').addEventListener('change', e => { loadFile(e.target.files[0]); e.target.value = ''; });
+['gview', 'mview'].forEach(id => {
+  const el = $(id);
+  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drop-on'); });
+  el.addEventListener('dragleave', e => { if (!el.contains(e.relatedTarget)) el.classList.remove('drop-on'); });
+  el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('drop-on'); loadFile(e.dataTransfer.files[0]); });
+});
+pickButtons($('sampleBtns'), Object.entries(SAMPLES).map(([k, v]) => [k, v[0].replace('Sample: ', '').replace(/^./, c => c.toUpperCase())]), 'figure', k => setSource(SAMPLES[k][1](), SAMPLES[k][0] + ' (drawn in the browser)'));
+
+/* ================= Printing ================= */
+
+// Decide the print sheet: true size on A4 or A3 when the target paper fits, otherwise scaled onto A4
+function printPlan() {
+  const P = paperCm(), g = gridSpec(P);
+  const pw = P.w * 10, ph = P.h * 10, port = ph >= pw;
+  const SHEETS = { A4: [210, 297], A3: [297, 420] };
+  const dims = s => port ? SHEETS[s] : [SHEETS[s][1], SHEETS[s][0]];
+  const fits = s => pw <= dims(s)[0] + .01 && ph <= dims(s)[1] + .01;
+  const sheet = fits('A4') ? 'A4' : fits('A3') ? 'A3' : 'A4';
+  const trueSize = fits(sheet);
+  const [SW, SH] = dims(sheet);
+  const scale = trueSize ? 1 : Math.min((SW - 24) / pw, (SH - 72) / ph);
+  const cellTxt = fmt(g.cell, 2) + ' cm (' + fmt(g.cell * 10, 1) + ' mm)';
+  const summary = trueSize
+    ? 'Prints on ' + sheet + ': page 1 is the gridded reference, page 2 a blank grid at true size (' + cellTxt + ' squares).' + (sheet === 'A3' ? ' Choose A3 paper in the print dialogue.' : '')
+    : 'Your paper is larger than A3, so the blank grid prints scaled to ' + Math.round(scale * 100) + '% on A4. Rule ' + cellTxt + ' squares on the real sheet yourself.';
+  return { P, g, pw, ph, port, sheet, trueSize, SW, SH, scale, summary, cellTxt };
+}
+
+function gridSVG(pl, s) {
+  const { pw, ph, g } = pl, c = g.cell * 10;
+  const col = /^#(ffffff|FFE600)$/i.test(G.col) ? '#555' : G.col;
+  const lw = (.12 + G.weight * .07) / s;
+  let d = '';
+  for (let i = 1; i < g.nc; i++) d += 'M' + f1(i * c * 10) / 10 + ' 0V' + ph;
+  for (let j = 1; j < g.nr; j++) d += 'M0 ' + f1(j * c * 10) / 10 + 'H' + pw;
+  let s2 = '<svg xmlns="http://www.w3.org/2000/svg" width="' + (pw * s) + 'mm" height="' + (ph * s) + 'mm" viewBox="0 0 ' + pw + ' ' + ph + '">';
+  s2 += '<rect width="' + pw + '" height="' + ph + '" fill="#fff"/>';
+  if (G.diag) {
+    let dd = '';
+    for (let i = 0; i < g.nc; i++) for (let j = 0; j < g.nr; j++) {
+      const x = i * c, y = j * c;
+      dd += 'M' + fmt(x) + ' ' + fmt(y) + 'L' + fmt(x + c) + ' ' + fmt(y + c) + 'M' + fmt(x + c) + ' ' + fmt(y) + 'L' + fmt(x) + ' ' + fmt(y + c);
+    }
+    s2 += '<svg width="' + pw + '" height="' + ph + '" overflow="hidden"><path d="' + dd + '" stroke="#999" stroke-width="' + fmt(.15 / s, 3) + '" stroke-dasharray="' + fmt(1.5 / s) + ' ' + fmt(1.2 / s) + '" fill="none"/></svg>';
+  }
+  s2 += '<path d="' + d + '" stroke="' + col + '" stroke-width="' + fmt(lw, 3) + '" fill="none"/>';
+  s2 += '<rect x="' + fmt(lw) + '" y="' + fmt(lw) + '" width="' + fmt(pw - 2 * lw) + '" height="' + fmt(ph - 2 * lw) + '" stroke="' + col + '" stroke-width="' + fmt(lw * 2, 3) + '" fill="none"/>';
+  if (G.labels) {
+    const fs = clamp(c * .22, 2.6 / s, 5 / s);
+    let t = '';
+    for (let i = 0; i < g.nc; i++) if ((i + .5) * c < pw) t += '<text x="' + fmt(i * c + c / 2) + '" y="' + fmt(fs * 1.4) + '" text-anchor="middle">' + colName(i) + '</text>';
+    for (let j = c > fs * 4 ? 0 : 1; j < g.nr; j++) if ((j + .3) * c < ph) t += '<text x="' + fmt(fs * .9) + '" y="' + fmt(j * c + c / 2 + fs * .35) + '">' + (j + 1) + '</text>';
+    s2 += '<g font-family="Archivo, Helvetica, Arial, sans-serif" font-weight="700" font-size="' + fmt(fs, 2) + '" fill="#666">' + t + '</g>';
+  }
+  return s2 + '</svg>';
+}
+
+function buildPrint() {
+  if (!SRC.work) return;
+  const pl = printPlan(), { P, g, SW, SH } = pl;
+  $('pageRule').textContent = '@page { size: ' + pl.sheet + ' ' + (pl.port ? 'portrait' : 'landscape') + '; margin: 0; }';
+  const pageStyle = 'width:' + SW + 'mm;height:' + (SH - .6) + 'mm;';
+  const who = '<div class="who">NAME<i></i>DATE<i style="width:24mm"></i></div>';
+  const A = P.w / P.h;
+
+  // Page 1: gridded reference, rendered at print resolution
+  const availW = SW - 24, availH = SH - 24 - 62;
+  const iw = Math.min(availW, availH * A), ih = iw / A;
+  const c = document.createElement('canvas');
+  c.width = Math.round(A >= 1 ? 2400 : 2400 * A); c.height = Math.round(c.width / A);
+  drawReference(c.getContext('2d'), c.width, c.height, P, c.width / iw * .25);
+  const bar = '<svg width="50mm" height="5mm" viewBox="0 0 50 5"><path d="M0 .3H50M0 0V5M10 0V3M20 0V3M30 0V3M40 0V3M50 0V5" stroke="#141414" stroke-width=".3" fill="none"/></svg>';
+  const labelsTxt = G.labels ? ' Columns are lettered A–' + colName(g.nc - 1) + ' and rows numbered 1–' + g.nr + '.' : '';
+  let html = '<div class="pp" style="' + pageStyle + 'padding:12mm">' +
+    '<div class="ph"><div><h3>GRID REFERENCE</h3></div>' + who + '</div>' +
+    '<img src="' + c.toDataURL('image/jpeg', .92) + '" alt="" style="width:' + fmt(iw) + 'mm;height:' + fmt(ih) + 'mm;margin:0 auto">' +
+    '<ul><li><b>Target paper:</b> ' + P.name + '.</li>' +
+    '<li><b>Grid:</b> ' + fmt(g.cols) + ' × ' + fmt(g.rows) + ' squares of ' + pl.cellTxt + ' on the target paper.' + labelsTxt + (G.mirror ? ' The reference is mirrored.' : '') + '</li>' +
+    (pl.trueSize
+      ? '<li><b>Page 2</b> is the blank grid at true size. Print at 100% (“Actual size”, not “Fit to page”). Check the printer: this bar should measure exactly 50 mm. ' + bar + '</li>'
+      : '<li><b>Page 2</b> is the blank grid scaled to ' + Math.round(pl.scale * 100) + '%. On your ' + P.name + ' sheet, rule squares of ' + pl.cellTxt + ' from the top-left corner with a long ruler and set square.</li>') +
+    '<li>Rule the grid on your paper lightly (2H), copy one cell at a time, then rub the grid back before adding tone.</li></ul></div>';
+
+  // Page 2: blank grid, true size and centred, or scaled with instructions
+  if (pl.trueSize) {
+    const left = (SW - pl.pw) / 2, top = (SH - pl.ph) / 2;
+    html += '<div class="pp" style="' + pageStyle + '"><div style="position:absolute;left:' + fmt(left) + 'mm;top:' + fmt(top) + 'mm">' + gridSVG(pl, 1) + '</div>' +
+      (SH - pl.ph > 24 ? '<p class="cap" style="position:absolute;left:' + fmt(left) + 'mm;top:' + fmt(top + pl.ph + 2) + 'mm">Blank grid at true size for ' + P.name + ': squares of ' + pl.cellTxt + '.</p>' : '') + '</div>';
+  } else {
+    html += '<div class="pp" style="' + pageStyle + 'padding:12mm">' +
+      '<div class="ph"><div><h3>BLANK GRID (SCALED)</h3></div>' + who + '</div>' +
+      '<p class="cap" style="margin:0 0 4mm">Scaled to ' + Math.round(pl.scale * 100) + '% to fit A4. On the real ' + P.name + ' sheet, each square is <b>' + pl.cellTxt + '</b>: ' + fmt(g.cols) + ' across and ' + fmt(g.rows) + ' down.</p>' +
+      '<div style="display:flex;justify-content:center">' + gridSVG(pl, pl.scale) + '</div></div>';
+  }
+  $('printArea').innerHTML = html;
+}
+$('printBtn').addEventListener('click', () => { buildPrint(); window.print(); });
+window.addEventListener('beforeprint', buildPrint);
+
+/* ================= Measuring tools ================= */
+
+const M = { tool: 'angle', items: [], pending: null, hover: null, unit: null, unitName: 'heads', kb: null, next: 1 };
+try { const s = JSON.parse(localStorage.getItem('gridProportion') || '{}'); if (typeof s.unitName === 'string' && s.unitName) M.unitName = s.unitName; } catch (e) { /* ignore */ }
+const mv = $('mv'), mctx = mv.getContext('2d');
+let mS = 1; // CSS px per image px
+const TOOLS = {
+  angle: ['Angle', 'Click two points along an edge.', 'Click the second point.'],
+  prop: ['Proportion', 'Click the two ends of a length. The first one becomes the unit.', 'Click the other end of the length.'],
+  plumb: ['Plumb line', 'Click to drop a vertical line and see what lines up above and below.', ''],
+  level: ['Level line', 'Click to draw a horizontal line and compare heights.', ''],
+};
+const singular = () => M.unitName.replace(/s$/i, '') || 'unit';
+const plen = m => Math.hypot(m.b.x - m.a.x, m.b.y - m.a.y);
+
+function angleInfo(a, b) {
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const h = Math.atan2(Math.abs(dy), Math.abs(dx)) * 180 / Math.PI;
+  const dir = Math.abs(dx) < .5 || Math.abs(dy) < .5 ? '' : dx * dy < 0 ? 'rising to the right' : 'falling to the right';
+  return { h, v: 90 - h, dir };
+}
+function describe(m) {
+  const W = SRC.work.width, H = SRC.work.height;
+  if (m.type === 'angle') {
+    const a = angleInfo(m.a, m.b);
+    return ['Angle', Math.round(a.h) + '° from horizontal, ' + Math.round(a.v) + '° from vertical' + (a.dir ? ', ' + a.dir : '')];
+  }
+  if (m.type === 'prop') {
+    const u = M.items.find(x => x.id === M.unit);
+    if (m.id === M.unit) return ['Unit', '1 ' + singular() + ' (the length everything else is compared with)'];
+    const r = plen(m) / plen(u);
+    return ['Proportion', fmt(r, 2) + ' ' + (Math.abs(r - 1) < .005 ? singular() : M.unitName) + ' (' + (r >= 1 ? 'the unit fits ' + fmt(r, 2) + ' times' : fmt(1 / r, 2) + ' of these make one ' + singular()) + ')'];
+  }
+  if (m.type === 'plumb') return ['Plumb line', Math.round(m.x / W * 100) + '% of the way across'];
+  return ['Level line', Math.round(m.y / H * 100) + '% of the way down'];
+}
+
+function renderMeasure() {
+  if (!SRC.work) return;
+  const src = curSrc(), sw = src.width, sh = src.height;
+  const avail = Math.max(120, $('mview').clientWidth - 28);
+  const maxH = Math.min(760, Math.max(320, window.innerHeight * .75));
+  const cssW = Math.min(avail, maxH * sw / sh), cssH = cssW * sh / sw;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  mv.style.width = cssW + 'px'; mv.style.height = cssH + 'px';
+  mv.width = Math.round(cssW * dpr); mv.height = Math.round(cssH * dpr);
+  mS = cssW / sw;
+  const ctx = mctx;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(src, 0, 0, mv.width, mv.height);
+  ctx.setTransform(dpr * mS, 0, 0, dpr * mS, 0, 0);
+  const u = 1 / mS; // one CSS pixel in image units
+  drawLines(ctx, u);
+  M.items.forEach((m, i) => drawItem(ctx, m, PAL[(m.id - 1) % PAL.length], u, i + 1));
+  if (M.pending) {
+    const p = M.pending, q = M.hover || M.kb;
+    const col = PAL[(M.next - 1) % PAL.length];
+    if (q) drawItem(ctx, { type: M.tool, a: p, b: q, id: M.next }, col, u, M.items.length + 1, true);
+    dotAt(ctx, p, col, u);
+  }
+  if (M.kb && document.activeElement === mv) {
+    const p = M.kb;
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 4 * u;
+    const cross = () => { ctx.beginPath(); ctx.moveTo(p.x - 14 * u, p.y); ctx.lineTo(p.x + 14 * u, p.y); ctx.moveTo(p.x, p.y - 14 * u); ctx.lineTo(p.x, p.y + 14 * u); ctx.stroke(); };
+    cross(); ctx.strokeStyle = '#141414'; ctx.lineWidth = 2 * u; cross();
+  }
+}
+
+function halo(ctx, u, w, col, draw, dash) {
+  ctx.setLineDash(dash ? dash.map(x => x * u) : []);
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = (w + 3) * u; ctx.beginPath(); draw(); ctx.stroke();
+  ctx.strokeStyle = col; ctx.lineWidth = w * u; ctx.beginPath(); draw(); ctx.stroke();
+  ctx.setLineDash([]);
+}
+function dotAt(ctx, p, col, u) {
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, 5.5 * u, 0, 7); ctx.fill();
+  ctx.fillStyle = col; ctx.beginPath(); ctx.arc(p.x, p.y, 3.8 * u, 0, 7); ctx.fill();
+}
+function tag(ctx, text, x, y, col, u, align) {
+  ctx.font = '700 ' + 12 * u + 'px Archivo, Helvetica, Arial, sans-serif';
+  const w = ctx.measureText(text).width + 10 * u, h = 18 * u;
+  const W = SRC.work.width, H = SRC.work.height;
+  let x0 = align === 'left' ? x : x - w / 2;
+  x0 = clamp(x0, 2 * u, W - w - 2 * u); y = clamp(y, h / 2 + 2 * u, H - h / 2 - 2 * u);
+  ctx.fillStyle = col; ctx.fillRect(x0, y - h / 2, w, h);
+  ctx.fillStyle = '#fff'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, x0 + 5 * u, y + .5 * u);
+}
+
+function drawItem(ctx, m, col, u, n, live) {
+  if (m.type === 'plumb' || m.type === 'level') return; // drawn by drawLines
+  const { a, b } = m;
+  if (m.type === 'angle') {
+    const [p, q] = a.x <= b.x ? [a, b] : [b, a];
+    const L = Math.hypot(q.x - p.x, q.y - p.y);
+    const r = clamp(L * .35, 18 * u, 60 * u);
+    halo(ctx, u, 1.5, col, () => { ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + Math.max(r * 1.6, 30 * u), p.y); }, [5, 4]);
+    halo(ctx, u, 3, col, () => { ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); });
+    const ang = Math.atan2(q.y - p.y, q.x - p.x);
+    halo(ctx, u, 2, col, () => { ctx.arc(p.x, p.y, r, Math.min(0, ang), Math.max(0, ang)); });
+    dotAt(ctx, a, col, u); dotAt(ctx, b, col, u);
+    const info = angleInfo(a, b);
+    tag(ctx, n + ': ' + Math.round(info.h) + '°', p.x + Math.cos(ang / 2) * (r + 26 * u), p.y + Math.sin(ang / 2) * (r + 12 * u), col, u);
+  } else if (m.type === 'prop') {
+    const L = Math.hypot(b.x - a.x, b.y - a.y) || 1, nx = -(b.y - a.y) / L * 7 * u, ny = (b.x - a.x) / L * 7 * u;
+    halo(ctx, u, 3, col, () => {
+      ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+      ctx.moveTo(a.x - nx, a.y - ny); ctx.lineTo(a.x + nx, a.y + ny);
+      ctx.moveTo(b.x - nx, b.y - ny); ctx.lineTo(b.x + nx, b.y + ny);
+    });
+    const unit = M.items.find(x => x.id === M.unit);
+    const label = !unit || m.id === M.unit || (live && !unit) ? '1 ' + singular() : fmt(L / plen(unit), 2) + ' ' + M.unitName;
+    tag(ctx, n + ': ' + label, (a.x + b.x) / 2 + nx * 2.4, (a.y + b.y) / 2 + ny * 2.4, col, u);
+  }
+}
+// Plumb and level lines span the whole image
+function drawLines(ctx, u) {
+  const W = SRC.work.width, H = SRC.work.height;
+  M.items.forEach((m, i) => {
+    const col = PAL[(m.id - 1) % PAL.length];
+    if (m.type === 'plumb') {
+      halo(ctx, u, 2, col, () => { ctx.moveTo(m.x, 0); ctx.lineTo(m.x, H); }, [8, 5]);
+      tag(ctx, (i + 1) + ': plumb', m.x + 6 * u, 14 * u, col, u, 'left');
+    } else if (m.type === 'level') {
+      halo(ctx, u, 2, col, () => { ctx.moveTo(0, m.y); ctx.lineTo(W, m.y); }, [8, 5]);
+      tag(ctx, (i + 1) + ': level', 6 * u, m.y - 14 * u, col, u, 'left');
+    }
+  });
+}
+
+function renderList() {
+  const ol = $('mList');
+  ol.innerHTML = '';
+  M.items.forEach((m, i) => {
+    const [title, text] = describe(m);
+    const li = document.createElement('li');
+    li.innerHTML = '<span class="mnum" style="background:' + PAL[(m.id - 1) % PAL.length] + '">' + (i + 1) + '</span><span class="mtxt"><b></b><span></span></span>';
+    li.querySelector('b').textContent = title;
+    li.querySelector('.mtxt span').textContent = text;
+    if (m.type === 'prop' && m.id !== M.unit) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'mini'; b.textContent = 'Make unit';
+      b.setAttribute('aria-label', 'Make measurement ' + (i + 1) + ' the unit');
+      b.addEventListener('click', () => { M.unit = m.id; update(); });
+      li.appendChild(b);
+    }
+    const del = document.createElement('button');
+    del.type = 'button'; del.className = 'mini'; del.textContent = 'Remove';
+    del.setAttribute('aria-label', 'Remove measurement ' + (i + 1) + ', ' + title);
+    del.addEventListener('click', () => removeItem(m.id));
+    li.appendChild(del);
+    ol.appendChild(li);
+  });
+  $('mEmpty').hidden = M.items.length > 0;
+  $('mUndo').disabled = $('mClear').disabled = !M.items.length;
+  const t = TOOLS[M.tool];
+  $('mMsg').textContent = t[0];
+  $('mSub').textContent = M.pending ? t[2] : t[1];
+}
+function update() { renderMeasure(); renderList(); }
+function removeItem(id) {
+  M.items = M.items.filter(x => x.id !== id);
+  if (M.unit === id) { const p = M.items.find(x => x.type === 'prop'); M.unit = p ? p.id : null; }
+  update();
+}
+
+function place(p) {
+  if (M.tool === 'plumb') M.items.push({ id: M.next++, type: 'plumb', x: p.x });
+  else if (M.tool === 'level') M.items.push({ id: M.next++, type: 'level', y: p.y });
+  else if (!M.pending) M.pending = p;
+  else {
+    const a = M.pending;
+    M.pending = null;
+    if (Math.hypot(p.x - a.x, p.y - a.y) * mS < 4) { update(); return; }
+    const m = { id: M.next++, type: M.tool, a, b: p };
+    M.items.push(m);
+    if (m.type === 'prop' && !M.items.some(x => x.id === M.unit)) M.unit = m.id;
+  }
+  update();
+}
+const mPoint = e => {
+  const r = mv.getBoundingClientRect();
+  return { x: clamp((e.clientX - r.left) / mS, 0, SRC.work.width), y: clamp((e.clientY - r.top) / mS, 0, SRC.work.height) };
+};
+let mDown = null;
+mv.addEventListener('pointerdown', e => { mDown = { x: e.clientX, y: e.clientY }; e.preventDefault(); });
+mv.addEventListener('pointermove', e => { if (M.pending) { M.hover = mPoint(e); renderMeasure(); } });
+mv.addEventListener('pointerup', e => {
+  if (!mDown) return;
+  const moved = Math.hypot(e.clientX - mDown.x, e.clientY - mDown.y);
+  mDown = null;
+  if (moved < 12 || M.pending) place(mPoint(e));
+});
+mv.addEventListener('pointerleave', () => { M.hover = null; renderMeasure(); });
+mv.addEventListener('focus', () => { if (!M.kb && SRC.work) M.kb = { x: SRC.work.width / 2, y: SRC.work.height / 2 }; renderMeasure(); });
+mv.addEventListener('blur', renderMeasure);
+mv.addEventListener('keydown', e => {
+  if (!SRC.work) return;
+  const W = SRC.work.width, H = SRC.work.height, st = (e.shiftKey ? .05 : .01) * Math.max(W, H);
+  const k = { ArrowLeft: [-st, 0], ArrowRight: [st, 0], ArrowUp: [0, -st], ArrowDown: [0, st] }[e.key];
+  if (k) {
+    e.preventDefault();
+    M.kb = { x: clamp(M.kb.x + k[0], 0, W), y: clamp(M.kb.y + k[1], 0, H) };
+    M.hover = null; renderMeasure();
+  } else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); place({ ...M.kb }); }
+  else if (e.key === 'Escape' && M.pending) { e.preventDefault(); M.pending = null; update(); }
+});
+
+pickButtons($('toolBtns'), Object.entries(TOOLS).map(([k, v]) => [k, v[0]]), M.tool, k => { M.tool = k; M.pending = null; update(); });
+$('unitName').value = M.unitName;
+$('unitName').addEventListener('input', e => { M.unitName = e.target.value.trim() || 'units'; update(); save(); });
+$('mUndo').addEventListener('click', () => { const m = M.items[M.items.length - 1]; if (m) removeItem(m.id); });
+$('mClear').addEventListener('click', () => { M.items = []; M.unit = null; M.pending = null; update(); });
+
+/* ================= Enlargement calculator ================= */
+
+const E = { unit: 'cm', ow: 15, oh: 20, mode: 'width', tv: 42, paper: 'A2', mar: 2, px: 6, py: 5, gs: 2.5 };
+try {
+  const s = JSON.parse(localStorage.getItem('gridProportion') || '{}');
+  if (s.E) Object.keys(E).forEach(k => { if (typeof s.E[k] === typeof E[k]) E[k] = s.E[k]; });
+} catch (e) { /* ignore */ }
+const UNIT_CM = { cm: 1, mm: .1, in: 2.54 };
+
+function calc() {
+  const ok = v => isFinite(v) && v > 0;
+  let k = NaN, note = '';
+  if (E.mode === 'width') k = E.tv / E.ow;
+  else if (E.mode === 'height') k = E.tv / E.oh;
+  else if (E.mode === 'scale') k = E.tv;
+  else {
+    const [a, b] = PAPERS[E.paper].map(v => v / UNIT_CM[E.unit]);
+    const kp = Math.min((a - 2 * E.mar) / E.ow, (b - 2 * E.mar) / E.oh);
+    const kl = Math.min((b - 2 * E.mar) / E.ow, (a - 2 * E.mar) / E.oh);
+    k = Math.max(kp, kl);
+    note = 'Largest size that fits ' + E.paper + ' ' + (kl > kp ? 'landscape' : 'portrait') + ' with a ' + fmt(E.mar) + ' ' + E.unit + ' margin all round. ';
+  }
+  const res = $('eRes');
+  if (!ok(E.ow) || !ok(E.oh) || !ok(k)) {
+    res.innerHTML = '<div><b>–</b><span>Enter positive sizes</span></div>';
+    $('eNote').textContent = ''; $('ev').innerHTML = '';
+    return;
+  }
+  const U = ' ' + E.unit, tw = E.ow * k, th = E.oh * k;
+  const tile = (v, l) => '<div><b>' + v + '</b><span>' + l + '</span></div>';
+  res.innerHTML =
+    tile('×' + fmt(k, 3), 'scale factor') +
+    tile(fmt(k * 100, 1) + '%', 'photocopier setting') +
+    tile(fmt(tw, 2) + ' × ' + fmt(th, 2), 'target size (' + E.unit + ')') +
+    tile('×' + fmt(k * k, 2), 'area') +
+    tile(fmt(E.px * k, 2) + ', ' + fmt(E.py * k, 2), 'point across, down (' + E.unit + ')') +
+    (ok(E.gs) ? tile(fmt(E.gs * k, 2) + U, 'grid square on the target') : '');
+  $('eNote').textContent = note + (k < 1 ? 'This is a reduction: every length shrinks by the same factor. ' : '') +
+    'The point ' + fmt(E.px) + U + ' across and ' + fmt(E.py) + U + ' down on the original lands ' + fmt(E.px * k, 2) + U + ' across and ' + fmt(E.py * k, 2) + U + ' down on the target.' +
+    (ok(E.gs) ? ' A ' + fmt(E.gs) + U + ' grid on the original becomes a ' + fmt(E.gs * k, 2) + U + ' grid, with the same number of squares.' : '');
+  drawCalc(k);
+  save();
+}
+
+function drawCalc(k) {
+  const tw = E.ow * k, th = E.oh * k;
+  const bw = Math.max(E.ow, tw), bh = Math.max(E.oh, th);
+  const s = Math.min(560 / bw, 286 / bh), y0 = 50;
+  const x0 = Math.round((640 - bw * s) / 2);
+  const r = (w, h) => ({ w: Math.max(3, w * s), h: Math.max(3, h * s) });
+  const O = r(E.ow, E.oh), T = r(tw, th);
+  const big = k >= 1 ? T : O, small = k >= 1 ? O : T;
+  let out = '<rect width="640" height="360" fill="#fbfaf6"/>';
+  // Grids: the target's grid squares are k times the original's
+  const gridIn = (R, step, col, op) => {
+    if (!(step > 0) || R.w / step > 60 || R.h / step > 60) return '';
+    let d = '';
+    for (let x = step; x < R.w - .5; x += step) d += 'M' + f1(x0 + x) + ' ' + y0 + 'v' + f1(R.h);
+    for (let y = step; y < R.h - .5; y += step) d += 'M' + x0 + ' ' + f1(y0 + y) + 'h' + f1(R.w);
+    return '<path d="' + d + '" stroke="' + col + '" stroke-opacity="' + op + '" stroke-width="1" fill="none"/>';
+  };
+  out += '<rect x="' + x0 + '" y="' + y0 + '" width="' + f1(big.w) + '" height="' + f1(big.h) + '" fill="#fff" stroke="#141414" stroke-width="2"/>';
+  out += gridIn(T, E.gs * k * s, '#1F5FBF', .35);
+  out += '<rect x="' + x0 + '" y="' + y0 + '" width="' + f1(small.w) + '" height="' + f1(small.h) + '" fill="#efe9dc" fill-opacity=".85" stroke="#141414" stroke-width="2"/>';
+  out += gridIn(O, E.gs * s, '#7a4a1f', .45);
+  out += '<path d="M' + x0 + ' ' + y0 + 'L' + f1(x0 + big.w) + ' ' + f1(y0 + big.h) + '" stroke="#8b8882" stroke-width="1.3" stroke-dasharray="6 5"/>';
+  // The point on each, joined by a ray from the shared corner
+  const po = { x: x0 + E.px * s, y: y0 + E.py * s }, pk = { x: x0 + E.px * k * s, y: y0 + E.py * k * s };
+  const far = k >= 1 ? pk : po;
+  out += '<path d="M' + x0 + ' ' + y0 + 'L' + pt(far) + '" stroke="#E4252C" stroke-width="1.3" stroke-dasharray="3 3"/>';
+  out += '<circle cx="' + f1(po.x) + '" cy="' + f1(po.y) + '" r="5" fill="#7a4a1f" stroke="#fff" stroke-width="1.5"/>';
+  out += '<circle cx="' + f1(pk.x) + '" cy="' + f1(pk.y) + '" r="6" fill="#E4252C" stroke="#fff" stroke-width="1.5"/>';
+  out += '<text class="lbl" x="' + x0 + '" y="' + (y0 - 28) + '">TARGET ' + fmt(tw, 2) + ' × ' + fmt(th, 2) + ' ' + E.unit.toUpperCase() + ' (BLUE GRID)</text>';
+  out += '<text class="lbl" x="' + x0 + '" y="' + (y0 - 8) + '" style="fill:#7a4a1f">ORIGINAL ' + fmt(E.ow) + ' × ' + fmt(E.oh) + ' ' + E.unit.toUpperCase() + ' (SHADED)</text>';
+  $('ev').innerHTML = out;
+}
+
+function eSync() {
+  $('eTvWrap').hidden = E.mode === 'paper';
+  $('ePaperWrap').hidden = E.mode !== 'paper';
+  $('eTvLbl').textContent = { width: 'Target width (' + E.unit + ')', height: 'Target height (' + E.unit + ')', scale: 'Scale factor (e.g. 2.5)', paper: '' }[E.mode];
+  $('eMarLbl').textContent = 'Margin (' + E.unit + ')';
+}
+pickButtons($('eUnitBtns'), [['cm', 'cm'], ['mm', 'mm'], ['in', 'inches']], E.unit, u => {
+  // Convert existing lengths to the new unit
+  const f = UNIT_CM[E.unit] / UNIT_CM[u];
+  ['ow', 'oh', 'px', 'py', 'gs', 'mar'].forEach(k => { E[k] = +(E[k] * f).toFixed(3); });
+  if (E.mode === 'width' || E.mode === 'height') E.tv = +(E.tv * f).toFixed(3);
+  E.unit = u; eFill(); eSync(); calc();
+});
+pickButtons($('eModeBtns'), [['width', 'Width'], ['height', 'Height'], ['scale', 'Scale'], ['paper', 'Paper']], E.mode, m => {
+  const k = E.mode === 'width' ? E.tv / E.ow : E.mode === 'height' ? E.tv / E.oh : E.mode === 'scale' ? E.tv : 2;
+  E.mode = m;
+  if (m === 'width') E.tv = +(E.ow * k).toFixed(2); else if (m === 'height') E.tv = +(E.oh * k).toFixed(2); else if (m === 'scale') E.tv = +k.toFixed(3);
+  eFill(); eSync(); calc();
+});
+const E_FIELDS = { eOW: 'ow', eOH: 'oh', eTV: 'tv', eMar: 'mar', ePX: 'px', ePY: 'py', eGS: 'gs' };
+function eFill() { Object.entries(E_FIELDS).forEach(([id, k]) => { $(id).value = E[k]; }); $('ePaper').value = E.paper; }
+Object.entries(E_FIELDS).forEach(([id, k]) => $(id).addEventListener('input', e => { E[k] = parseFloat(e.target.value); calc(); }));
+$('ePaper').addEventListener('change', e => { E.paper = e.target.value; calc(); });
+eFill(); eSync(); calc();
+
+/* ================= Step-by-step guides ================= */
+
+const seg = (a, b, c = 'ln') => '<path class="' + c + '"' + (c === 'cn' ? '' : ' pathLength="1"') + ' d="M' + pt(a) + 'L' + pt(b) + '"/>';
+const lbl = (p, t, o = {}) => '<text class="lbl' + (o.cn ? ' cnl' : '') + '" x="' + f1(p.x) + '" y="' + f1(p.y) + '"' + (o.anchor ? ' text-anchor="' + o.anchor + '"' : '') + (o.col ? ' style="fill:' + o.col + '"' : '') + '>' + t + '</text>';
+const dot = (p, col) => '<circle class="dot" cx="' + f1(p.x) + '" cy="' + f1(p.y) + '" r="3"' + (col ? ' style="fill:' + col + '"' : '') + '/>';
+const polyline = (pts, c = 'ln') => '<path class="' + c + '"' + (c === 'cn' ? '' : ' pathLength="1"') + ' d="M' + pts.map(pt).join('L') + '"/>';
+
+// Closed Catmull-Rom curve through the control points, returned as dense samples
+function spline(pts, n = 12) {
+  const out = [], L = pts.length;
+  for (let i = 0; i < L; i++) {
+    const p0 = pts[(i - 1 + L) % L], p1 = pts[i], p2 = pts[(i + 1) % L], p3 = pts[(i + 2) % L];
+    for (let t = 0; t < n; t++) {
+      const s = t / n, s2 = s * s, s3 = s2 * s;
+      const f = (a, b, c, d) => .5 * (2 * b + (-a + c) * s + (2 * a - 5 * b + 4 * c - d) * s2 + (-a + 3 * b - 3 * c + d) * s3);
+      out.push({ x: f(p0.x, p1.x, p2.x, p3.x), y: f(p0.y, p1.y, p2.y, p3.y) });
+    }
+  }
+  return out;
+}
+
+function guideGrid() {
+  // A vase in grid units: 5 cells across, 6 down
+  const VASE = [[1.8, .6], [3.2, .6], [3.0, 1.2], [2.95, 1.8], [3.9, 2.8], [4.3, 3.8], [4.0, 4.8], [3.4, 5.4], [1.6, 5.4], [1.0, 4.8], [.7, 3.8], [1.1, 2.8], [2.05, 1.8], [2.0, 1.2]].map(([x, y]) => ({ x, y }));
+  const curve = spline(VASE);
+  const R = { x: 20, y: 46, c: 28 }, Pp = { x: 212, y: 24, c: 34 };
+  const map = (B, p) => ({ x: B.x + p.x * B.c, y: B.y + p.y * B.c });
+  const closed = B => 'M' + curve.map(p => pt(map(B, p))).join('L') + 'Z';
+  const box = (B, cls) => {
+    let s = '<rect class="hl" x="' + B.x + '" y="' + B.y + '" width="' + 5 * B.c + '" height="' + 6 * B.c + '"/>';
+    for (let i = 1; i < 5; i++) s += seg(map(B, { x: i, y: 0 }), map(B, { x: i, y: 6 }), cls);
+    for (let j = 1; j < 6; j++) s += seg(map(B, { x: 0, y: j }), map(B, { x: 5, y: j }), cls);
+    return s;
+  };
+  // Where the contour crosses the interior grid lines
+  const hits = [];
+  curve.forEach((a, i) => {
+    const b = curve[(i + 1) % curve.length];
+    for (let k = 1; k < 6; k++) {
+      if (k < 5 && (a.x - k) * (b.x - k) < 0) { const t = (k - a.x) / (b.x - a.x); hits.push({ x: k, y: a.y + (b.y - a.y) * t }); }
+      if ((a.y - k) * (b.y - k) < 0) { const t = (k - a.y) / (b.y - a.y); hits.push({ x: a.x + (b.x - a.x) * t, y: k }); }
+    }
+  });
+  const labels = (B, cn) => {
+    let s = '';
+    for (let i = 0; i < 5; i++) s += lbl({ x: B.x + (i + .5) * B.c, y: B.y - 5 }, 'ABCDE'[i], { anchor: 'middle', cn });
+    for (let j = 0; j < 6; j++) s += lbl({ x: B.x - 5, y: B.y + (j + .5) * B.c + 4 }, j + 1, { anchor: 'end', cn });
+    return s;
+  };
+  return { name: 'Grid transfer', steps: [
+    { t: 'Start with the reference. Rule a grid of square cells over it, here 5 across by 6 down. The cells must be square, so horizontal and vertical proportions scale identically.',
+      e: [{ l: 'b', s: '<path class="fd" d="' + closed(R) + '" fill="#bdb9b0" stroke="#55534e" stroke-width="1"/>' }, box(R, 'hl'), lbl({ x: R.x, y: R.y + 6 * R.c + 16 }, 'REFERENCE')] },
+    { t: 'Rule the same number of cells on your paper, lightly, with a hard pencil (2H). The cells are larger, so everything scales by one factor: here 34 ÷ 28 ≈ ×1.21.',
+      e: ['<rect class="hl" x="' + Pp.x + '" y="' + Pp.y + '" width="' + 5 * Pp.c + '" height="' + 6 * Pp.c + '"/>', box(Pp, 'cn'), lbl({ x: Pp.x + 5 * Pp.c, y: Pp.y + 6 * Pp.c + 14 }, 'YOUR PAPER', { anchor: 'end', cn: true })] },
+    { t: 'Letter the columns and number the rows on both grids. When you lose your place, a reference such as C4 finds it again at once.',
+      e: [labels(R), labels(Pp, true)] },
+    { t: 'Wherever the contour crosses a grid line on the reference, judge the position as a fraction of the cell edge (a half, a third) and mark the same point on your grid.',
+      e: [hits.map(h => dot(map(R, h), '#E4252C')).join(''), hits.map(h => dot(map(Pp, h), '#E4252C')).join('')] },
+    { t: 'Join the marks one cell at a time, looking at the abstract shape inside each square rather than at "a vase". This is what overrides the symbol your memory supplies.',
+      e: ['<path class="ln" pathLength="1" d="' + closed(Pp) + '"/>'] },
+    { t: 'Rub the grid back with a putty rubber, restate the contour with some variation in weight, then develop tone from the reference.', erase: true,
+      e: [{ l: 'f', s: '<path class="sh" d="' + closed(Pp) + '" fill="url(#p2)"/>' }] },
+  ] };
+}
+
+function guideMeasure() {
+  const F = FIG, U = 29, top = 18;
+  const pl = arr => polyline(arr);
+  const figure = [
+    '<ellipse class="ln" pathLength="1" cx="' + F.head.x + '" cy="' + F.head.y + '" rx="' + F.head.rx + '" ry="' + F.head.ry + '"/>',
+    pl([{ x: 196, y: 46 }, { x: 196, y: 56 }]), pl([{ x: 204, y: 46 }, { x: 204, y: 57 }]),
+    '<path class="ln" pathLength="1" d="M' + F.torso.map(pt).join('L') + 'Z"/>',
+    pl(F.armL), pl(F.armR), pl(F.legL), pl(F.legR), pl(F.footL), pl(F.footR),
+  ];
+  const pencil = '<path class="ln" pathLength="1" d="M312 18L316 28V132H308V28Z"/>' +
+    '<ellipse class="fd" cx="312" cy="47" rx="8" ry="4.5" fill="#d6d3cc" stroke="#55534e"/>';
+  let ticks = seg({ x: 120, y: top }, { x: 120, y: top + 7.5 * U });
+  let across = '';
+  for (let n = 0; n <= 7; n++) {
+    const y = top + n * U;
+    ticks += seg({ x: 115, y }, { x: 125, y });
+    if (n) ticks += lbl({ x: 110, y: y + 4 }, n, { anchor: 'end' });
+    across += seg({ x: 128, y }, { x: 250, y }, 'cn');
+  }
+  ticks += seg({ x: 115, y: top + 7.5 * U }, { x: 125, y: top + 7.5 * U }) + lbl({ x: 110, y: top + 7.5 * U + 4 }, '7½', { anchor: 'end' });
+  const armA = F.armR[0], armB = F.armR[1];
+  const ext = { x: armA.x + (armB.x - armA.x) * 1.35, y: armA.y + (armB.y - armA.y) * 1.35 };
+  const deg = Math.round(Math.atan2(armB.x - armA.x, armB.y - armA.y) * 180 / Math.PI);
+  return { name: 'Measuring a figure', steps: [
+    { t: 'Hold the pencil at full arm\'s length with the elbow locked and one eye closed. Keep that distance constant, or every measurement changes with it.', e: figure },
+    { t: 'Choose a unit: here the head. Align the pencil tip with the top of the head and slide your thumbnail to the chin. That length is 1.',
+      e: [pencil, seg({ x: 212, y: top }, { x: 306, y: top }, 'cn'), seg({ x: 212, y: 47 }, { x: 302, y: 47 }, 'cn'), lbl({ x: 324, y: 36 }, '1 HEAD', { col: '#1F5FBF' })] },
+    { t: 'Step the unit down the figure without changing your grip. This adult is about 7½ heads; landmarks fall near units: chin 1, nipples 2, navel 3, knees about 5½.',
+      e: [ticks, across] },
+    { t: 'Plumb line: hold the pencil truly vertical. With the weight on one leg, the pit of the neck sits directly above the weight-bearing ankle.', erase: true,
+      e: [seg({ x: 200, y: 50 }, { x: 200, y: 244 }, 'cn'), dot({ x: 200, y: 56 }, '#1F5FBF'), dot({ x: 201, y: 229 }, '#1F5FBF'), lbl({ x: 206, y: 250 }, 'PLUMB', { col: '#1F5FBF' })] },
+    { t: 'Level: hold the pencil horizontal to compare heights. On the weight-bearing side the hip rises and the shoulder drops; this counter-tilt is contrapposto.',
+      e: [seg({ x: 150, y: 56 }, { x: 250, y: 56 }, 'cn'), seg({ x: 150, y: 121 }, { x: 250, y: 121 }, 'cn'), lbl({ x: 252, y: 60 }, 'LEVEL', { col: '#1F5FBF' }), lbl({ x: 252, y: 125 }, 'LEVEL', { col: '#1F5FBF' })] },
+    { t: 'Angles: lay the pencil along an edge, here the upper arm, keep its tilt as you bring it to the paper, and judge it against vertical: about ' + deg + '°.',
+      e: [seg(armA, ext, 'cn'), seg(armA, { x: armA.x, y: armA.y + 52 }, 'cn'),
+        '<path class="ln" pathLength="1" style="stroke:#E4252C;stroke-width:1.6" d="M' + armA.x + ' ' + (armA.y + 30) + 'A30 30 0 0 0 ' + f1(armA.x + 30 * Math.sin(deg * Math.PI / 180)) + ' ' + f1(armA.y + 30 * Math.cos(deg * Math.PI / 180)) + '"/>',
+        lbl({ x: 246, y: 150 }, deg + '° FROM', { col: '#E4252C' }), lbl({ x: 246, y: 163 }, 'VERTICAL', { col: '#E4252C' })] },
+  ] };
+}
+
+Stepper({ grid: guideGrid(), measure: guideMeasure() });
+
+/* ================= Start ================= */
+syncPaperUI();
+setSource(SAMPLES.figure[1](), SAMPLES.figure[0] + ' (drawn in the browser)');
+let rsT = 0, lastW = 0;
+const onResize = () => {
+  clearTimeout(rsT);
+  rsT = setTimeout(() => { const w = $('gview').clientWidth; if (w !== lastW) { lastW = w; renderGrid(); renderMeasure(); } }, 60);
+};
+if (window.ResizeObserver) { new ResizeObserver(onResize).observe($('gview')); new ResizeObserver(onResize).observe($('mview')); }
+else window.addEventListener('resize', onResize);
+
+})();
+</script>
+</body>
+</html>

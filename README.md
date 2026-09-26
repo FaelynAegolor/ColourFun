@@ -109,6 +109,16 @@ The wheel is fully keyboard accessible: Tab to a segment, arrow keys step around
 
 Grade values and textures are indicative drawings, not measurements of real products.
 
+## Grid & Proportion
+
+`grid-proportion.html` covers the grid method and comparative measuring.
+
+- **Methods and step-by-step guides**: grid transfer, and measuring a figure.
+- **Grid tool**: grid a reference image (or built-in sample) to A5–A1, square or custom paper. Crop to fill or fit, and set squares across or square size in cm. Options for diagonals, cell labels, greyscale, mirror, and line colour and weight.
+- **Printing**: the gridded reference plus a blank grid at true size when the paper fits A4/A3 (otherwise scaled, with the real cell size stated).
+- **Measuring tools**: angle, proportion (in units such as heads), and plumb and level lines.
+- **Enlargement calculator**: scale factor, photocopier %, point mapping and grid spacing.
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
