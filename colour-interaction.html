@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Colour Interaction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="lesson.css">
+<style>
+/* ---------- Intro: key terms ---------- */
+.terms { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin: 0; padding: 0; }
+.terms li { list-style: none; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+.terms b { display: block; margin-bottom: 2px; font-size: 15px; }
+.about { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; margin-bottom: 14px; }
+.about p { margin: 0 0 10px; font-size: 15px; line-height: 1.5; }
+.about p:last-child { margin-bottom: 0; }
+.caveat { font-size: 13px; color: var(--muted); }
+
+/* ---------- Tool layout: drawing on the left, controls on the right ---------- */
+.tool { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 20px; align-items: start; }
+.paper svg { display: block; width: 100%; height: auto; }
+.foot { border-top: 1px solid #e1ded6; padding: 12px 16px 14px; min-height: 64px; font-size: 14px; color: #333; }
+.foot b { color: #141414; }
+.foot p { margin: 4px 0 0; }
+.bgrid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.tbtn:disabled, input:disabled { opacity: .45; cursor: default; }
+.actions { display: grid; gap: 8px; margin-top: 12px; }
+.row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+
+/* Colour pickers with their hex code */
+.cfield { display: flex; align-items: center; gap: 10px; min-height: 48px; font-size: 14px; }
+.cfield input[type="color"] {
+  width: 48px; height: 44px; flex: none; padding: 3px; cursor: pointer;
+  background: var(--panel); border: 2px solid var(--border); border-radius: 10px;
+}
+.cfield input[type="color"]:hover { border-color: var(--ink); }
+.cfield code { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+/* Preset buttons with a little colour chip */
+.preset { display: flex; align-items: center; gap: 8px; text-align: left; }
+.chip { display: inline-flex; width: 30px; height: 22px; flex: none; border-radius: 4px; overflow: hidden; border: 1px solid rgba(0, 0, 0, .25); }
+.chip i { flex: 1; }
+.chip i.in { flex: .7; }
+
+/* Readouts */
+.readout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 12px 0 0; }
+.readout div { background: var(--bg); border-radius: 10px; padding: 8px 10px; }
+.readout b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+.readout span { font-size: 12px; color: var(--muted); }
+.verdict { margin: 10px 0 0; font-size: 14px; font-weight: 600; }
+
+/* Moving parts in the demos */
+.mv { transition: transform .7s ease-in-out, fill .6s ease; }
+.fl { transition: fill .6s ease; }
+.bridge { transform-box: fill-box; transform-origin: center; transform: scaleX(0); transition: transform .7s ease-in-out; }
+.bridge.on { transform: scaleX(1); }
+
+/* ---------- Afterimage ---------- */
+#aiStage { cursor: pointer; }
+.ai-status { font-weight: 700; }
+.swrow { display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: 13px; color: var(--muted); }
+.swrow svg { width: 96px; height: 54px; border-radius: 6px; border: 1px solid var(--border); flex: none; }
+.paper svg rect { shape-rendering: crispEdges; }
+
+/* ---------- Temperature ---------- */
+.temp { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.temp figure { margin: 0; }
+.temp figcaption { padding: 10px 14px 12px; font-size: 13px; color: #333; border-top: 1px solid #e1ded6; }
+.temp figcaption b { display: block; color: #141414; font-size: 14px; }
+
+/* ---------- Value vs hue ---------- */
+.pairs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.pairs figure { margin: 0; }
+.pairs figcaption { padding: 8px 12px 10px; font-size: 13px; color: #333; border-top: 1px solid #e1ded6; min-height: 38px; }
+.pairs figcaption b { color: #141414; }
+.gbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-bottom: 14px; }
+.gbar .tbtn { padding: 6px 16px; }
+
+/* ---------- Exercises and printable sheet ---------- */
+.ex { counter-reset: ex; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin: 0 0 24px; padding: 0; }
+.ex li { list-style: none; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; font-size: 14px; line-height: 1.45; }
+.ex li::before { counter-increment: ex; content: counter(ex); display: inline-grid; place-items: center; width: 26px; height: 26px; margin-right: 8px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-weight: 800; font-size: 13px; }
+.ex b { font-size: 15px; }
+.ex p { margin: 6px 0 0; }
+.ex .look { color: var(--muted); }
+.sheet-ctl { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 16px; }
+.sheet-ctl .bgrid { display: flex; flex-wrap: wrap; gap: 6px; margin-right: auto; }
+.sheet {
+  background: #fff; color: #141414;
+  max-width: 794px; margin: 0 auto;
+  aspect-ratio: 210 / 297;
+  padding: 30px 34px 24px;
+  border: 1px solid #cfcbc2; box-shadow: 0 2px 14px rgba(0, 0, 0, .18);
+  display: flex; flex-direction: column;
+  container-type: inline-size;
+}
+.sheet .head { display: flex; align-items: flex-end; gap: 20px; border-bottom: 2px solid #141414; padding-bottom: 8px; }
+.sheet h3 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: .12em; }
+.sheet .sub { margin: 2px 0 0; font-size: 12px; color: #333; }
+.sheet .who { margin-left: auto; display: flex; gap: 8px; align-items: flex-end; font-weight: 700; font-size: 11px; letter-spacing: .06em; }
+.sheet .who i { display: inline-block; border-bottom: 1px solid #141414; width: 130px; height: 14px; }
+.sheet .who i.short { width: 80px; }
+.sheet svg { display: block; width: 100%; height: auto; flex: 1; min-height: 0; margin: 10px 0 6px; }
+.sheet .brief { margin: 0; font-size: 11px; color: #333; line-height: 1.4; }
+@container (max-width: 560px) {
+  .sheet .head { flex-wrap: wrap; }
+  .sheet .who { margin-left: 0; }
+}
+
+@media (max-width: 960px) {
+  .tool, .about { grid-template-columns: 1fr; }
+  .pairs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .temp, .pairs { gap: 8px; }
+  .sheet { aspect-ratio: auto; padding: 16px; }
+  .readout b { font-size: 17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mv, .fl, .bridge { transition: none; }
+}
+
+@page { size: A4 portrait; margin: 10mm; }
+@media print {
+  html, body { background: #fff; }
+  main > *:not(#studio), #studio > *:not(.sheet) { display: none !important; }
+  .wrap { padding: 0; max-width: none; }
+  #studio { margin: 0; }
+  .sheet { box-shadow: none; border: 0; padding: 0; max-width: none; width: 100%; height: 276mm; aspect-ratio: auto; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Colour</button>
+        <ul>
+          <li><a href="colour-schemes.html">Colour schemes</a></li>
+          <li><a href="colour-interaction.html" aria-current="page">Colour interaction</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Form &amp; space</button>
+        <ul>
+          <li><a href="shape-shading.html">3D shape shading</a></li>
+          <li><a href="perspective.html">Perspective</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>Colour interaction</h1>
+    <p>A colour is almost never seen as it physically is. Its appearance depends on what surrounds it, what you looked at a moment ago and how light or dark it is next to its neighbours. These studies follow Josef Albers' <em>Interaction of Color</em> (1963): try each effect on screen, then repeat it with paper or paint.</p>
+    <ul class="jump">
+      <li><a href="#relative">Colour is relative</a></li>
+      <li><a href="#oneAsTwo">One colour as two</a></li>
+      <li><a href="#twoAsOne">Two colours as one</a></li>
+      <li><a href="#afterimage">Afterimage</a></li>
+      <li><a href="#temperature">Temperature</a></li>
+      <li><a href="#value">Value vs hue</a></li>
+      <li><a href="#studio">Studio exercises</a></li>
+    </ul>
+  </div>
+
+  <!-- ---------- 1. Colour is relative ---------- -->
+  <section id="relative" aria-labelledby="relTitle">
+    <h2 class="sec-title" id="relTitle">Colour is relative</h2>
+    <div class="about">
+      <div class="panel">
+        <p>Josef Albers taught colour at the Bauhaus, Black Mountain College and Yale. <em>Interaction of Color</em> reverses the usual order of colour teaching: instead of starting from theory and wheels, it starts from observation. Students work with sheets of flat coloured paper (Color-aid), so that texture and brushwork cannot interfere, and set colours against each other until they can make one colour look like two, or two look like one.</p>
+        <p>His point for studio practice is that the colour you mix on the palette is not the colour you will see on the canvas. The same paint changes when it is surrounded by a warmer, darker or more saturated neighbour. Judge colour in context: test a mix against the passage it is going into, not against the white of the palette.</p>
+      </div>
+      <div class="panel">
+        <p><strong>How the maths on this page works.</strong> Colours are treated as sRGB and converted to CIELAB (D65 white). <em>L*</em> is perceived lightness (0 black to 100 white), so every greyscale view here uses L*, not a simple average of red, green and blue. Differences between colours are given as <em>ΔE<sub>00</sub></em> (CIEDE2000): below about 1 is invisible side by side, 2 to 3 is just noticeable, above 5 is clearly different.</p>
+        <p class="caveat">Screens vary in calibration and brightness, and a sheet of paper under daylight behaves differently again. Treat the numbers as a guide and your eye as the judge.</p>
+      </div>
+    </div>
+    <ul class="terms">
+      <li><b>Simultaneous contrast</b>Neighbouring colours push each other apart: a colour looks lighter on a dark ground, and shifts towards the complement of its surround.</li>
+      <li><b>Successive contrast</b>After staring at a colour, the eye adapts and you see its opposite (an afterimage) on the next thing you look at.</li>
+      <li><b>Hue, value, chroma</b>Hue is the colour family (red, blue); value is lightness; chroma or saturation is intensity, from grey to fully saturated.</li>
+      <li><b>Colour temperature</b>A relative quality, not a fixed one: a colour reads as warm or cool only in comparison to what is around it.</li>
+      <li><b>Equiluminance</b>Two colours of equal value but different hue. Edges between them look unstable, and they vanish in a greyscale photograph.</li>
+    </ul>
+  </section>
+
+  <!-- ---------- 2. One colour as two ---------- -->
+  <section id="oneAsTwo" aria-labelledby="o2Title">
+    <h2 class="sec-title" id="o2Title">One colour looks like two</h2>
+    <p class="sec-lead">Both small squares are exactly the same colour. The grounds make them look different. Choose a study or set your own colours, then press <em>Reveal</em> to join the two squares with a bridge of the same colour.</p>
+    <div class="tool">
+      <div class="paper">
+        <svg id="o2Svg" viewBox="0 0 800 400" role="img" aria-label="Two coloured grounds side by side, each with a small square of the same inner colour at its centre."></svg>
+        <div class="foot" aria-live="polite" id="o2Foot"></div>
+      </div>
+      <div class="panel">
+        <h3 class="label" id="o2PresetLbl">Studies</h3>
+        <div class="bgrid two" role="group" aria-labelledby="o2PresetLbl" id="o2Presets"></div>
+        <h3 class="label">Colours</h3>
+        <label class="cfield"><input type="color" id="o2Inner"> Inner square <code id="o2InnerHex"></code></label>
+        <label class="cfield"><input type="color" id="o2GL"> Left ground <code id="o2GLHex"></code></label>
+        <label class="cfield"><input type="color" id="o2GR"> Right ground <code id="o2GRHex"></code></label>
+        <label class="range" style="margin-top:10px"><span>Inner square size <output id="o2SizeOut"></output></span><input type="range" id="o2Size" min="10" max="60" value="28"></label>
+        <div class="actions">
+          <button type="button" class="btn primary" id="o2Reveal" aria-pressed="false">Reveal: show the bridge</button>
+          <button type="button" class="btn ghost" id="o2Slide" aria-pressed="false">Slide the squares together</button>
+          <button type="button" class="btn ghost" id="o2Swap">Swap the grounds</button>
+        </div>
+        <p class="hint">The smaller the inner square, the stronger the effect: more of what you see is ground.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- 3. Two colours as one ---------- -->
+  <section id="twoAsOne" aria-labelledby="t1Title">
+    <h2 class="sec-title" id="t1Title">Two colours look like one</h2>
+    <p class="sec-lead">The reverse study. Adjust the right-hand square with the sliders until it looks the same as the left-hand square on its own ground. When you are satisfied, press <em>Reveal</em>: the grounds are removed and the two squares are put side by side, with the real difference measured.</p>
+    <div class="tool">
+      <div class="paper">
+        <svg id="t1Svg" viewBox="0 0 800 400" role="img" aria-label="Two grounds with a square on each. The right square is adjustable."></svg>
+        <div class="foot" aria-live="polite" id="t1Foot"></div>
+      </div>
+      <div class="panel">
+        <h3 class="label" id="t1PresetLbl">Challenge</h3>
+        <div class="bgrid two" role="group" aria-labelledby="t1PresetLbl" id="t1Presets"></div>
+        <h3 class="label">Right-hand square (HSL)</h3>
+        <label class="range"><span>Hue <output id="t1HOut"></output></span><input type="range" id="t1H" min="0" max="359" value="0"></label>
+        <label class="range"><span>Saturation <output id="t1SOut"></output></span><input type="range" id="t1S" min="0" max="100" value="0"></label>
+        <label class="range"><span>Lightness <output id="t1LOut"></output></span><input type="range" id="t1L" min="0" max="100" value="50"></label>
+        <details>
+          <summary class="hint" style="cursor:pointer;min-height:32px">Change the grounds and target colour</summary>
+          <label class="cfield"><input type="color" id="t1Target"> Left square (target) <code id="t1TargetHex"></code></label>
+          <label class="cfield"><input type="color" id="t1GL"> Left ground <code id="t1GLHex"></code></label>
+          <label class="cfield"><input type="color" id="t1GR"> Right ground <code id="t1GRHex"></code></label>
+        </details>
+        <div class="actions">
+          <button type="button" class="btn primary" id="t1Reveal" aria-pressed="false">Reveal the real difference</button>
+          <div class="row2">
+            <button type="button" class="btn ghost" id="t1Typical">Typical match</button>
+            <button type="button" class="btn ghost" id="t1Reset">Start again</button>
+          </div>
+        </div>
+        <div class="readout" id="t1Read" hidden aria-live="polite">
+          <div><b id="t1dE"></b><span>ΔE<sub>00</sub> (overall)</span></div>
+          <div><b id="t1dL"></b><span>ΔL* (lightness)</span></div>
+          <div><b id="t1dC"></b><span>ΔC* (chroma)</span></div>
+          <div><b id="t1dH"></b><span>Δh (hue angle)</span></div>
+        </div>
+        <p class="verdict" id="t1Verdict" hidden></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- 4. Afterimage ---------- -->
+  <section id="afterimage" aria-labelledby="aiTitle">
+    <h2 class="sec-title" id="aiTitle">Afterimage: successive contrast</h2>
+    <p class="sec-lead">Stare at the black dot without moving your eyes while the countdown runs. When the field turns plain, keep looking at the dot: a ghost of the shape appears in roughly the opposite colour. The cones that were working hardest have adapted, so the plain field briefly looks tinted with their opponent colour.</p>
+    <div class="tool">
+      <div class="paper">
+        <svg id="aiStage" viewBox="0 0 800 450" role="img" aria-label="Afterimage stage: a saturated shape with a fixation dot at its centre."></svg>
+        <div class="foot"><span class="ai-status" id="aiStatus" aria-live="polite"></span><p id="aiTip"></p></div>
+      </div>
+      <div class="panel">
+        <h3 class="label" id="aiShapeLbl">Shape</h3>
+        <div class="bgrid" role="group" aria-labelledby="aiShapeLbl" id="aiShapes"></div>
+        <h3 class="label" id="aiColLbl">Colour</h3>
+        <div class="bgrid two" role="group" aria-labelledby="aiColLbl" id="aiCols"></div>
+        <label class="cfield" id="aiCustomWrap"><input type="color" id="aiCustom" value="#e4252c"> Own colour <code id="aiCustomHex"></code></label>
+        <h3 class="label" id="aiFieldLbl">Plain field afterwards</h3>
+        <div class="bgrid" role="group" aria-labelledby="aiFieldLbl" id="aiFields"></div>
+        <label class="range" style="margin-top:12px"><span>Staring time <output id="aiDurOut"></output></span><input type="range" id="aiDur" min="10" max="45" step="5" value="25"></label>
+        <label class="check"><input type="checkbox" id="aiAuto"> Switch to the plain field automatically</label>
+        <div class="actions">
+          <button type="button" class="btn primary" id="aiStart">Start staring</button>
+          <button type="button" class="btn ghost" id="aiSwitch" disabled>Switch to plain field</button>
+        </div>
+        <div class="swrow" id="aiPredict" hidden><svg id="aiPredSw" viewBox="0 0 800 450" aria-hidden="true"></svg><span id="aiPredTxt"></span></div>
+        <p class="hint" id="aiNote">Afterimages are brief and faint; blinking can make them flicker back. A grey field shows the pure opponent colour; a coloured field mixes with it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- 5. Temperature ---------- -->
+  <section id="temperature" aria-labelledby="tpTitle">
+    <h2 class="sec-title" id="tpTitle">Colour temperature is relative</h2>
+    <p class="sec-lead">The centre tile is the same colour in both groups. Among warmer neighbours it reads as cool; among cooler neighbours it reads as warm. Painters use this constantly: a grey can be made to glow warm or recede cool purely by what is placed next to it.</p>
+    <div class="tool">
+      <div>
+        <div class="temp">
+          <figure class="paper"><svg id="tpWarm" viewBox="0 0 300 300" role="img" aria-label="The test colour surrounded by warmer neighbours."></svg>
+            <figcaption><b>Among warmer colours</b><span id="tpWarmCap"></span></figcaption></figure>
+          <figure class="paper"><svg id="tpCool" viewBox="0 0 300 300" role="img" aria-label="The test colour surrounded by cooler neighbours."></svg>
+            <figcaption><b>Among cooler colours</b><span id="tpCoolCap"></span></figcaption></figure>
+        </div>
+      </div>
+      <div class="panel">
+        <h3 class="label" id="tpPresetLbl">Test colour</h3>
+        <div class="bgrid two" role="group" aria-labelledby="tpPresetLbl" id="tpPresets"></div>
+        <label class="cfield" style="margin-top:6px"><input type="color" id="tpTest"> Test colour <code id="tpTestHex"></code></label>
+        <label class="range" style="margin-top:10px"><span>How far the neighbours lean <output id="tpShiftOut"></output></span><input type="range" id="tpShift" min="20" max="100" value="60"></label>
+        <label class="check"><input type="checkbox" id="tpIsolate"> Neutralise the neighbours (same value, grey)</label>
+        <p class="hint" aria-live="polite" id="tpInfo"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- 6. Value vs hue ---------- -->
+  <section id="value" aria-labelledby="vhTitle">
+    <h2 class="sec-title" id="vhTitle">Value vs hue</h2>
+    <p class="sec-lead">Hue grabs attention, but value (lightness) carries the structure of a picture. Decide which pairs below are the same value, then switch to greyscale to check. Greyscale here is computed from CIELAB L*, which follows perceived lightness.</p>
+    <div class="gbar">
+      <button type="button" class="tbtn" id="vhGrey" aria-pressed="false">Show in greyscale</button>
+      <span class="hint" style="margin:0" id="vhScore" aria-live="polite"></span>
+    </div>
+    <div class="pairs" id="vhPairs"></div>
+
+    <h3 class="sec-title" style="font-size:18px;margin-top:32px">Vibrating edges</h3>
+    <p class="sec-lead">Complementary colours of equal value produce edges that shimmer and seem to move, because the eye's luminance channel finds no edge while its colour channels find a strong one. Bring the lightness difference to zero to see the effect at its strongest, then view it in greyscale: the pattern disappears.</p>
+    <div class="tool">
+      <div class="paper">
+        <svg id="vbSvg" viewBox="0 0 800 340" role="img" aria-label="A pattern of two complementary colours."></svg>
+        <div class="foot" aria-live="polite" id="vbFoot"></div>
+      </div>
+      <div class="panel">
+        <h3 class="label" id="vbPatLbl">Pattern</h3>
+        <div class="bgrid" role="group" aria-labelledby="vbPatLbl" id="vbPats"></div>
+        <h3 class="label">Colours</h3>
+        <label class="range"><span>Hue of colour A <output id="vbHOut"></output></span><input type="range" id="vbH" min="0" max="359" value="30"></label>
+        <label class="range"><span>Chroma <output id="vbCOut"></output></span><input type="range" id="vbC" min="10" max="90" value="60"></label>
+        <label class="range"><span>Lightness L* of A <output id="vbLOut"></output></span><input type="range" id="vbL" min="30" max="80" value="55"></label>
+        <label class="range"><span>Lightness difference B − A <output id="vbDOut"></output></span><input type="range" id="vbD" min="-40" max="40" value="0"></label>
+        <div class="actions"><button type="button" class="btn ghost" id="vbEq">Make them equal value</button></div>
+        <p class="hint">Colour B is the complement of A (hue + 180° in CIELAB). If a colour falls outside the screen's range its chroma is reduced, keeping its L*.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- 7. Studio exercises ---------- -->
+  <section id="studio" aria-labelledby="stTitle">
+    <h2 class="sec-title" id="stTitle">Studio exercises</h2>
+    <p class="sec-lead">Classic Albers studies to do with coloured paper (Color-aid, sugar paper, magazine pages cut into flat areas) or with gouache or acrylic painted flat. Paper is better for a first attempt: you can try twenty candidates in the time it takes to mix one.</p>
+    <ol class="ex">
+      <li><b>One colour as two</b><p>Find one small piece of colour and two grounds that make it look as different as possible. Cut two identical inner squares from the same sheet. Try light against dark first, then two grounds of equal value but different hue.</p><p class="look">Look for: which ground change moves the inner colour the most, value, hue or saturation?</p></li>
+      <li><b>Two colours as one</b><p>Choose two grounds, then find two different inner colours that look identical on them. The colour on the darker ground usually needs to be darker; on a red ground it needs to be redder.</p><p class="look">Look for: how far apart the two inner colours are when taken off their grounds.</p></li>
+      <li><b>Afterimage in the work</b><p>Stare at a saturated shape for 30 seconds, then look at white paper. Paint or cut the afterimage colour you saw and place it next to the original.</p><p class="look">Look for: whether your painted complement matches the opponent colour the eye produced.</p></li>
+      <li><b>Vanishing boundaries</b><p>Place two different hues side by side and adjust one until the edge between them almost disappears. Photograph in greyscale to confirm equal value.</p><p class="look">Look for: the edge softening; this is how to make forms merge in a painting.</p></li>
+      <li><b>Illusion of transparency</b><p>Two overlapping rectangles, A and B, where the overlap is a third, separate colour chosen to look like a mix of the two. Make B appear to lie on top of A, then find a middle colour that makes A appear on top.</p><p class="look">Look for: how the overlap colour's value decides which layer seems in front.</p></li>
+      <li><b>Warm and cool</b><p>Make one neutral grey read as warm in one study and cool in another, only by changing its surround. Then do the same with a green or a violet.</p><p class="look">Look for: temperature shifts in your own paintings when you repaint an adjacent area.</p></li>
+    </ol>
+    <div class="sheet-ctl">
+      <div class="bgrid" role="group" aria-label="Sheet layout" id="shLayouts"></div>
+      <button type="button" class="btn primary" id="shPrint">Print sheet</button>
+    </div>
+    <div class="sheet" id="sheet">
+      <div class="head">
+        <div><h3 id="shTitle">COLOUR INTERACTION</h3><p class="sub" id="shSub"></p></div>
+        <div class="who">NAME <i></i> DATE <i class="short"></i></div>
+      </div>
+      <svg id="shv" viewBox="0 0 1000 1180" preserveAspectRatio="xMidYMin meet" aria-label="Exercise frames to fill in with collage or paint"></svg>
+      <p class="brief" id="shBrief"></p>
+    </div>
+  </section>
+</main>
+
+<script src="site.js"></script>
+<script>
+(function () {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const r1 = n => Math.round(n * 10) / 10;
+
+/* ================= Colour maths (sRGB, D65) ================= */
+const clamp01 = v => Math.min(1, Math.max(0, v));
+const toLin = c => c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+const toGam = c => c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+const WHITE = [0.95047, 1, 1.08883];
+const EPS = 216 / 24389, KAP = 24389 / 27;
+
+function hexToRgb(h) { return [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255); }
+function rgbToHex(rgb) { return '#' + rgb.map(v => Math.round(clamp01(v) * 255).toString(16).padStart(2, '0')).join(''); }
+
+function rgbToLab(rgb) {
+  const [r, g, b] = rgb.map(toLin);
+  const xyz = [
+    0.4124564 * r + 0.3575761 * g + 0.1804375 * b,
+    0.2126729 * r + 0.7151522 * g + 0.0721750 * b,
+    0.0193339 * r + 0.1191920 * g + 0.9503041 * b];
+  const f = xyz.map((v, i) => { const t = v / WHITE[i]; return t > EPS ? Math.cbrt(t) : (KAP * t + 16) / 116; });
+  return { L: 116 * f[1] - 16, a: 500 * (f[0] - f[1]), b: 200 * (f[1] - f[2]) };
+}
+function labToRgb(L, a, b) {
+  const fy = (L + 16) / 116, fx = fy + a / 500, fz = fy - b / 200;
+  const inv = t => { const t3 = t * t * t; return t3 > EPS ? t3 : (116 * t - 16) / KAP; };
+  const X = inv(fx) * WHITE[0], Y = L > KAP * EPS ? fy * fy * fy : L / KAP, Z = inv(fz) * WHITE[2];
+  const lr = 3.2404542 * X - 1.5371385 * Y - 0.4985314 * Z;
+  const lg = -0.9692660 * X + 1.8760108 * Y + 0.0415560 * Z;
+  const lb = 0.0556434 * X - 0.2040259 * Y + 1.0572252 * Z;
+  return [lr, lg, lb].map(v => v < 0 ? -toGam(-v) : toGam(v));
+}
+const hexToLab = h => rgbToLab(hexToRgb(h));
+function labToLch(c) { let h = Math.atan2(c.b, c.a) * 180 / Math.PI; if (h < 0) h += 360; return { L: c.L, C: Math.hypot(c.a, c.b), h }; }
+const inGamut = rgb => rgb.every(v => v >= -0.0005 && v <= 1.0005);
+// LCh to hex, reducing chroma (keeping L* and hue) until the colour fits in sRGB
+function lchToHex(L, C, h) {
+  L = Math.min(100, Math.max(0, L));
+  const at = c => labToRgb(L, c * Math.cos(h * Math.PI / 180), c * Math.sin(h * Math.PI / 180));
+  let rgb = at(C);
+  if (!inGamut(rgb)) {
+    let lo = 0, hi = C;
+    for (let k = 0; k < 22; k++) { const m = (lo + hi) / 2; if (inGamut(at(m))) lo = m; else hi = m; }
+    rgb = at(lo);
+  }
+  return rgbToHex(rgb);
+}
+const labToHex = c => { const l = labToLch(c); return lchToHex(l.L, l.C, l.h); };
+// Neutral grey with the same L* (perceived lightness)
+const greyOf = hex => lchToHex(hexToLab(hex).L, 0, 0);
+// Relative luminance and WCAG contrast ratio
+const lum = hex => { const [r, g, b] = hexToRgb(hex).map(toLin); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+const contrast = (x, y) => { const a = lum(x), b = lum(y); return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05); };
+
+// CIEDE2000 colour difference
+function dE00(p, q) {
+  const rad = Math.PI / 180;
+  const C1 = Math.hypot(p.a, p.b), C2 = Math.hypot(q.a, q.b), Cb = (C1 + C2) / 2;
+  const G = 0.5 * (1 - Math.sqrt(Math.pow(Cb, 7) / (Math.pow(Cb, 7) + Math.pow(25, 7))));
+  const a1 = (1 + G) * p.a, a2 = (1 + G) * q.a;
+  const c1 = Math.hypot(a1, p.b), c2 = Math.hypot(a2, q.b);
+  const hp = (b, a) => { if (a === 0 && b === 0) return 0; const h = Math.atan2(b, a) / rad; return h < 0 ? h + 360 : h; };
+  const h1 = hp(p.b, a1), h2 = hp(q.b, a2);
+  const dL = q.L - p.L, dC = c2 - c1;
+  let dh = 0;
+  if (c1 * c2 !== 0) { dh = h2 - h1; if (dh > 180) dh -= 360; else if (dh < -180) dh += 360; }
+  const dH = 2 * Math.sqrt(c1 * c2) * Math.sin(dh * rad / 2);
+  const Lb = (p.L + q.L) / 2, cb = (c1 + c2) / 2;
+  let hb = h1 + h2;
+  if (c1 * c2 !== 0) { if (Math.abs(h1 - h2) > 180) hb += (h1 + h2 < 360) ? 360 : -360; hb /= 2; }
+  const T = 1 - 0.17 * Math.cos((hb - 30) * rad) + 0.24 * Math.cos(2 * hb * rad) + 0.32 * Math.cos((3 * hb + 6) * rad) - 0.20 * Math.cos((4 * hb - 63) * rad);
+  const dTh = 30 * Math.exp(-Math.pow((hb - 275) / 25, 2));
+  const Rc = 2 * Math.sqrt(Math.pow(cb, 7) / (Math.pow(cb, 7) + Math.pow(25, 7)));
+  const Sl = 1 + 0.015 * Math.pow(Lb - 50, 2) / Math.sqrt(20 + Math.pow(Lb - 50, 2));
+  const Sc = 1 + 0.045 * cb, Sh = 1 + 0.015 * cb * T;
+  const Rt = -Math.sin(2 * dTh * rad) * Rc;
+  return Math.sqrt(Math.pow(dL / Sl, 2) + Math.pow(dC / Sc, 2) + Math.pow(dH / Sh, 2) + Rt * (dC / Sc) * (dH / Sh));
+}
+
+// HSL (the sliders in the matching study)
+function hslToHex(h, s, l) {
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+  return rgbToHex([f(0), f(8), f(4)]);
+}
+function hexToHsl(hex) {
+  const [r, g, b] = hexToRgb(hex), mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+  const l = (mx + mn) / 2;
+  let h = 0, s = 0;
+  if (d) {
+    s = d / (1 - Math.abs(2 * l - 1));
+    h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    h = (h * 60 + 360) % 360;
+  }
+  return { h: Math.round(h) % 360, s: Math.round(s * 100), l: Math.round(l * 100) };
+}
+
+// Rough hue names for CIELAB hue angles, used in the explanations
+function hueName(h) {
+  h = ((h % 360) + 360) % 360;
+  const N = [[10, 'red-purple'], [48, 'red'], [75, 'orange'], [105, 'yellow'], [130, 'yellow-green'], [170, 'green'], [225, 'blue-green'], [312, 'blue'], [345, 'purple'], [360, 'red-purple']];
+  return N.find(([lim]) => h < lim)[1];
+}
+function describe(hex) {
+  const c = labToLch(hexToLab(hex));
+  if (c.C < 8) return c.L > 70 ? 'light grey' : c.L < 35 ? 'dark grey' : 'grey';
+  return (c.C < 25 ? 'muted ' : '') + hueName(c.h);
+}
+// Ink that reads on a given colour
+const inkOn = hex => hexToLab(hex).L > 58 ? '#141414' : '#fbfaf6';
+
+/* ================= Small UI helpers ================= */
+function pickButtons(el, items, current, onPick) {
+  el.innerHTML = '';
+  items.forEach(it => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tbtn' + (it.chip ? ' preset' : '');
+    b.innerHTML = (it.chip ? '<span class="chip" aria-hidden="true">' + it.chip.map((c, i) => '<i' + (i === 1 && it.chip.length === 3 ? ' class="in"' : '') + ' style="background:' + c + '"></i>').join('') + '</span>' : '') + '<span>' + it.label + '</span>';
+    b.setAttribute('aria-pressed', String(it.key === current));
+    b.addEventListener('click', () => { press(el, b); onPick(it.key); });
+    el.appendChild(b);
+  });
+}
+function press(el, b) { el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b))); }
+function unpress(el) { el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', 'false')); }
+function bindColour(id, onChange) {
+  const inp = $(id), out = $(id + 'Hex');
+  const set = v => { inp.value = v; if (out) out.textContent = v.toUpperCase(); };
+  inp.addEventListener('input', () => { if (out) out.textContent = inp.value.toUpperCase(); onChange(inp.value); });
+  return set;
+}
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('ci.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('ci.' + k, JSON.stringify(v)); } catch (e) { /* ignore */ } },
+};
+const rect = (x, y, w, h, fill, extra) => '<rect x="' + r1(x) + '" y="' + r1(y) + '" width="' + r1(w) + '" height="' + r1(h) + '" fill="' + fill + '"' + (extra || '') + '/>';
+
+/* ================= 2. One colour as two ================= */
+const O2_PRESETS = [
+  { key: 'value', label: 'Light and dark', inner: '#8a8a8a', gl: '#1c1c1c', gr: '#f0efeb',
+    why: 'Value contrast: on the black ground the grey looks lighter, on the white ground darker.' },
+  { key: 'hue', label: 'Warm and cool', inner: '#9c907c', gl: '#2c67a8', gr: '#e0842e',
+    why: 'Hue contrast: each ground pushes the inner colour towards its complement, so the neutral looks warmer on blue and cooler on orange.' },
+  { key: 'sat', label: 'Dull and bright', inner: '#6f8f63', gl: '#23a33a', gr: '#8b8b86',
+    why: 'Saturation contrast: next to the intense green the same green looks greyer; on the grey it looks greener.' },
+  { key: 'albers', label: 'Ochre (Albers)', inner: '#b3915a', gl: '#4b2f73', gr: '#e7c42a',
+    why: 'Albers\' ochre: on violet it looks light and yellowish, on yellow it looks darker and brownish. Value and hue contrast work together.' },
+];
+const O2 = { inner: '', gl: '', gr: '', size: 28, bridge: false, slide: false, preset: 'albers' };
+
+const o2Set = {
+  inner: bindColour('o2Inner', v => { O2.inner = v; o2Custom(); }),
+  gl: bindColour('o2GL', v => { O2.gl = v; o2Custom(); }),
+  gr: bindColour('o2GR', v => { O2.gr = v; o2Custom(); }),
+};
+function o2Custom() { O2.preset = null; unpress($('o2Presets')); drawO2(); }
+function o2Load(key) {
+  const p = O2_PRESETS.find(x => x.key === key);
+  O2.preset = key; O2.inner = p.inner; O2.gl = p.gl; O2.gr = p.gr;
+  o2Set.inner(p.inner); o2Set.gl(p.gl); o2Set.gr(p.gr);
+  drawO2();
+}
+// Explain what the two grounds do to the inner colour, from their CIELAB values
+function explainGrounds(inner, gl, gr) {
+  const a = labToLch(hexToLab(gl)), b = labToLch(hexToLab(gr)), c = labToLch(hexToLab(inner));
+  const out = [];
+  if (Math.abs(a.L - b.L) > 8) {
+    const darker = a.L < b.L ? 'left' : 'right', lighter = darker === 'left' ? 'right' : 'left';
+    out.push('On the darker ' + darker + ' ground the square looks lighter; on the ' + lighter + ' ground it looks darker.');
+  }
+  const pushes = [['left', a], ['right', b]].filter(([, g]) => g.C > 18).map(([side, g]) => 'the ' + hueName(g.h) + ' ' + side + ' ground pushes it towards ' + hueName(g.h + 180));
+  if (pushes.length) out.push(pushes.join('; ').replace(/^t/, 'T') + '.');
+  if (Math.abs(a.C - b.C) > 20 && c.C > 10) out.push('It looks duller beside the more saturated ' + (a.C > b.C ? 'left' : 'right') + ' ground.');
+  return out.join(' ') || 'The grounds are too similar to change the square much. Try grounds that differ in value or hue.';
+}
+function drawO2() {
+  const s = 400 * O2.size / 100, y = 200 - s / 2;
+  const shift = O2.slide ? 200 - s / 2 : 0;
+  const bh = Math.max(12, s * 0.28);
+  let h = rect(0, 0, 400, 400, O2.gl, ' class="fl"') + rect(400, 0, 400, 400, O2.gr, ' class="fl"');
+  h += rect(200, 200 - bh / 2, 400, bh, O2.inner, ' class="bridge' + (O2.bridge ? ' on' : '') + '"');
+  h += rect(200 - s / 2, y, s, s, O2.inner, ' class="mv" style="transform:translateX(' + r1(shift) + 'px)"');
+  h += rect(600 - s / 2, y, s, s, O2.inner, ' class="mv" style="transform:translateX(' + r1(-shift) + 'px)"');
+  const svg = $('o2Svg');
+  // Keep existing nodes so the bridge and slide can animate: update attributes in place
+  if (svg.childElementCount === 5) {
+    const n = svg.children, tmp = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    tmp.innerHTML = h;
+    [...tmp.children].forEach((src, i) => { for (const at of src.attributes) n[i].setAttribute(at.name, at.value); });
+  } else svg.innerHTML = h;
+  $('o2SizeOut').textContent = O2.size + '%';
+  $('o2Reveal').setAttribute('aria-pressed', String(O2.bridge));
+  $('o2Reveal').textContent = O2.bridge ? 'Hide the bridge' : 'Reveal: show the bridge';
+  $('o2Slide').setAttribute('aria-pressed', String(O2.slide));
+  $('o2Slide').textContent = O2.slide ? 'Slide the squares apart' : 'Slide the squares together';
+  const p = O2_PRESETS.find(x => x.key === O2.preset);
+  const lab = hexToLab(O2.inner);
+  $('o2Foot').innerHTML = '<b>Both squares: ' + O2.inner.toUpperCase() + '</b> (L* ' + Math.round(lab.L) + ', ' + describe(O2.inner) + ', ΔE<sub>00</sub> between them = 0)<p>' + (p ? p.why : explainGrounds(O2.inner, O2.gl, O2.gr)) + '</p>';
+}
+pickButtons($('o2Presets'), O2_PRESETS.map(p => ({ key: p.key, label: p.label, chip: [p.gl, p.inner, p.gr] })), O2.preset, o2Load);
+$('o2Size').addEventListener('input', e => { O2.size = +e.target.value; drawO2(); });
+// The bridge and the slide are two alternative proofs, so only one is shown at a time
+$('o2Reveal').addEventListener('click', () => { O2.bridge = !O2.bridge; if (O2.bridge) O2.slide = false; drawO2(); });
+$('o2Slide').addEventListener('click', () => { O2.slide = !O2.slide; if (O2.slide) O2.bridge = false; drawO2(); });
+$('o2Swap').addEventListener('click', () => { [O2.gl, O2.gr] = [O2.gr, O2.gl]; o2Set.gl(O2.gl); o2Set.gr(O2.gr); o2Custom(); });
+o2Load(O2.preset);
+
+/* ================= 3. Two colours as one ================= */
+const T1_PRESETS = [
+  { key: 'value', label: 'Lightness', target: '#808080', gl: '#161616', gr: '#f2f1ec' },
+  { key: 'hue', label: 'Hue', target: '#a79a86', gl: '#c8412f', gr: '#2f8a6c' },
+  { key: 'sat', label: 'Saturation', target: '#5d7fa6', gl: '#8a8a88', gr: '#1f55c9' },
+  { key: 'albers', label: 'Violet and yellow', target: '#a58a62', gl: '#e7c42a', gr: '#4b2f73' },
+];
+const T1 = { target: '', gl: '', gr: '', hsl: { h: 0, s: 0, l: 50 }, reveal: false, preset: 'value' };
+const t1Set = {
+  target: bindColour('t1Target', v => { T1.target = v; t1Custom(); }),
+  gl: bindColour('t1GL', v => { T1.gl = v; t1Custom(); }),
+  gr: bindColour('t1GR', v => { T1.gr = v; t1Custom(); }),
+};
+function t1Custom() { T1.preset = null; unpress($('t1Presets')); drawT1(); }
+function t1SetHsl(hsl) {
+  T1.hsl = hsl;
+  $('t1H').value = hsl.h; $('t1S').value = hsl.s; $('t1L').value = hsl.l;
+}
+function t1Load(key) {
+  const p = T1_PRESETS.find(x => x.key === key);
+  T1.preset = key; T1.target = p.target; T1.gl = p.gl; T1.gr = p.gr; T1.reveal = false;
+  t1Set.target(p.target); t1Set.gl(p.gl); t1Set.gr(p.gr);
+  t1SetHsl(hexToHsl(p.target)); // start identical: they will not look it
+  drawT1();
+}
+const t1Colour = () => hslToHex(T1.hsl.h, T1.hsl.s, T1.hsl.l);
+function drawT1() {
+  const mine = t1Colour();
+  const s = 110, y = 200 - s / 2, rev = T1.reveal;
+  const NEUTRAL = '#8f8e8a';
+  const shift = rev ? 200 - s / 2 : 0; // squares meet edge to edge at the centre line
+  let h = rect(0, 0, 400, 400, rev ? NEUTRAL : T1.gl, ' class="fl"') + rect(400, 0, 400, 400, rev ? NEUTRAL : T1.gr, ' class="fl"');
+  h += rect(200 - s / 2, y, s, s, T1.target, ' class="mv" style="transform:translateX(' + r1(shift) + 'px)"');
+  h += rect(600 - s / 2, y, s, s, mine, ' class="mv" style="transform:translateX(' + r1(-shift) + 'px)"');
+  if (rev) {
+    h += '<text x="345" y="' + (y - 14) + '" text-anchor="middle" class="lbl" style="fill:#141414">TARGET</text>';
+    h += '<text x="455" y="' + (y - 14) + '" text-anchor="middle" class="lbl" style="fill:#141414">YOURS</text>';
+  }
+  const svg = $('t1Svg');
+  if (svg.childElementCount >= 4) {
+    // Update the four shapes in place so the reveal animates, then replace the labels
+    const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    tmp.innerHTML = h;
+    const n = svg.children;
+    for (let i = 0; i < 4; i++) for (const at of tmp.children[i].attributes) n[i].setAttribute(at.name, at.value);
+    while (svg.childElementCount > 4) svg.lastChild.remove();
+    [...tmp.children].slice(4).forEach(el => svg.appendChild(el));
+  } else svg.innerHTML = h;
+
+  $('t1HOut').textContent = T1.hsl.h + '°';
+  $('t1SOut').textContent = T1.hsl.s + '%';
+  $('t1LOut').textContent = T1.hsl.l + '%';
+  const b = $('t1Reveal');
+  b.setAttribute('aria-pressed', String(rev));
+  b.textContent = rev ? 'Put the grounds back' : 'Reveal the real difference';
+
+  const A = hexToLab(T1.target), B = hexToLab(mine), la = labToLch(A), lb = labToLch(B);
+  const d = dE00(A, B);
+  let dh = lb.h - la.h; if (dh > 180) dh -= 360; if (dh < -180) dh += 360;
+  $('t1Read').hidden = !rev; $('t1Verdict').hidden = !rev;
+  $('t1dE').textContent = d.toFixed(1);
+  $('t1dL').textContent = (B.L - A.L >= 0 ? '+' : '') + (B.L - A.L).toFixed(1);
+  $('t1dC').textContent = (lb.C - la.C >= 0 ? '+' : '') + (lb.C - la.C).toFixed(1);
+  $('t1dH').textContent = (la.C < 4 || lb.C < 4) ? 'n/a' : (dh >= 0 ? '+' : '') + Math.round(dh) + '°';
+  const v = d < 1 ? 'Physically almost identical, so the grounds are fooling you less than you thought, or you matched the numbers rather than the look.'
+    : d < 3 ? 'Only just different physically. The grounds had a small effect here.'
+    : d < 8 ? 'Clearly different colours that you judged to look alike: that gap is the ground\'s effect.'
+    : 'Very different colours made to look alike. The grounds are doing a lot of work.';
+  $('t1Verdict').textContent = v;
+  const hsl = 'HSL ' + T1.hsl.h + '°, ' + T1.hsl.s + '%, ' + T1.hsl.l + '%';
+  $('t1Foot').innerHTML = rev
+    ? '<b>Target ' + T1.target.toUpperCase() + ' · yours ' + mine.toUpperCase() + '</b><p>Grounds removed. ΔE<sub>00</sub> = ' + d.toFixed(1) + ' (L* ' + A.L.toFixed(1) + ' vs ' + B.L.toFixed(1) + ').</p>'
+    : '<b>Yours: ' + mine.toUpperCase() + '</b> (' + hsl + ')<p>' + (mine === T1.target ? 'At the moment both squares are physically identical. Do they look it?' : 'Keep adjusting until the right square looks the same as the left one, then reveal.') + '</p>';
+}
+// A typical perceptual match: simultaneous contrast pushes a colour away from its ground,
+// so a match shifts the colour partly towards the difference between the grounds (a rough model).
+function typicalMatch() {
+  const c = hexToLab(T1.target), a = hexToLab(T1.gl), b = hexToLab(T1.gr), k = 0.15;
+  return labToHex({ L: c.L + k * (b.L - a.L), a: c.a + k * (b.a - a.a), b: c.b + k * (b.b - a.b) });
+}
+pickButtons($('t1Presets'), T1_PRESETS.map(p => ({ key: p.key, label: p.label, chip: [p.gl, p.target, p.gr] })), T1.preset, t1Load);
+['t1H', 't1S', 't1L'].forEach(id => $(id).addEventListener('input', () => {
+  T1.hsl = { h: +$('t1H').value, s: +$('t1S').value, l: +$('t1L').value }; drawT1();
+}));
+$('t1Reveal').addEventListener('click', () => { T1.reveal = !T1.reveal; drawT1(); });
+$('t1Typical').addEventListener('click', () => { t1SetHsl(hexToHsl(typicalMatch())); drawT1(); });
+$('t1Reset').addEventListener('click', () => { T1.reveal = false; t1SetHsl(hexToHsl(T1.target)); drawT1(); });
+t1Load(T1.preset);
+
+/* ================= 4. Afterimage ================= */
+const AI_COLS = [
+  { key: 'red', label: 'Red', hex: '#e4252c' },
+  { key: 'green', label: 'Green', hex: '#1f9e3a' },
+  { key: 'blue', label: 'Blue', hex: '#1f4fd0' },
+  { key: 'yellow', label: 'Yellow', hex: '#ffd500' },
+  { key: 'magenta', label: 'Magenta', hex: '#d0239a' },
+  { key: 'own', label: 'Own (below)', hex: null },
+];
+const AI_FIELDS = [
+  { key: 'white', label: 'White', hex: '#fbfaf6' },
+  { key: 'grey', label: 'Grey', hex: '#a6a5a1' },
+  { key: 'yellow', label: 'Pale yellow', hex: '#f3e6a2' },
+];
+const AI = { shape: 'disc', col: 'red', field: 'grey', dur: store.get('aiDur', 25), auto: !reduceMotion, phase: 'idle', end: 0, timer: 0 };
+const setAiCustom = bindColour('aiCustom', () => { AI.col = 'own'; press($('aiCols'), $('aiCols').lastChild); drawAI(); });
+setAiCustom('#e4252c');
+const aiHex = () => AI.col === 'own' ? $('aiCustom').value : AI_COLS.find(c => c.key === AI.col).hex;
+const fieldHex = () => AI_FIELDS.find(f => f.key === AI.field).hex;
+// Tricolour stripes in cyan, magenta and yellow give red, green and blue afterimages
+const TRI = ['#00a6d6', '#d0239a', '#ffd500'];
+
+function aiShapeSVG(col, tri) {
+  if (AI.shape === 'disc') return '<circle cx="400" cy="225" r="140" fill="' + col + '"/>';
+  if (AI.shape === 'cross') return '<path d="M345 85h110v85h85v110h-85v85h-110v-85h-85v-110h85z" fill="' + col + '"/>';
+  return (tri || TRI).map((c, i) => rect(220 + i * 120, 105, 120, 240, c)).join('');
+}
+function drawAI() {
+  const stare = AI.phase === 'stare' || AI.phase === 'ready' || AI.phase === 'idle';
+  const bg = stare ? '#fbfaf6' : fieldHex();
+  let h = rect(0, 0, 800, 450, bg);
+  if (stare) h += aiShapeSVG(aiHex());
+  // Fixation dot: black with a pale ring so it reads on any colour
+  h += '<circle cx="400" cy="225" r="8" fill="#141414" stroke="#fbfaf6" stroke-width="3"/>';
+  if (AI.phase === 'stare') {
+    const left = Math.max(0, Math.ceil((AI.end - Date.now()) / 1000));
+    h += '<text x="770" y="50" text-anchor="end" style="font:800 34px var(--font);fill:#55534e" aria-hidden="true">' + left + '</text>';
+  }
+  if (AI.phase === 'ready') h += '<text x="400" y="420" text-anchor="middle" style="font:700 20px var(--font);fill:#141414">Keep looking at the dot, then switch</text>';
+  $('aiStage').innerHTML = h;
+  $('aiDurOut').textContent = AI.dur + ' s';
+  const tips = {
+    idle: ['Ready', 'Sit at a normal distance, press Start and fix your eyes on the dot.'],
+    stare: ['Staring…', 'Keep your eyes still on the dot. Try not to blink.'],
+    ready: ['Time is up', AI.auto ? '' : 'Keep your eyes on the dot and press "Switch to plain field" (or click the picture).'],
+    after: ['Plain field', 'Keep looking at the dot. The ghost fades after a few seconds.'],
+  };
+  $('aiStatus').textContent = tips[AI.phase][0];
+  $('aiTip').textContent = tips[AI.phase][1];
+  $('aiStart').textContent = AI.phase === 'stare' ? 'Stop' : AI.phase === 'after' || AI.phase === 'ready' ? 'Start again' : 'Start staring';
+  $('aiSwitch').disabled = !(AI.phase === 'stare' || AI.phase === 'ready');
+  // The tricolour has its own fixed colours
+  const tri = AI.shape === 'stripes';
+  $('aiCols').querySelectorAll('.tbtn').forEach(b => { b.disabled = tri; });
+  $('aiCustom').disabled = tri;
+  $('aiColLbl').textContent = tri ? 'Colour (tricolour uses cyan, magenta, yellow)' : 'Colour';
+  // Predicted afterimage: roughly the CIELAB complement, lighter and weaker on a light field
+  const pr = $('aiPredict');
+  pr.hidden = AI.phase !== 'after';
+  if (AI.phase === 'after') {
+    const cols = AI.shape === 'stripes' ? TRI : [aiHex()];
+    const f = labToLch(hexToLab(fieldHex()));
+    const preds = cols.map(c => { const l = labToLch(hexToLab(c)); return lchToHex(f.L - 4, Math.min(35, l.C * .35), l.h + 180); });
+    $('aiPredSw').innerHTML = rect(0, 0, 800, 450, fieldHex()) + aiShapeSVG(preds[0], preds);
+    $('aiPredTxt').textContent = 'Roughly what the afterimage should look like on this field (a simple opponent-colour model, not a measurement).';
+  }
+}
+function aiTick() {
+  if (AI.phase !== 'stare') return;
+  if (Date.now() >= AI.end) {
+    clearInterval(AI.timer);
+    if (AI.auto) AI.phase = 'after'; else AI.phase = 'ready';
+  }
+  drawAI();
+}
+function aiStart() {
+  clearInterval(AI.timer);
+  if (AI.phase === 'stare') { AI.phase = 'idle'; drawAI(); return; }
+  AI.phase = 'stare'; AI.end = Date.now() + AI.dur * 1000;
+  AI.timer = setInterval(aiTick, 250);
+  drawAI();
+}
+function aiSwitch() {
+  if (AI.phase !== 'stare' && AI.phase !== 'ready') return;
+  clearInterval(AI.timer); AI.phase = 'after'; drawAI();
+}
+pickButtons($('aiShapes'), [{ key: 'disc', label: 'Disc' }, { key: 'cross', label: 'Cross' }, { key: 'stripes', label: 'Tricolour' }], AI.shape, k => { AI.shape = k; drawAI(); });
+pickButtons($('aiCols'), AI_COLS.map(c => ({ key: c.key, label: c.label, chip: c.hex ? [c.hex] : null })), AI.col, k => { AI.col = k; drawAI(); });
+pickButtons($('aiFields'), AI_FIELDS.map(f => ({ key: f.key, label: f.label })), AI.field, k => { AI.field = k; drawAI(); });
+$('aiDur').value = AI.dur;
+$('aiDur').addEventListener('input', e => { AI.dur = +e.target.value; store.set('aiDur', AI.dur); if (AI.phase !== 'stare') drawAI(); });
+$('aiAuto').checked = AI.auto;
+$('aiAuto').addEventListener('change', e => { AI.auto = e.target.checked; });
+if (reduceMotion) $('aiNote').textContent += ' Your device asks for reduced motion, so the field only changes when you press Switch (you can turn automatic switching on above).';
+$('aiStart').addEventListener('click', aiStart);
+$('aiSwitch').addEventListener('click', aiSwitch);
+$('aiStage').addEventListener('click', aiSwitch);
+drawAI();
+
+/* ================= 5. Temperature ================= */
+const TP_PRESETS = [
+  { key: 'grey', label: 'Warm grey', hex: '#8f8a83' },
+  { key: 'violet', label: 'Red-violet', hex: '#9b4f86' },
+  { key: 'green', label: 'Green', hex: '#5f9470' },
+  { key: 'yg', label: 'Yellow-green', hex: '#a3a24e' },
+];
+const TP = { test: '#9b4f86', shift: 60, isolate: false };
+const WARM_POLE = 55, COOL_POLE = 250; // CIELAB hue angles: orange-red and blue
+const setTp = bindColour('tpTest', v => { TP.test = v; unpress($('tpPresets')); drawTP(); });
+// Shortest way round the hue circle from h towards pole, by fraction t
+function towards(h, pole, t) { let d = pole - h; if (d > 180) d -= 360; if (d < -180) d += 360; return h + d * t; }
+function neighbours(pole) {
+  const c = labToLch(hexToLab(TP.test));
+  const baseH = c.C < 6 ? pole : c.h;
+  const C = Math.max(c.C, 38);
+  // Eight tiles leaning towards the pole by varying amounts, with slight value variation
+  const lean = [1, .75, .9, .65, .85, .7, .95, .8];
+  const dl = [6, -4, 2, -7, 5, -2, -5, 3];
+  return lean.map((f, i) => {
+    const h = towards(baseH, pole, clamp01(TP.shift / 100 * f + .15));
+    const L = c.L + dl[i];
+    return TP.isolate ? lchToHex(L, 0, 0) : lchToHex(L, C * (0.8 + f * 0.25), h);
+  });
+}
+function mosaic(cols) {
+  // 3 x 3 tiles, centre tile is the test colour
+  let h = '', k = 0;
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+    const centre = r === 1 && c === 1;
+    h += rect(c * 100, r * 100, 100, 100, centre ? TP.test : cols[k++]);
+  }
+  return h;
+}
+function drawTP() {
+  $('tpWarm').innerHTML = mosaic(neighbours(WARM_POLE));
+  $('tpCool').innerHTML = mosaic(neighbours(COOL_POLE));
+  $('tpShiftOut').textContent = TP.shift + '%';
+  const c = labToLch(hexToLab(TP.test));
+  $('tpWarmCap').textContent = TP.isolate ? 'Neighbours neutralised.' : 'The centre reads cooler, bluer.';
+  $('tpCoolCap').textContent = TP.isolate ? 'Neighbours neutralised.' : 'The centre reads warmer, redder.';
+  $('tpInfo').textContent = 'Test colour ' + TP.test.toUpperCase() + ': L* ' + Math.round(c.L) + ', chroma ' + Math.round(c.C) + (c.C < 6 ? ', effectively neutral.' : ', hue angle ' + Math.round(c.h) + '° (' + hueName(c.h) + ').') + ' The neighbours stay close to its value, so mainly temperature changes.';
+}
+pickButtons($('tpPresets'), TP_PRESETS.map(p => ({ key: p.key, label: p.label, chip: [p.hex] })), 'violet', k => { TP.test = TP_PRESETS.find(p => p.key === k).hex; setTp(TP.test); drawTP(); });
+setTp(TP.test);
+$('tpShift').addEventListener('input', e => { TP.shift = +e.target.value; drawTP(); });
+$('tpIsolate').addEventListener('change', e => { TP.isolate = e.target.checked; drawTP(); });
+drawTP();
+
+/* ================= 6. Value vs hue ================= */
+// Pairs as CIELAB LCh [L, C, h]; four of the six are equal in value
+const PAIRS = [
+  { a: [55, 62, 35], b: [55, 55, 145], name: 'Red and green' },
+  { a: [85, 75, 95], b: [42, 55, 305], name: 'Yellow and violet' },
+  { a: [60, 60, 65], b: [60, 40, 270], name: 'Orange and blue' },
+  { a: [48, 62, 285], b: [48, 0, 0], name: 'Blue and grey' },
+  { a: [80, 60, 125], b: [64, 45, 0], name: 'Yellow-green and pink' },
+  { a: [58, 55, 345], b: [58, 38, 195], name: 'Magenta and teal' },
+].map(p => ({ ...p, A: lchToHex(...p.a), B: lchToHex(...p.b) }));
+let VH_GREY = false;
+const shown = hex => VH_GREY ? greyOf(hex) : hex;
+function drawPairs() {
+  $('vhPairs').innerHTML = PAIRS.map((p, i) => {
+    const A = shown(p.A), B = shown(p.B);
+    const la = hexToLab(p.A).L, lb = hexToLab(p.B).L, eq = Math.abs(la - lb) < 2;
+    const svg = '<svg viewBox="0 0 240 140" role="img" aria-label="' + p.name + '">' +
+      rect(0, 0, 120, 140, A) + rect(120, 0, 120, 140, B) + rect(40, 45, 40, 50, B) + rect(160, 45, 40, 50, A) + '</svg>';
+    const cap = VH_GREY
+      ? '<b>' + (eq ? 'Equal value' : 'Different value') + '</b>: L* ' + Math.round(la) + ' / ' + Math.round(lb)
+      : '<b>' + (i + 1) + '.</b> ' + p.name;
+    return '<figure class="paper">' + svg + '<figcaption>' + cap + '</figcaption></figure>';
+  }).join('');
+  const b = $('vhGrey');
+  b.setAttribute('aria-pressed', String(VH_GREY));
+  b.textContent = VH_GREY ? 'Show in colour' : 'Show in greyscale';
+  const n = PAIRS.filter(p => Math.abs(hexToLab(p.A).L - hexToLab(p.B).L) < 2).length;
+  $('vhScore').textContent = VH_GREY ? n + ' of ' + PAIRS.length + ' pairs are equal in value: in greyscale their halves and inner squares merge.' : 'Guess first: which pairs will merge into a single grey?';
+}
+
+const VB = { pat: 'stripes', h: 30, C: 60, L: 55, d: 0 };
+function vbColours() {
+  return { A: lchToHex(VB.L, VB.C, VB.h), B: lchToHex(VB.L + VB.d, VB.C, VB.h + 180) };
+}
+function drawVB() {
+  const { A, B } = vbColours();
+  const a = shown(A), b = shown(B);
+  let h = rect(0, 0, 800, 340, a);
+  if (VB.pat === 'stripes') for (let x = 40; x < 800; x += 80) h += rect(x, 0, 40, 340, b);
+  else if (VB.pat === 'checks') { for (let y = 0; y < 340; y += 40) for (let x = 0; x < 800; x += 40) if (((x + y) / 40) % 2) h += rect(x, y, 40, 40, b); }
+  else h += '<text x="400" y="228" text-anchor="middle" style="font:800 150px var(--font);letter-spacing:.04em;fill:' + b + '">VIBRATE</text>';
+  $('vbSvg').innerHTML = h;
+  $('vbHOut').textContent = VB.h + '°';
+  $('vbCOut').textContent = VB.C;
+  $('vbLOut').textContent = VB.L;
+  $('vbDOut').textContent = (VB.d > 0 ? '+' : '') + VB.d;
+  const la = hexToLab(A), lb = hexToLab(B);
+  const cr = contrast(A, B);
+  $('vbFoot').innerHTML = '<b>A ' + A.toUpperCase() + ' · B ' + B.toUpperCase() + '</b><p>L* ' + la.L.toFixed(1) + ' vs ' + lb.L.toFixed(1) +
+    ' · ΔE<sub>00</sub> ' + dE00(la, lb).toFixed(1) + ' · luminance contrast ' + cr.toFixed(2) + ':1. ' +
+    (Math.abs(la.L - lb.L) < 3 ? 'Equal value: maximum vibration, and the pattern vanishes in greyscale.' : Math.abs(la.L - lb.L) < 12 ? 'Close in value: the edges still shimmer.' : 'The value difference gives the edge a firm, stable line.') + '</p>';
+}
+$('vhGrey').addEventListener('click', () => { VH_GREY = !VH_GREY; drawPairs(); drawVB(); });
+pickButtons($('vbPats'), [{ key: 'stripes', label: 'Stripes' }, { key: 'checks', label: 'Checks' }, { key: 'word', label: 'Word' }], VB.pat, k => { VB.pat = k; drawVB(); });
+[['vbH', 'h'], ['vbC', 'C'], ['vbL', 'L'], ['vbD', 'd']].forEach(([id, k]) => $(id).addEventListener('input', e => { VB[k] = +e.target.value; drawVB(); }));
+$('vbEq').addEventListener('click', () => { VB.d = 0; $('vbD').value = 0; drawVB(); });
+drawPairs(); drawVB();
+
+/* ================= 7. Printable exercise sheet ================= */
+const INK = '#141414';
+const T = (x, y, s, o) => '<text x="' + x + '" y="' + y + '"' + (o && o.mid ? ' text-anchor="middle"' : '') + ' style="font:700 ' + ((o && o.size) || 13) + 'px Archivo,Helvetica,Arial,sans-serif;letter-spacing:.06em;fill:' + ((o && o.col) || '#444') + '">' + s + '</text>';
+const frame = (x, y, w, h) => rect(x, y, w, h, 'none', ' stroke="' + INK + '" stroke-width="2"');
+const dashed = (x, y, w, h) => rect(x, y, w, h, 'none', ' stroke="#777" stroke-width="1.5" stroke-dasharray="7 5"');
+const lines = (x, y, w, n) => { let s = ''; for (let i = 0; i < n; i++) s += '<path d="M' + x + ' ' + (y + i * 30) + 'h' + w + '" stroke="#bbb" stroke-width="1"/>'; return s; };
+
+// A pair of grounds with an inner square frame in each
+function groundPair(y, h, innerL, innerR, heading) {
+  const w = 470, s = h * .34;
+  let o = T(0, y - 12, heading, { size: 15, col: INK });
+  [[0, innerL, 'GROUND A'], [530, innerR, 'GROUND B']].forEach(([x, lab, g]) => {
+    o += frame(x, y, w, h) + dashed(x + w / 2 - s / 2, y + h / 2 - s / 2, s, s);
+    o += T(x + 10, y + 22, g, { size: 11 });
+    o += T(x + w / 2, y + h / 2 + s / 2 + 22, lab, { mid: true, size: 11 });
+  });
+  return o;
+}
+const SHEETS = {
+  one: {
+    label: 'One colour as two', title: 'ONE COLOUR AS TWO',
+    sub: 'Collage or flat paint · the two inner squares must be cut from the same sheet',
+    brief: 'In each row, fill both grounds, then place identical inner squares so they look as different as possible. Row 1: change value only. Row 2: change hue at equal value. Row 3: your strongest version. Note what changed under each row.',
+    draw() {
+      let s = '';
+      [0, 1, 2].forEach(i => { const y = 30 + i * 385; s += groundPair(y, 270, 'INNER: SAME COLOUR', 'INNER: SAME COLOUR', (i + 1) + '. ' + ['VALUE', 'HUE', 'FREE STUDY'][i]) + lines(0, y + 305, 1000, 2); });
+      return s;
+    },
+  },
+  two: {
+    label: 'Two colours as one', title: 'TWO COLOURS AS ONE',
+    sub: 'Collage or flat paint · two different inner colours that must look identical',
+    brief: 'Fill the grounds first. Then test inner colours until the two squares look the same. Afterwards, cut a strip of each inner colour and stick them side by side in the small boxes to record the real difference.',
+    draw() {
+      let s = '';
+      [0, 1, 2].forEach(i => {
+        const y = 30 + i * 385;
+        s += groundPair(y, 250, 'INNER A', 'INNER B', (i + 1) + '. STUDY');
+        s += T(0, y + 290, 'OFF THE GROUND:', { size: 11 }) + frame(150, y + 272, 70, 28) + frame(220, y + 272, 70, 28) + lines(320, y + 298, 680, 1);
+      });
+      return s;
+    },
+  },
+  mixed: {
+    label: 'Mixed studies', title: 'COLOUR STUDIES',
+    sub: 'Four Albers studies · collage or flat paint',
+    brief: '1 One colour as two. 2 Two colours as one. 3 Vanishing boundary: two different hues adjusted to equal value until the edge almost disappears. 4 Transparency: fill A and B, then choose a separate colour for the overlap that makes one seem to lie on top of the other.',
+    draw() {
+      let s = groundPair(30, 230, 'SAME COLOUR', 'SAME COLOUR', '1. ONE COLOUR AS TWO');
+      s += groundPair(330, 230, 'INNER A', 'INNER B', '2. TWO COLOURS AS ONE');
+      // Vanishing boundary: two adjacent fields
+      s += T(0, 618, '3. VANISHING BOUNDARY', { size: 15, col: INK });
+      s += frame(0, 630, 235, 300) + frame(235, 630, 235, 300);
+      s += T(117, 950, 'HUE 1', { mid: true, size: 11 }) + T(352, 950, 'HUE 2 · SAME VALUE', { mid: true, size: 11 });
+      // Transparency: overlapping rectangles with the overlap drawn as its own field
+      s += T(530, 618, '4. TRANSPARENCY', { size: 15, col: INK });
+      s += frame(530, 630, 300, 200) + frame(700, 730, 300, 200) + dashed(700, 730, 130, 100);
+      s += T(560, 660, 'A', { size: 14 }) + T(975, 915, 'B', { size: 14 }) + T(765, 787, 'MIX', { mid: true, size: 11 });
+      s += T(0, 1000, 'NOTES', { size: 11 }) + lines(0, 1030, 1000, 5);
+      return s;
+    },
+  },
+};
+let SH = 'mixed';
+function drawSheet() {
+  const d = SHEETS[SH];
+  $('shTitle').textContent = d.title;
+  $('shSub').textContent = d.sub;
+  $('shBrief').textContent = d.brief;
+  $('shv').innerHTML = d.draw();
+}
+pickButtons($('shLayouts'), Object.entries(SHEETS).map(([key, d]) => ({ key, label: d.label })), SH, k => { SH = k; drawSheet(); });
+$('shPrint').addEventListener('click', () => window.print());
+drawSheet();
+
+})();
+</script>
+</body>
+</html>

@@ -35,6 +35,16 @@ The wheel is fully keyboard accessible: Tab to a segment, arrow keys step around
 - **Find the vanishing point**: random 1- or 2-point pictures with the guides removed. Draw ruler lines along the edges, tap your guess, then check it for a star score.
 - **Practice sheet**: a printable A4 landscape sheet of rectangles (1-point) or upright edges (2-point) to turn into boxes, with an optional worked example. **New layout** makes a different sheet.
 
+## Colour Interaction
+
+`colour-interaction.html` has interactive studies after Josef Albers' *Interaction of Color* (1963). Colour maths uses CIELAB (D65) and CIEDE2000.
+
+- **One colour looks like two**: the same inner colour on two grounds, with a bridge, slide-together and swap reveal.
+- **Two colours look like one**: adjust HSL sliders until the squares match on their grounds, then reveal the real difference (ΔE00, ΔL*, ΔC*, Δh).
+- **Afterimage**: a timed stare study with a choice of shapes, colours and afterfields.
+- **Colour temperature**, **value vs hue** (greyscale check of equal-value pairs) and **vibrating edges**.
+- **Studio exercises**, with a printable A4 exercise sheet in three layouts.
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
