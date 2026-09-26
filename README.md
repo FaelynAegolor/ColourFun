@@ -25,9 +25,21 @@ The wheel is fully keyboard accessible: Tab to a segment, arrow keys step around
 - **Draw it step by step**: animated guides for the cube, cylinder, cone, sphere and pyramid, from first line to cast shadow.
 - **Shading with a pencil**: the parts of light and shadow, a value scale with pencil grades, and animated hatching, cross-hatching, contour hatching, stippling, blending and scumbling swatches.
 
+## Perspective Practiser
+
+`perspective.html` teaches one-, two- and three-point perspective.
+
+- **Key words**: horizon line, vanishing point, guide lines, verticals, eye level.
+- **Perspective playground**: drag the horizon, the vanishing points and the boxes; resize a box with its handles. Guide lines, dashed hidden edges and shading can be toggled, and three-point can look down or up. The caption says whether the selected box is above, below or at eye level.
+- **Draw it step by step**: animated guides for a 1-point box, a 1-point road, a 2-point box and a 3-point tower.
+- **Find the vanishing point**: random 1- or 2-point pictures with the guides removed. Draw ruler lines along the edges, tap your guess, then check it for a star score.
+- **Practice sheet**: a printable A4 landscape sheet of rectangles (1-point) or upright edges (2-point) to turn into boxes, with an optional worked example. **New layout** makes a different sheet.
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
+
+The lesson pages also share `lesson.css` (layout, buttons, the step-by-step guide and its drawing marks) and `stepper.js` (the animated step-by-step player; see the comment at the top for the guide data format).
 
 ## Running locally
 

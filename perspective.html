@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Perspective Practiser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="lesson.css">
+<style>
+/* ---------- Key words ---------- */
+.words { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.words li { list-style: none; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+.words b { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; font-size: 15px; }
+.words svg { width: 40px; height: 22px; flex: none; }
+.words { margin: 0; padding: 0; }
+
+/* ---------- Playground ---------- */
+.pg { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+.pg svg, .pr svg { display: block; width: 100%; height: auto; touch-action: none; user-select: none; -webkit-user-select: none; }
+.pg-foot, .pr-foot { border-top: 1px solid #e1ded6; padding: 12px 16px 14px; min-height: 72px; }
+.pg-foot b, .pr-foot b { display: block; font-size: 14px; }
+.pg-foot p, .pr-foot p { margin: 4px 0 0; font-size: 14px; color: #333; }
+.bgrid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.actions { display: grid; gap: 8px; margin-top: 12px; }
+[data-h] { cursor: grab; }
+[data-h="h"] { cursor: ns-resize; }
+.dragging, .dragging [data-h] { cursor: grabbing; }
+
+/* ---------- Practice ---------- */
+.pr { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+.pr svg { cursor: crosshair; }
+.score { display: flex; gap: 16px; margin: 4px 0 12px; }
+.score div { flex: 1; background: var(--bg); border-radius: 10px; padding: 8px 10px; }
+.score b { display: block; font-size: 22px; }
+.score span { font-size: 12px; color: var(--muted); }
+.stars { color: #d49a00; letter-spacing: .1em; }
+
+/* ---------- Printable sheet ---------- */
+.sheet-ctl { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 16px; }
+.sheet-ctl .bgrid { display: flex; gap: 6px; }
+.sheet-ctl .check { margin-right: auto; }
+.sheet {
+  background: #fff; color: #141414;
+  max-width: 1123px; margin: 0 auto;
+  aspect-ratio: 297 / 210;
+  padding: 26px 34px 20px;
+  border: 1px solid #cfcbc2; box-shadow: 0 2px 14px rgba(0, 0, 0, .18);
+  display: flex; flex-direction: column;
+  container-type: inline-size;
+}
+.sheet .head { display: flex; align-items: flex-end; gap: 24px; border-bottom: 2px solid #141414; padding-bottom: 8px; }
+.sheet h3 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: .12em; }
+.sheet .sub { margin: 2px 0 0; font-size: 13px; color: #333; }
+.sheet .who { margin-left: auto; display: flex; gap: 8px; align-items: flex-end; font-weight: 700; font-size: 12px; letter-spacing: .06em; }
+.sheet .who i { display: inline-block; border-bottom: 1px solid #141414; width: 180px; height: 14px; }
+.sheet .who i.short { width: 110px; }
+.sheet svg { display: block; width: 100%; height: auto; flex: 1; min-height: 0; margin: 8px 0; }
+.sheet ol { margin: 0; padding: 0 0 0 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 22px; font-size: 12px; }
+@container (max-width: 700px) {
+  .sheet ol { grid-template-columns: 1fr; }
+  .sheet .head { flex-wrap: wrap; }
+  .sheet .who { margin-left: 0; }
+}
+
+@media (max-width: 960px) {
+  .pg, .pr { grid-template-columns: 1fr; }
+  .sheet { aspect-ratio: auto; padding: 18px; }
+}
+
+@page { size: A4 landscape; margin: 10mm; }
+@media print {
+  html, body { background: #fff; }
+  main > *:not(#sheetSec), #sheetSec > *:not(.sheet) { display: none !important; }
+  .wrap { padding: 0; max-width: none; }
+  #sheetSec { margin: 0; }
+  .sheet { box-shadow: none; border: 0; padding: 0; max-width: none; width: 100%; height: 186mm; aspect-ratio: auto; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li><a href="colour-schemes.html">Colour schemes</a></li>
+      <li><a href="shape-shading.html">3D shape shading</a></li>
+      <li><a href="perspective.html" aria-current="page">Perspective</a></li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="p1" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="7" height="7" fill="#f2f0ea"/><line x1="1" y1="0" x2="1" y2="7" stroke="#2a2a2e" stroke-opacity=".3" stroke-width="1"/>
+    </pattern>
+    <pattern id="p2" width="4.5" height="4.5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="4.5" height="4.5" fill="#d6d3cc"/><line x1="1" y1="0" x2="1" y2="4.5" stroke="#2a2a2e" stroke-opacity=".45" stroke-width="1"/>
+    </pattern>
+    <pattern id="p3" width="4.5" height="4.5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="4.5" height="4.5" fill="#a9a6a0"/><line x1="1" y1="0" x2="1" y2="4.5" stroke="#2a2a2e" stroke-opacity=".55" stroke-width="1"/><line x1="0" y1="1" x2="4.5" y2="1" stroke="#2a2a2e" stroke-opacity=".45" stroke-width="1"/>
+    </pattern>
+    <pattern id="p4" width="3.5" height="3.5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="3.5" height="3.5" fill="#75736f"/><line x1="1" y1="0" x2="1" y2="3.5" stroke="#1d1d1f" stroke-opacity=".6" stroke-width="1"/><line x1="0" y1="1" x2="3.5" y2="1" stroke="#1d1d1f" stroke-opacity=".5" stroke-width="1"/>
+    </pattern>
+  </defs>
+</svg>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>Perspective practiser</h1>
+    <p>Perspective makes a flat drawing look deep. Things further away look smaller, and lines going away from you meet at a point. Learn one-, two- and three-point perspective, then practise.</p>
+    <ul class="jump">
+      <li><a href="#words">Key words</a></li>
+      <li><a href="#playground">Playground</a></li>
+      <li><a href="#guide">Draw it step by step</a></li>
+      <li><a href="#practice">Find the vanishing point</a></li>
+      <li><a href="#sheetSec">Practice sheet</a></li>
+    </ul>
+  </div>
+
+  <!-- ---------- Key words ---------- -->
+  <section id="words" aria-labelledby="wordsTitle">
+    <h2 class="sec-title" id="wordsTitle">Key words</h2>
+    <ul class="words">
+      <li><b><svg viewBox="0 0 40 22" aria-hidden="true"><path d="M0 11h40" stroke="currentColor" stroke-width="2"/></svg>Horizon line</b>A flat line across the page at your eye level. If you're sitting, it's low; if you're up a ladder, it's high.</li>
+      <li><b><svg viewBox="0 0 40 22" aria-hidden="true"><path d="M0 11h40" stroke="currentColor" stroke-width="1.5"/><circle cx="20" cy="11" r="4.5" fill="#1F5FBF"/></svg>Vanishing point (VP)</b>A dot on the horizon where lines going away from you meet, like train tracks disappearing into the distance.</li>
+      <li><b><svg viewBox="0 0 40 22" aria-hidden="true"><path d="M2 20L34 4M2 4L34 4M16 20L34 4" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2" fill="none"/><circle cx="34" cy="4" r="3" fill="#1F5FBF"/></svg>Guide lines</b>Light ruler lines from the corners of a shape to a vanishing point. Rub them out at the end.</li>
+      <li><b><svg viewBox="0 0 40 22" aria-hidden="true"><path d="M8 2v18M20 2v18M32 2v18" stroke="currentColor" stroke-width="2"/></svg>Verticals</b>Upright lines. In one- and two-point perspective they stay straight up and down.</li>
+      <li><b><svg viewBox="0 0 40 22" aria-hidden="true"><path d="M2 18h36" stroke="currentColor" stroke-width="1.5"/><path d="M12 14V6h14v8z" fill="#d6d3cc" stroke="currentColor" stroke-width="1.5"/></svg>Eye level</b>Below the horizon you see the tops of things. Above it you see underneath. On it, you see neither.</li>
+    </ul>
+  </section>
+
+  <!-- ---------- Playground ---------- -->
+  <section id="playground" aria-labelledby="pgTitle">
+    <h2 class="sec-title" id="pgTitle">Perspective playground</h2>
+    <p class="sec-lead">Drag the horizon line up and down, drag the vanishing points, and drag boxes around. Tap a box to select it, then drag its blue squares to resize it. Watch how every edge follows the guide lines.</p>
+    <div class="pg">
+      <div class="paper">
+        <svg id="pv" viewBox="0 0 1000 600" tabindex="0" role="img" aria-label="Perspective drawing with a horizon line, vanishing points and boxes. Arrow keys move the selected box; Shift and arrow keys move the horizon."></svg>
+        <div class="pg-foot" aria-live="polite"><b id="pgTitle2"></b><p id="pgTip"></p></div>
+      </div>
+      <div class="panel" aria-label="Playground controls">
+        <h3 class="label" id="modeLbl">Perspective</h3>
+        <div class="bgrid" role="group" aria-labelledby="modeLbl" id="modeBtns"></div>
+        <div id="lookWrap" hidden>
+          <h3 class="label" id="lookLbl">Looking</h3>
+          <div class="bgrid two" role="group" aria-labelledby="lookLbl" id="lookBtns"></div>
+        </div>
+        <h3 class="label">Show</h3>
+        <label class="check"><input type="checkbox" id="oGuides" checked> Guide lines</label>
+        <label class="check"><input type="checkbox" id="oHidden"> Hidden edges (dashed)</label>
+        <label class="check"><input type="checkbox" id="oShade" checked> Shading</label>
+        <div class="actions">
+          <button type="button" class="btn ghost" id="addBox">Add a box</button>
+          <button type="button" class="btn ghost" id="delBox">Remove selected box</button>
+          <button type="button" class="btn ghost" id="resetPg">Reset</button>
+        </div>
+        <p class="hint">Keyboard: focus the drawing, then use the arrow keys to move the selected box, or Shift + arrows to move the horizon.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Guide ---------- -->
+  <section id="guide" aria-labelledby="guideTitle">
+    <h2 class="sec-title" id="guideTitle">Draw it step by step</h2>
+    <p class="sec-lead">Grab a pencil and a ruler. Each step draws itself. Press <em>Next</em> when you're ready, or <em>Play all</em> to watch the whole thing.</p>
+    <div class="tabs" role="tablist" aria-label="Drawing to follow" id="gTabs"></div>
+    <div class="guide">
+      <div class="paper gstage">
+        <svg id="gsvg" viewBox="0 0 400 260" role="img" aria-labelledby="gText">
+          <g id="gBack"></g><g id="gFill"></g><g id="gLine"></g>
+        </svg>
+      </div>
+      <div class="panel gpanel">
+        <div class="gcount" id="gCount"></div>
+        <p class="gtext" id="gText" aria-live="polite"></p>
+        <div class="dots" id="gDots" aria-label="Steps"></div>
+        <div class="gbtns">
+          <button type="button" class="btn ghost" id="gPrev">Back</button>
+          <button type="button" class="btn primary" id="gNext">Next</button>
+          <button type="button" class="btn ghost" id="gPlay">Play all</button>
+          <button type="button" class="btn ghost" id="gAgain">Replay step</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Practice ---------- -->
+  <section id="practice" aria-labelledby="prTitle">
+    <h2 class="sec-title" id="prTitle">Find the vanishing point</h2>
+    <p class="sec-lead">These boxes were drawn in perspective, but the guide lines have been rubbed out. Drag along the edges to draw ruler lines, then tap where you think the vanishing point is. Press <em>Check</em> to see how close you were.</p>
+    <div class="pr">
+      <div class="paper">
+        <svg id="prv" viewBox="0 0 1000 560" role="img" aria-label="Practice picture. Drag to draw ruler lines, tap to place your vanishing point guess."></svg>
+        <div class="pr-foot" aria-live="polite"><b id="prMsg"></b><p id="prSub"></p></div>
+      </div>
+      <div class="panel">
+        <h3 class="label" id="prModeLbl">Type</h3>
+        <div class="bgrid two" role="group" aria-labelledby="prModeLbl" id="prModes"></div>
+        <h3 class="label">Score</h3>
+        <div class="score">
+          <div><b id="prRounds">0</b><span>pictures</span></div>
+          <div><b id="prStars" class="stars">0</b><span>stars</span></div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn primary" id="prCheck">Check</button>
+          <button type="button" class="btn ghost" id="prUndo">Undo last line</button>
+          <button type="button" class="btn ghost" id="prNext">Next picture</button>
+        </div>
+        <p class="hint">Tip: pick two edges that go away from you. Where your ruler lines cross is the vanishing point.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Printable sheet ---------- -->
+  <section id="sheetSec" aria-labelledby="sheetTitle">
+    <h2 class="sec-title" id="sheetTitle">Practice sheet</h2>
+    <p class="sec-lead">Print this sheet and turn every shape into a box. Press <em>New layout</em> for a different sheet.</p>
+    <div class="sheet-ctl">
+      <div class="bgrid" role="group" aria-label="Sheet type" id="shModes"></div>
+      <label class="check"><input type="checkbox" id="shExample" checked> Worked example</label>
+      <button type="button" class="btn ghost" id="shNew">New layout</button>
+      <button type="button" class="btn primary" id="shPrint">Print sheet</button>
+    </div>
+    <div class="sheet" id="sheet">
+      <div class="head">
+        <div><h3>PERSPECTIVE PRACTICE</h3><p class="sub" id="shSub"></p></div>
+        <div class="who">NAME <i></i> DATE <i class="short"></i></div>
+      </div>
+      <svg id="shv" viewBox="0 0 1000 500" aria-label="Practice drawing area"></svg>
+      <ol id="shSteps"></ol>
+    </div>
+  </section>
+</main>
+
+<script src="site.js"></script>
+<script src="stepper.js"></script>
+<script>
+(function () {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const INK = '#1d1d1f';
+const VP_COL = ['#1F5FBF', '#D2402A', '#2E8B57'];
+const TONE = { top: '#fefdfa', lit: '#d6d3cc', dark: '#a5a29c', under: '#7f7d79' };
+const f1 = n => Math.round(n * 10) / 10;
+const pt = p => f1(p.x) + ' ' + f1(p.y);
+const pathOf = pts => 'M' + pts.map(pt).join('L') + 'Z';
+
+/* ================= Perspective geometry ================= */
+// Each of a box's three edge directions (X, Y, Z) either heads to a vanishing point {x, y}
+// or stays parallel on the page {dx, dy}. A box is an anchor corner p plus how far it
+// reaches along each direction: a fraction of the way to the VP, or a length in pixels.
+
+const along = (P, V, s) => V.dx !== undefined ? { x: P.x + V.dx * s, y: P.y + V.dy * s } : { x: P.x + (V.x - P.x) * s, y: P.y + (V.y - P.y) * s };
+const dirTo = (P, V) => V.dx !== undefined ? { x: V.dx, y: V.dy } : { x: V.x - P.x, y: V.y - P.y };
+
+// Where the line from P towards V1 crosses the line from Q towards V2
+function meet(P, V1, Q, V2) {
+  const a = dirTo(P, V1), b = dirTo(Q, V2);
+  const den = a.x * b.y - a.y * b.x;
+  if (Math.abs(den) < 1e-9) return { x: (P.x + Q.x) / 2, y: (P.y + Q.y) / 2 };
+  const t = ((Q.x - P.x) * b.y - (Q.y - P.y) * b.x) / den;
+  return { x: P.x + a.x * t, y: P.y + a.y * t };
+}
+
+function corners(b, V) {
+  const c = { '000': b.p };
+  c['100'] = along(b.p, V.X, b.sx);
+  c['010'] = along(b.p, V.Y, b.sy);
+  c['001'] = along(b.p, V.Z, b.sz);
+  c['110'] = meet(c['100'], V.Y, c['010'], V.X);
+  c['011'] = meet(c['010'], V.Z, c['001'], V.Y);
+  c['101'] = meet(c['100'], V.Z, c['001'], V.X);
+  c['111'] = meet(c['110'], V.Z, c['011'], V.X);
+  return c;
+}
+
+// Faces listed with a consistent outward winding, so a face is visible when its
+// on-page winding matches the front face (z0), which always faces the viewer.
+const FACES = {
+  x0: ['000', '001', '011', '010'], x1: ['100', '110', '111', '101'],
+  y0: ['000', '100', '101', '001'], y1: ['010', '011', '111', '110'],
+  z0: ['000', '010', '110', '100'], z1: ['001', '101', '111', '011'],
+};
+const EDGES = (() => {
+  const m = new Map();
+  for (const [f, vs] of Object.entries(FACES)) for (let k = 0; k < 4; k++) {
+    const a = vs[k], b = vs[(k + 1) % 4], key = [a, b].sort().join('-');
+    if (!m.has(key)) m.set(key, [a, b, []]);
+    m.get(key)[2].push(f);
+  }
+  return [...m.values()];
+})();
+const area = pts => pts.reduce((s, a, i) => { const b = pts[(i + 1) % pts.length]; return s + a.x * b.y - b.x * a.y; }, 0) / 2;
+
+function solve(b, V) {
+  const c = corners(b, V);
+  const ar = {};
+  for (const f in FACES) ar[f] = area(FACES[f].map(k => c[k]));
+  const ref = Math.sign(Math.abs(ar.z0) > 1 ? ar.z0 : ar.x0);
+  const vis = {};
+  for (const f in FACES) vis[f] = Math.sign(ar[f]) === ref && Math.abs(ar[f]) > 1;
+  return { c, vis };
+}
+
+function boxSVG(b, V, o) {
+  const { c, vis } = solve(b, V);
+  const cx = Object.values(c).reduce((s, p) => s + p.x, 0) / 8;
+  let s = '';
+  for (const f in FACES) {
+    if (!vis[f]) continue;
+    const pts = FACES[f].map(k => c[k]);
+    const mx = pts.reduce((a, p) => a + p.x, 0) / 4;
+    const fill = !o.shade ? '#fbfaf6' : f === 'y1' ? TONE.top : f === 'y0' ? TONE.under : mx < cx - .5 ? TONE.lit : TONE.dark;
+    s += '<path d="' + pathOf(pts) + '" fill="' + fill + '"' + (o.hit ? ' data-h="' + o.hit + '"' : '') + '/>';
+  }
+  let hid = '', solid = '';
+  EDGES.forEach(([a, bb, fs]) => {
+    const d = 'M' + pt(c[a]) + 'L' + pt(c[bb]);
+    if (fs.some(f => vis[f])) solid += d; else hid += d;
+  });
+  if (o.hidden && hid) s += '<path d="' + hid + '" fill="none" stroke="#8b8882" stroke-width="1.4" stroke-dasharray="6 5"/>';
+  s += '<path d="' + solid + '" fill="none" stroke="' + INK + '" stroke-width="' + (o.w || 2.6) + '" stroke-linejoin="round" stroke-linecap="round" pointer-events="none"/>';
+  return { s, c, vis };
+}
+
+// Guide lines from every corner to each finite vanishing point
+function guideSVG(c, V, keys, op) {
+  let s = '';
+  keys.forEach((k, n) => {
+    const v = V[k];
+    if (v.dx !== undefined) return;
+    let d = '';
+    Object.values(c).forEach(p => { d += 'M' + pt(p) + 'L' + pt(v); });
+    s += '<path d="' + d + '" stroke="' + VP_COL[n] + '" stroke-opacity="' + (op || .45) + '" stroke-width="1.2" fill="none"/>';
+  });
+  return s;
+}
+
+const FLAT_X = { dx: 1, dy: 0 }, UP = { dx: 0, dy: -1 };
+function dirsFor(st) {
+  if (st.mode === 1) return { X: FLAT_X, Y: UP, Z: st.vps[0] };
+  if (st.mode === 2) return { X: st.vps[0], Y: UP, Z: st.vps[1] };
+  return { X: st.vps[0], Y: st.vps[2], Z: st.vps[1] };
+}
+const VP_KEYS = { 1: ['Z'], 2: ['X', 'Z'], 3: ['X', 'Z', 'Y'] };
+const vpName = (mode, i) => mode === 1 ? 'VP' : 'VP' + (i + 1);
+
+/* ================= Playground ================= */
+
+const PRESETS = {
+  1: () => ({ mode: 1, h: 250, vps: [{ x: 560, y: 250 }], boxes: [
+    { p: { x: 110, y: 480 }, sx: 190, sy: 130, sz: .35 },
+    { p: { x: 720, y: 170 }, sx: 160, sy: 90, sz: .3 },
+    { p: { x: 400, y: 340 }, sx: 100, sy: 160, sz: .3 },
+  ] }),
+  2: () => ({ mode: 2, h: 230, vps: [{ x: 40, y: 230 }, { x: 960, y: 230 }], boxes: [
+    { p: { x: 470, y: 500 }, sx: .3, sy: 150, sz: .3 },
+    { p: { x: 770, y: 170 }, sx: .25, sy: 80, sz: .25 },
+    { p: { x: 220, y: 330 }, sx: .2, sy: 170, sz: .22 },
+  ] }),
+  down: () => ({ mode: 3, look: 'down', h: 70, vps: [{ x: 40, y: 70 }, { x: 960, y: 70 }, { x: 500, y: 590 }], boxes: [
+    { p: { x: 500, y: 460 }, sx: .22, sy: -1.1, sz: .22 },
+    { p: { x: 210, y: 470 }, sx: .1, sy: -.6, sz: .14 },
+    { p: { x: 800, y: 480 }, sx: .14, sy: -.55, sz: .1 },
+  ] }),
+  up: () => ({ mode: 3, look: 'up', h: 540, vps: [{ x: 40, y: 540 }, { x: 960, y: 540 }, { x: 500, y: 10 }], boxes: [
+    { p: { x: 500, y: 480 }, sx: .2, sy: .55, sz: .2 },
+    { p: { x: 200, y: 500 }, sx: .1, sy: .35, sz: .14 },
+    { p: { x: 800, y: 500 }, sx: .14, sy: .4, sz: .1 },
+  ] }),
+};
+const TIPS = {
+  1: ['One-point perspective', 'The front of each box faces you flat on. Only the edges going away from you head to the vanishing point. Flat lines stay flat and upright lines stay upright.'],
+  2: ['Two-point perspective', 'You are looking at a corner. Edges going left head to VP1, edges going right head to VP2. Upright lines stay upright.'],
+  3: ['Three-point perspective', 'For tall things seen from high up or low down. Upright lines now lean too, towards VP3.'],
+};
+
+let S = PRESETS[1](), sel = 0;
+const opts = { guides: true, hidden: false, shade: true };
+const pv = $('pv');
+
+function drawPlayground() {
+  const V = dirsFor(S), keys = VP_KEYS[S.mode];
+  let s = '<rect width="1000" height="600" fill="#fbfaf6"/>';
+  if (S.h < 600) s += '<rect y="' + f1(S.h) + '" width="1000" height="' + f1(600 - S.h) + '" fill="#e9e5db"/>';
+  s += '<path d="M0 ' + f1(S.h) + 'H1000" stroke="' + INK + '" stroke-width="1.6"/>';
+  s += horizonLabel(S.h, S.vps.filter((v, i) => S.mode !== 3 || i < 2), 'HORIZON LINE (EYE LEVEL)', 1000);
+
+  const order = S.boxes.map((b, i) => i).sort((a, b) => Math.abs(S.boxes[a].p.y - S.h) - Math.abs(S.boxes[b].p.y - S.h));
+  const solved = S.boxes.map(b => solve(b, V));
+  if (opts.guides) order.forEach(i => { s += guideSVG(solved[i].c, V, keys); });
+  order.forEach(i => { s += boxSVG(S.boxes[i], V, { ...opts, hit: 'mv:' + i }).s; });
+
+  // Horizon grab strip, vanishing points, then handles for the selected box
+  s += '<path d="M0 ' + f1(S.h) + 'H1000" stroke="transparent" stroke-width="22" data-h="h"/>';
+  S.vps.forEach((v, i) => {
+    const col = VP_COL[S.mode === 1 ? 0 : i];
+    s += '<g data-h="vp:' + i + '"><circle cx="' + f1(v.x) + '" cy="' + f1(v.y) + '" r="22" fill="transparent"/>' +
+      '<circle cx="' + f1(v.x) + '" cy="' + f1(v.y) + '" r="9" fill="' + col + '" stroke="#fff" stroke-width="2.5"/>' +
+      '<text x="' + f1(Math.min(960, Math.max(8, v.x + 12))) + '" y="' + f1(v.y < 40 ? v.y + 28 : v.y - 14) + '" class="lbl" style="fill:' + col + '">' + vpName(S.mode, i) + '</text></g>';
+  });
+  if (S.boxes[sel]) {
+    const c = solved[sel].c;
+    [['X', '100'], ['Y', '010'], ['Z', '001']].forEach(([ax, k]) => {
+      s += '<rect data-h="sz:' + sel + ':' + ax + '" x="' + f1(c[k].x - 8) + '" y="' + f1(c[k].y - 8) + '" width="16" height="16" rx="3" fill="#1F5FBF" stroke="#fff" stroke-width="2"/>';
+    });
+    s += '<circle cx="' + pt(c['000']).replace(' ', '" cy="') + '" r="5" fill="#fff" stroke="#1F5FBF" stroke-width="2" pointer-events="none"/>';
+  }
+  pv.innerHTML = s;
+
+  const [title, tip] = TIPS[S.mode];
+  $('pgTitle2').textContent = title;
+  let where = '';
+  if (S.boxes[sel]) {
+    const v = solved[sel].vis;
+    where = v.y1 ? ' The selected box is below eye level, so you can see its top.'
+      : v.y0 ? ' The selected box is above eye level, so you can see underneath it.'
+      : ' The selected box is cut by the horizon, at eye level, so you can see neither its top nor its bottom.';
+  }
+  $('pgTip').textContent = tip + where;
+}
+
+// Put the horizon label at the start, middle or end of the line, whichever is furthest from a VP
+function horizonLabel(h, vps, text, width) {
+  const half = text.length * 4.3;
+  const spots = [[12, 'start', 12 + half], [width / 2, 'middle', width / 2], [width - 12, 'end', width - 12 - half]];
+  let best = spots[0], bestD = -1;
+  spots.forEach(sp => {
+    const d = Math.min(...vps.map(v => Math.abs(v.x - sp[2])));
+    if (d > bestD) { bestD = d; best = sp; }
+  });
+  return '<text x="' + best[0] + '" y="' + f1(h - 8) + '" text-anchor="' + best[1] + '" class="lbl">' + text + '</text>';
+}
+
+function svgPt(svg, e) {
+  const p = svg.createSVGPoint();
+  p.x = e.clientX; p.y = e.clientY;
+  const q = p.matrixTransform(svg.getScreenCTM().inverse());
+  return { x: q.x, y: q.y };
+}
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+function setHorizon(y) {
+  y = clamp(y, 20, 580);
+  if (S.mode === 3) y = S.look === 'down' ? Math.min(y, S.vps[2].y - 150) : Math.max(y, S.vps[2].y + 150);
+  S.h = y;
+  S.vps[0].y = y;
+  if (S.vps[1] && S.mode !== 1) S.vps[1].y = y;
+}
+function keepBoxesBetween() {
+  if (S.mode === 1) return;
+  S.boxes.forEach(b => { b.p.x = clamp(b.p.x, S.vps[0].x + 20, S.vps[1].x - 20); });
+}
+function moveVP(i, m) {
+  if (S.mode === 3 && i === 2) {
+    S.vps[2].x = clamp(m.x, 20, 980);
+    S.vps[2].y = S.look === 'down' ? clamp(m.y, S.h + 150, 595) : clamp(m.y, 5, S.h - 150);
+    return;
+  }
+  let x = clamp(m.x, 10, 990);
+  if (S.mode !== 1) x = i === 0 ? Math.min(x, S.vps[1].x - 200) : Math.max(x, S.vps[0].x + 200);
+  S.vps[i].x = x;
+  setHorizon(m.y);
+  keepBoxesBetween();
+}
+function resize(b, ax, m) {
+  const V = dirsFor(S)[ax], d = dirTo(b.p, V);
+  let s = ((m.x - b.p.x) * d.x + (m.y - b.p.y) * d.y) / (d.x * d.x + d.y * d.y);
+  const key = 's' + ax.toLowerCase();
+  if (V.dx !== undefined) s = clamp(s, 20, ax === 'X' ? 600 : 450);
+  else if (ax === 'Y') { s = clamp(s, -4, .9); if (Math.abs(s) < .05) s = b[key] < 0 ? -.05 : .05; }
+  else s = clamp(s, .04, .92);
+  b[key] = s;
+}
+
+let drag = null;
+pv.addEventListener('pointerdown', e => {
+  const t = e.target.closest('[data-h]');
+  if (!t) { sel = -1; drawPlayground(); return; }
+  const [kind, a, ax] = t.dataset.h.split(':');
+  if (kind === 'mv' || kind === 'sz') sel = +a;
+  drag = { kind, i: +a, ax, last: svgPt(pv, e) };
+  pv.setPointerCapture(e.pointerId);
+  pv.classList.add('dragging');
+  e.preventDefault();
+  drawPlayground();
+});
+pv.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const m = svgPt(pv, e);
+  if (drag.kind === 'h') setHorizon(m.y);
+  else if (drag.kind === 'vp') moveVP(drag.i, m);
+  else if (drag.kind === 'mv') {
+    const b = S.boxes[drag.i];
+    b.p = { x: clamp(b.p.x + m.x - drag.last.x, 10, 990), y: clamp(b.p.y + m.y - drag.last.y, 10, 590) };
+    keepBoxesBetween();
+  } else if (drag.kind === 'sz') resize(S.boxes[drag.i], drag.ax, m);
+  drag.last = m;
+  drawPlayground();
+});
+const endDrag = () => { drag = null; pv.classList.remove('dragging'); };
+pv.addEventListener('pointerup', endDrag);
+pv.addEventListener('pointercancel', endDrag);
+pv.addEventListener('keydown', e => {
+  const k = { ArrowLeft: [-10, 0], ArrowRight: [10, 0], ArrowUp: [0, -10], ArrowDown: [0, 10] }[e.key];
+  if (!k) return;
+  e.preventDefault();
+  if (e.shiftKey) setHorizon(S.h + k[1]);
+  else {
+    if (!S.boxes[sel]) sel = 0;
+    const b = S.boxes[sel];
+    if (!b) return;
+    b.p = { x: clamp(b.p.x + k[0], 10, 990), y: clamp(b.p.y + k[1], 10, 590) };
+    keepBoxesBetween();
+  }
+  drawPlayground();
+});
+
+function pickButtons(el, items, current, onPick) {
+  el.innerHTML = '';
+  items.forEach(([key, label]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tbtn'; b.textContent = label;
+    b.setAttribute('aria-pressed', String(key === current));
+    b.addEventListener('click', () => {
+      el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      onPick(key);
+    });
+    el.appendChild(b);
+  });
+}
+function loadPreset(key) {
+  S = PRESETS[key]();
+  sel = 0;
+  $('lookWrap').hidden = S.mode !== 3;
+  drawPlayground();
+}
+pickButtons($('modeBtns'), [['1', '1-point'], ['2', '2-point'], ['3', '3-point']], '1', k => {
+  if (k === '3') { pickButtons($('lookBtns'), [['down', 'Down'], ['up', 'Up']], 'down', loadPreset); loadPreset('down'); }
+  else loadPreset(k);
+});
+[['oGuides', 'guides'], ['oHidden', 'hidden'], ['oShade', 'shade']].forEach(([id, key]) => {
+  $(id).checked = opts[key];
+  $(id).addEventListener('change', () => { opts[key] = $(id).checked; drawPlayground(); });
+});
+$('addBox').addEventListener('click', () => {
+  const lo = S.mode === 1 ? 60 : S.vps[0].x + 80, hi = S.mode === 1 ? 800 : S.vps[1].x - 80;
+  const x = lo + Math.random() * (hi - lo);
+  const below = Math.random() < .5 || S.mode === 3;
+  const y = S.mode === 3 ? (S.look === 'down' ? S.h + 120 + Math.random() * 200 : S.h - 40 - Math.random() * 120)
+    : below ? Math.min(570, S.h + 90 + Math.random() * 180) : Math.max(120, S.h - 60 - Math.random() * 100);
+  const box = S.mode === 1 ? { p: { x, y }, sx: 90 + Math.random() * 90, sy: 60 + Math.random() * 80, sz: .2 + Math.random() * .2 }
+    : S.mode === 2 ? { p: { x, y }, sx: .15 + Math.random() * .15, sy: 60 + Math.random() * 90, sz: .15 + Math.random() * .15 }
+    : { p: { x, y }, sx: .18, sy: S.look === 'down' ? -.5 : .35, sz: .18 };
+  S.boxes.push(box);
+  sel = S.boxes.length - 1;
+  drawPlayground();
+});
+$('delBox').addEventListener('click', () => {
+  if (!S.boxes[sel]) return;
+  S.boxes.splice(sel, 1);
+  sel = S.boxes.length - 1;
+  drawPlayground();
+});
+$('resetPg').addEventListener('click', () => {
+  loadPreset(S.mode === 3 ? S.look : String(S.mode));
+});
+drawPlayground();
+
+/* ================= Step-by-step guides ================= */
+
+const pl = c => c === 'cn' ? '' : ' pathLength="1"';
+const seg = (a, b, c = 'ln') => '<path class="' + c + '"' + pl(c) + ' d="M' + pt(a) + 'L' + pt(b) + '"/>';
+const poly = (pts, c = 'ln') => '<path class="' + c + '"' + pl(c) + ' d="' + pathOf(pts) + '"/>';
+const dot = (p, col) => '<circle class="dot" cx="' + f1(p.x) + '" cy="' + f1(p.y) + '" r="4.5"' + (col ? ' style="fill:' + col + '"' : '') + '/>';
+const lbl = (p, t, col, cn) => '<text class="lbl' + (cn ? ' cnl' : '') + '" x="' + f1(p.x) + '" y="' + f1(p.y) + '"' + (col ? ' style="fill:' + col + '"' : '') + '>' + t + '</text>';
+const shade = (pts, fill) => ({ l: 'f', s: '<path class="sh" d="' + pathOf(pts) + '" fill="' + fill + '"/>' });
+const hz = (y, x = 6, anchor = 'start') => [seg({ x: 0, y }, { x: 400, y }), lbl({ x, y: y - 7 }, 'HORIZON LINE').replace('<text ', '<text text-anchor="' + anchor + '" ')];
+const vpMark = (p, name, col) => [dot(p, col), lbl({ x: Math.min(368, p.x + 8), y: p.y - 9 }, name, col)];
+const face = (c, keys) => keys.map(k => c[k]);
+
+function guideOnePoint() {
+  const VP = { x: 250, y: 80 };
+  const c = corners({ p: { x: 70, y: 215 }, sx: 110, sy: 70, sz: .38 }, { X: FLAT_X, Y: UP, Z: VP });
+  return { name: '1-point box', steps: [
+    { t: 'Draw a horizon line across the page with a ruler. This is your eye level.', e: hz(80) },
+    { t: 'Put a vanishing point (VP) on the horizon. Everything going away from you will shrink towards this dot.', e: vpMark(VP, 'VP', VP_COL[0]) },
+    { t: 'Draw the front of the box as an ordinary rectangle: flat top and bottom, upright sides.', e: [poly(face(c, ['000', '100', '110', '010']))] },
+    { t: 'With your ruler, draw light guide lines from each corner to the vanishing point.', e: ['000', '100', '110', '010'].map(k => seg(c[k], VP, 'cn')) },
+    { t: 'Decide how deep the box is. Draw the back edges: flat lines stay flat and upright lines stay upright. They stop where they meet the guide lines.', e: [seg(c['010'], c['011']), seg(c['110'], c['111']), seg(c['100'], c['101']), seg(c['011'], c['111']), seg(c['111'], c['101'])] },
+    { t: 'Rub out the guide lines, then shade. The top is lightest, and the side is darker.', erase: true, e: [shade(face(c, ['010', '110', '111', '011']), 'url(#p1)'), shade(face(c, ['000', '100', '110', '010']), 'url(#p2)'), shade(face(c, ['100', '101', '111', '110']), 'url(#p3)')] },
+  ] };
+}
+
+function guideRoad() {
+  const VP = { x: 200, y: 95 }, H = 95;
+  const depth = (P, d) => ({ x: VP.x + (P.x - VP.x) / d, y: VP.y + (P.y - VP.y) / d });
+  const dashes = [1, 1.6, 2.3, 3.2, 4.4, 6, 8.5].map(d => {
+    const a = depth({ x: 200, y: 260 }, d), b = depth({ x: 200, y: 260 }, d + .35 * d * .5 + .2);
+    const w = 5 / d;
+    return '<path class="fd" style="fill:' + INK + '" d="M' + f1(a.x - w) + ' ' + f1(a.y) + 'L' + f1(a.x + w) + ' ' + f1(a.y) + 'L' + f1(b.x + w * .8) + ' ' + f1(b.y) + 'L' + f1(b.x - w * .8) + ' ' + f1(b.y) + 'Z"/>';
+  }).join('');
+  const base = { x: 385, y: 252 }, top = { x: 385, y: 118 };
+  const post = d => seg(depth(base, d), depth(top, d));
+  return { name: '1-point road', steps: [
+    { t: 'Draw the horizon and put one vanishing point in the middle.', e: [...hz(H), ...vpMark(VP, 'VP', VP_COL[0])] },
+    { t: 'Draw two lines from the bottom of the page to the vanishing point. These are the edges of the road.', e: [seg({ x: 30, y: 260 }, VP), seg({ x: 370, y: 260 }, VP)] },
+    { t: 'Add dashes down the middle. Each one is shorter, thinner and closer to the next as the road goes back.', e: [dashes] },
+    { t: 'Draw the nearest fence post. Then draw guide lines from its top and bottom to the vanishing point.', e: [post(1), seg(top, VP, 'cn'), seg(base, VP, 'cn')] },
+    { t: 'Add more posts between the guide lines. They get shorter and closer together as they go back.', e: [1.35, 1.8, 2.4, 3.2, 4.3, 6].map(post) },
+    { t: 'Rub out the guides and shade the road. Everything shrinks to one point, so it looks like it goes on forever.', erase: true, e: [shade([{ x: 30, y: 260 }, { x: 370, y: 260 }, VP], 'url(#p2)')] },
+  ] };
+}
+
+function guideTwoPoint() {
+  const L = { x: 14, y: 70 }, R = { x: 386, y: 70 };
+  const c = corners({ p: { x: 190, y: 222 }, sx: .33, sy: 95, sz: .3 }, { X: L, Y: UP, Z: R });
+  return { name: '2-point box', steps: [
+    { t: 'Draw the horizon with a vanishing point near each end: VP1 on the left, VP2 on the right.', e: [...hz(70, 200, 'middle'), ...vpMark(L, 'VP1', VP_COL[0]), dot(R, VP_COL[1]), lbl({ x: 352, y: 61 }, 'VP2', VP_COL[1])] },
+    { t: 'Draw one upright line between them. This is the corner of the box nearest to you.', e: [seg(c['000'], c['010'])] },
+    { t: 'Draw guide lines from the top and bottom of that line to both vanishing points.', e: [seg(c['010'], L, 'cn'), seg(c['000'], L, 'cn'), seg(c['010'], R, 'cn'), seg(c['000'], R, 'cn')] },
+    { t: 'Draw two more upright lines to set how wide each side is. Go over the edges between them.', e: [seg(c['100'], c['110']), seg(c['001'], c['011']), seg(c['000'], c['100']), seg(c['010'], c['110']), seg(c['000'], c['001']), seg(c['010'], c['011'])] },
+    { t: 'From the top of each new line, draw a guide to the opposite vanishing point. Where they cross is the back corner of the top.', e: [seg(c['110'], R, 'cn'), seg(c['011'], L, 'cn'), seg(c['110'], c['111']), seg(c['011'], c['111'])] },
+    { t: 'Rub out the guides and shade: the top lightest, one side mid-tone, the other side darkest.', erase: true, e: [shade(face(c, ['010', '110', '111', '011']), 'url(#p1)'), shade(face(c, ['000', '100', '110', '010']), 'url(#p2)'), shade(face(c, ['000', '001', '011', '010']), 'url(#p4)')] },
+  ] };
+}
+
+function guideThreePoint() {
+  const L = { x: 8, y: 245 }, R = { x: 392, y: 245 }, T = { x: 200, y: 10 };
+  const V = { X: L, Y: T, Z: R };
+  const c = corners({ p: { x: 200, y: 222 }, sx: .28, sy: .7, sz: .26 }, V);
+  return { name: '3-point tower', steps: [
+    { t: 'Looking up at a tall tower: put the horizon low, with VP1 and VP2 at each end, and VP3 high above.', e: [...hz(245, 200, 'middle'), dot(L, VP_COL[0]), lbl({ x: 10, y: 236 }, 'VP1', VP_COL[0]), dot(R, VP_COL[1]), lbl({ x: 358, y: 236 }, 'VP2', VP_COL[1]), dot(T, VP_COL[2]), lbl({ x: 210, y: 22 }, 'VP3', VP_COL[2])] },
+    { t: 'Draw a guide from the bottom of the nearest corner up to VP3. Draw the corner along it: it leans instead of standing straight.', e: [seg(c['000'], T, 'cn'), seg(c['000'], c['010'])] },
+    { t: 'Draw the bottom edges with guides to VP1 and VP2.', e: [seg(c['000'], L, 'cn'), seg(c['000'], R, 'cn'), seg(c['000'], c['100']), seg(c['000'], c['001'])] },
+    { t: 'From each bottom corner, guide up to VP3 for the side edges. From the top of the front corner, guide to VP1 and VP2 for the top edges.', e: [seg(c['100'], T, 'cn'), seg(c['001'], T, 'cn'), seg(c['010'], L, 'cn'), seg(c['010'], R, 'cn'), seg(c['100'], c['110']), seg(c['001'], c['011']), seg(c['010'], c['110']), seg(c['010'], c['011'])] },
+    { t: 'The tower starts above your eye level, so you can just see its underside. Guide each bottom corner to the opposite VP to find the back corner.', e: [seg(c['100'], R, 'cn'), seg(c['001'], L, 'cn'), seg(c['100'], c['101']), seg(c['001'], c['101'])] },
+    { t: 'Rub out the guides and shade. The sides squeeze together as they go up, which makes the tower look really tall.', erase: true, e: [shade(face(c, ['000', '100', '110', '010']), 'url(#p2)'), shade(face(c, ['000', '001', '011', '010']), 'url(#p3)'), shade(face(c, ['000', '100', '101', '001']), 'url(#p4)')] },
+  ] };
+}
+
+Stepper({ one: guideOnePoint(), road: guideRoad(), two: guideTwoPoint(), three: guideThreePoint() });
+
+/* ================= Find the vanishing point ================= */
+
+const PR = { mode: 1, scene: null, guesses: [], lines: [], temp: null, done: false, rounds: 0, stars: 0 };
+const prv = $('prv');
+const rand = (a, b) => a + Math.random() * (b - a);
+
+function inView(c) { return Object.values(c).every(p => p.x > 20 && p.x < 980 && p.y > 20 && p.y < 540); }
+function bbox(c) {
+  const xs = Object.values(c).map(p => p.x), ys = Object.values(c).map(p => p.y);
+  return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
+}
+const overlaps = (a, b) => !(a[2] + 30 < b[0] || b[2] + 30 < a[0] || a[3] + 30 < b[1] || b[3] + 30 < a[1]);
+
+function makeScene(mode) {
+  for (let tries = 0; tries < 400; tries++) {
+    const h = rand(150, 400);
+    const st = mode === 1
+      ? { mode: 1, h, vps: [{ x: rand(200, 800), y: h }], boxes: [] }
+      : { mode: 2, h, vps: [{ x: rand(40, 170), y: h }, { x: rand(830, 960), y: h }], boxes: [] };
+    const V = dirsFor(st), n = mode === 1 ? 2 : 1 + (Math.random() < .5 ? 1 : 0);
+    const boxes = [];
+    for (let k = 0; k < 60 && boxes.length < n; k++) {
+      const above = Math.random() < .35;
+      const b = mode === 1
+        ? { p: { x: rand(40, 860), y: above ? rand(h - 160, h - 60) : rand(h + 110, 530) }, sx: rand(100, 170), sy: rand(70, 130), sz: rand(.25, .45) }
+        : { p: { x: rand(st.vps[0].x + 230, st.vps[1].x - 230), y: above ? rand(h - 110, h - 50) : rand(h + 80, 530) }, sx: rand(.16, .3), sy: rand(above ? 50 : 80, above ? 90 : 160), sz: rand(.16, .3) };
+      const { c } = solve(b, V);
+      const bb = bbox(c);
+      if (!inView(c)) continue;
+      if (st.vps.some(v => v.x > bb[0] - 60 && v.x < bb[2] + 60 && v.y > bb[1] - 60 && v.y < bb[3] + 60)) continue;
+      if (boxes.some(o => overlaps(bbox(solve(o, V).c), bb))) continue;
+      boxes.push(b);
+    }
+    if (boxes.length === n) { st.boxes = boxes; return st; }
+  }
+  return PRESETS[mode]();
+}
+
+function starsFor(d) { return d < 25 ? 3 : d < 60 ? 2 : d < 120 ? 1 : 0; }
+function drawPractice() {
+  const st = PR.scene, V = dirsFor(st), keys = VP_KEYS[st.mode];
+  let s = '<rect width="1000" height="560" fill="#fbfaf6"/>';
+  const solved = st.boxes.map(b => solve(b, V));
+  if (PR.done) {
+    s += '<path d="M0 ' + f1(st.h) + 'H1000" stroke="' + INK + '" stroke-width="1.4"/><text x="12" y="' + f1(st.h - 8) + '" class="lbl">HORIZON LINE</text>';
+    solved.forEach(x => { s += guideSVG(x.c, V, keys, .6); });
+  }
+  st.boxes.forEach(b => { s += boxSVG(b, V, { shade: true }).s; });
+  PR.lines.concat(PR.temp ? [PR.temp] : []).forEach(l => {
+    s += '<path d="M' + pt(l[0]) + 'L' + pt(l[1]) + '" stroke="#7B3F99" stroke-width="1.8" stroke-linecap="round"/>';
+  });
+  const truth = st.vps.slice().sort((a, b) => a.x - b.x);
+  const guesses = PR.guesses.slice().sort((a, b) => a.x - b.x);
+  guesses.forEach((g, i) => {
+    if (PR.done && truth[i]) s += '<path d="M' + pt(g) + 'L' + pt(truth[i]) + '" stroke="#141414" stroke-width="1.2" stroke-dasharray="4 4"/>';
+    s += '<path d="M' + f1(g.x - 9) + ' ' + f1(g.y - 9) + 'L' + f1(g.x + 9) + ' ' + f1(g.y + 9) + 'M' + f1(g.x + 9) + ' ' + f1(g.y - 9) + 'L' + f1(g.x - 9) + ' ' + f1(g.y + 9) + '" stroke="#E4252C" stroke-width="3" stroke-linecap="round"/>';
+  });
+  if (PR.done) truth.forEach((v, i) => {
+    s += '<circle cx="' + f1(v.x) + '" cy="' + f1(v.y) + '" r="9" fill="' + VP_COL[st.mode === 1 ? 0 : i] + '" stroke="#fff" stroke-width="2.5"/>';
+    s += '<text x="' + f1(Math.min(950, v.x + 12)) + '" y="' + f1(v.y + 26) + '" class="lbl" style="fill:' + VP_COL[st.mode === 1 ? 0 : i] + '">' + vpName(st.mode, i) + '</text>';
+  });
+  prv.innerHTML = s;
+  const need = st.mode === 1 ? 1 : 2;
+  $('prCheck').disabled = PR.done || PR.guesses.length < need;
+  $('prUndo').disabled = PR.done || !PR.lines.length;
+  $('prRounds').textContent = PR.rounds;
+  $('prStars').textContent = PR.stars;
+  if (!PR.done) {
+    $('prMsg').textContent = PR.guesses.length < need
+      ? (need === 1 ? 'Where is the vanishing point?' : 'Where are the two vanishing points? (' + PR.guesses.length + ' of 2 placed)')
+      : 'Ready? Press Check.';
+    $('prSub').textContent = need === 1
+      ? 'Drag along two edges that go away from you to draw ruler lines. Tap where they cross.'
+      : 'Two-point: edges going left meet at one VP, edges going right meet at the other. Tap to place each one.';
+  }
+}
+function checkPractice() {
+  const st = PR.scene;
+  const truth = st.vps.slice().sort((a, b) => a.x - b.x);
+  const guesses = PR.guesses.slice().sort((a, b) => a.x - b.x);
+  const dists = truth.map((v, i) => Math.round(Math.hypot(v.x - guesses[i].x, v.y - guesses[i].y)));
+  const stars = Math.round(dists.reduce((s, d) => s + starsFor(d), 0) / dists.length);
+  PR.done = true; PR.rounds++; PR.stars += stars;
+  $('prMsg').innerHTML = ['Keep practising!', 'Getting there', 'Very close!', 'Spot on!'][stars] + ' <span class="stars">' + '★'.repeat(stars) + '☆'.repeat(3 - stars) + '</span>';
+  $('prSub').textContent = (dists.length === 1 ? 'You were ' + dists[0] + ' px away.' : 'VP1: ' + dists[0] + ' px away. VP2: ' + dists[1] + ' px away.') +
+    ' The coloured guide lines show where every edge really goes. ' + (stars < 3 ? 'Extend two edges right to the end with a ruler line and see where they cross.' : 'Press Next picture for another.');
+  drawPractice();
+}
+function newPractice() {
+  PR.scene = makeScene(PR.mode); PR.guesses = []; PR.lines = []; PR.temp = null; PR.done = false;
+  drawPractice();
+}
+
+let prDown = null;
+prv.addEventListener('pointerdown', e => {
+  prDown = svgPt(prv, e);
+  prv.setPointerCapture(e.pointerId);
+  e.preventDefault();
+});
+prv.addEventListener('pointermove', e => {
+  if (!prDown || PR.done) return;
+  const m = svgPt(prv, e);
+  if (PR.temp || Math.hypot(m.x - prDown.x, m.y - prDown.y) > 10) { PR.temp = [prDown, m]; drawPractice(); }
+});
+prv.addEventListener('pointerup', e => {
+  if (!prDown) return;
+  const m = svgPt(prv, e);
+  if (PR.temp) { PR.lines.push([prDown, m]); PR.temp = null; }
+  else if (!PR.done) {
+    const need = PR.scene.mode === 1 ? 1 : 2;
+    if (PR.guesses.length < need) PR.guesses.push(m);
+    else {
+      let k = 0;
+      PR.guesses.forEach((g, i) => { if (Math.hypot(g.x - m.x, g.y - m.y) < Math.hypot(PR.guesses[k].x - m.x, PR.guesses[k].y - m.y)) k = i; });
+      PR.guesses[k] = m;
+    }
+  }
+  prDown = null;
+  drawPractice();
+});
+prv.addEventListener('pointercancel', () => { prDown = null; PR.temp = null; drawPractice(); });
+$('prCheck').addEventListener('click', checkPractice);
+$('prUndo').addEventListener('click', () => { PR.lines.pop(); drawPractice(); });
+$('prNext').addEventListener('click', newPractice);
+pickButtons($('prModes'), [[1, '1-point'], [2, '2-point']], 1, k => { PR.mode = k; newPractice(); });
+newPractice();
+
+/* ================= Printable practice sheet ================= */
+
+const SH = { mode: 1, example: true, layout: null };
+const shv = $('shv');
+const SHEET_TEXT = {
+  1: ['One-point perspective: turn every rectangle into a box.', [
+    'With a ruler, draw light guide lines from each corner of a rectangle to the VP.',
+    'Choose a depth. Draw the back edges: flat lines stay flat, upright lines stay upright.',
+    'Go over the edges you can see, rub out the guides, then shade: top lightest, side darker.',
+  ]],
+  2: ['Two-point perspective: turn every upright line into a box.', [
+    'From the top and bottom of each upright line, draw light guide lines to VP1 and VP2.',
+    'Add an upright line on each side, then guide each top corner to the opposite VP to find the back corner.',
+    'Go over the edges you can see, rub out the guides, then shade each side a different tone.',
+  ]],
+};
+
+function makeSheet(mode) {
+  const h = rand(200, 290);
+  const W = 1000, H = 500;
+  const st = mode === 1 ? { mode: 1, h, vps: [{ x: rand(420, 580), y: h }] } : { mode: 2, h, vps: [{ x: 18, y: h }, { x: 982, y: h }] };
+  const items = [];
+  if (mode === 1) {
+    const v = st.vps[0];
+    const cols = [0, 1, 2];
+    const straddle = cols.reduce((m, c) => Math.abs((c + .5) * W / 3 - v.x) > Math.abs((m + .5) * W / 3 - v.x) ? c : m, 0);
+    const place = (col, kind) => {
+      for (let t = 0; t < 60; t++) {
+        const w = rand(80, 140), hh = kind === 'mid' ? rand(100, 140) : rand(55, 105);
+        const x = col * W / 3 + rand(30, W / 3 - w - 30);
+        const y = kind === 'top' ? rand(25, h - 30 - hh) : kind === 'bot' ? rand(h + 30, H - 25 - hh) : h - hh * rand(.35, .65);
+        if (v.x > x - 70 && v.x < x + w + 70 && v.y > y - 70 && v.y < y + hh + 70) continue;
+        return { p: { x, y: y + hh }, sx: w, sy: hh, sz: .3 };
+      }
+      return null;
+    };
+    cols.filter(c => c !== straddle).forEach(c => { items.push(place(c, 'top'), place(c, 'bot')); });
+    items.push(place(straddle, 'mid'));
+    for (let k = items.length - 1; k >= 0; k--) if (!items[k]) items.splice(k, 1);
+  } else {
+    const xs = [190, 340, 500, 660, 810];
+    xs.forEach((x0, k) => {
+      const x = x0 + rand(-25, 25);
+      const kind = k % 3; // below, above, straddling
+      const len = rand(80, 130);
+      const bottom = kind === 0 ? rand(h + 110, H - 30) : kind === 1 ? rand(h - 60, h - 40) : h + len * .45;
+      items.push({ p: { x, y: bottom }, sx: .16, sy: len, sz: .16 });
+    });
+  }
+  return { st, items };
+}
+
+function drawSheet() {
+  const { st, items } = SH.layout, V = dirsFor(st);
+  const [sub, steps] = SHEET_TEXT[st.mode];
+  $('shSub').textContent = sub;
+  $('shSteps').innerHTML = steps.map(t => '<li>' + t + '</li>').join('');
+  let s = '<path d="M0 ' + f1(st.h) + 'H1000" stroke="#141414" stroke-width="1.5"/>';
+  // One-point: label beside the VP, on the side away from the rectangle that crosses the horizon
+  const across = items.find(it => it.p.y - it.sy < st.h && it.p.y > st.h);
+  const right = !across || across.p.x < st.vps[0].x;
+  s += st.mode === 1
+    ? '<text x="' + f1(st.vps[0].x + (right ? 16 : -16)) + '" y="' + f1(st.h - 7) + '" text-anchor="' + (right ? 'start' : 'end') + '" class="lbl" style="fill:#333">HORIZON LINE (EYE LEVEL)</text>'
+    : '<text x="6" y="' + f1(st.h - 7) + '" class="lbl" style="fill:#333">HORIZON LINE (EYE LEVEL)</text>';
+  items.forEach((b, k) => {
+    const ex = SH.example && k === 0;
+    const { c } = solve(b, V);
+    if (ex) {
+      s += guideSVG(c, V, VP_KEYS[st.mode], .5);
+      s += boxSVG(b, V, { shade: true, hidden: false, w: 2 }).s;
+      const bb = bbox(c);
+      s += '<text x="' + f1(bb[0]) + '" y="' + f1(bb[3] + 16) + '" class="lbl" style="fill:#333">EXAMPLE</text>';
+    } else if (st.mode === 1) {
+      s += '<path d="' + pathOf(face(c, ['000', '100', '110', '010'])) + '" fill="none" stroke="#141414" stroke-width="2"/>';
+    } else {
+      s += '<path d="M' + pt(c['000']) + 'L' + pt(c['010']) + '" stroke="#141414" stroke-width="2.4" stroke-linecap="round"/>';
+    }
+  });
+  st.vps.forEach((v, i) => {
+    s += '<circle cx="' + f1(v.x) + '" cy="' + f1(v.y) + '" r="6" fill="#141414"/>';
+    s += '<text x="' + f1(i === 1 ? v.x - 36 : v.x + 4) + '" y="' + f1(v.y + 22) + '" class="lbl" style="fill:#141414">' + vpName(st.mode, i) + '</text>';
+  });
+  shv.innerHTML = s;
+}
+function newSheet() { SH.layout = makeSheet(SH.mode); drawSheet(); }
+pickButtons($('shModes'), [[1, '1-point'], [2, '2-point']], 1, k => { SH.mode = k; newSheet(); });
+$('shExample').addEventListener('change', e => { SH.example = e.target.checked; drawSheet(); });
+$('shNew').addEventListener('click', newSheet);
+$('shPrint').addEventListener('click', () => window.print());
+newSheet();
+
+})();
+</script>
+</body>
+</html>

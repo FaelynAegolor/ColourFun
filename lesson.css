@@ -1,0 +1,117 @@
+/* Shared styles for the lesson pages (3D shape shading, perspective):
+   page layout, buttons, the step-by-step guide player and its drawing marks. */
+
+/* ---------- Layout ---------- */
+.wrap { max-width: 1180px; margin: 0 auto; padding: 24px 24px 64px; }
+.intro h1 { font-size: clamp(28px, 4.5vw, 40px); font-weight: 800; letter-spacing: .01em; margin: 12px 0 6px; }
+.intro p { margin: 0; color: var(--muted); font-size: 16px; max-width: 68ch; }
+.jump { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; }
+.jump a {
+  display: flex; align-items: center; min-height: 40px; padding: 0 14px;
+  border: 2px solid var(--border); border-radius: 999px;
+  color: var(--ink); text-decoration: none; font-weight: 600; font-size: 13px;
+}
+.jump a:hover { border-color: var(--ink); }
+
+section { margin-top: 44px; scroll-margin-top: 16px; }
+.sec-title { font-size: 22px; font-weight: 800; margin: 0 0 4px; }
+.sec-lead { margin: 0 0 16px; color: var(--muted); max-width: 72ch; }
+
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+/* Drawing surfaces are always white paper with pencil-grey ink, in light and dark mode. */
+.paper {
+  background: #fbfaf6; color: #141414;
+  border: 1px solid #cfcbc2; border-radius: 14px;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, .14);
+  overflow: hidden;
+}
+.label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 16px 0 8px; }
+.label:first-child { margin-top: 0; }
+
+/* Buttons */
+.bgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.tbtn {
+  min-height: 44px; padding: 6px 8px;
+  background: var(--panel); color: var(--ink);
+  border: 2px solid var(--border); border-radius: 9px;
+  font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.tbtn:hover { border-color: var(--ink); }
+.tbtn[aria-pressed="true"], .tbtn[aria-selected="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--panel)); }
+.btn {
+  min-height: 44px; padding: 8px 16px; border-radius: 10px;
+  font: inherit; font-weight: 700; font-size: 14px; cursor: pointer;
+}
+.btn.primary { background: var(--accent); color: var(--accent-ink); border: 2px solid var(--accent); }
+.btn.ghost { background: transparent; color: var(--ink); border: 2px solid var(--accent); }
+.btn:hover { border-color: var(--ink); }
+.btn:disabled { opacity: .45; cursor: default; }
+
+.check { display: flex; align-items: center; gap: 10px; min-height: 40px; cursor: pointer; font-size: 14px; }
+.check input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); flex: none; }
+.range { display: grid; gap: 4px; margin-bottom: 8px; font-size: 13px; }
+.range span { display: flex; justify-content: space-between; }
+.range output { color: var(--muted); }
+.range input { width: 100%; accent-color: var(--accent); min-height: 32px; }
+.hint { margin: 10px 0 0; font-size: 12px; color: var(--muted); }
+
+/* ---------- Step-by-step guide ---------- */
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.tabs .tbtn { padding: 6px 16px; }
+.guide { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: stretch; }
+.gstage svg { display: block; width: 100%; height: auto; }
+.gpanel { display: flex; flex-direction: column; }
+.gcount { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.gtext { font-size: 18px; line-height: 1.45; margin: 8px 0 16px; min-height: 5.8em; }
+.gbtns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
+.dots { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 14px; }
+.dots button {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid var(--border); background: var(--panel); color: var(--ink);
+  font: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.dots button.done { background: color-mix(in srgb, var(--accent) 18%, var(--panel)); border-color: color-mix(in srgb, var(--accent) 50%, var(--border)); }
+.dots button[aria-current="step"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+/* Drawing marks inside the guide and diagrams */
+.ln { fill: none; stroke: #1d1d1f; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.cn { fill: none; stroke: #8b8882; stroke-width: 1.3; stroke-dasharray: 5 4; stroke-linecap: round; }
+.hl { fill: none; stroke: #2a2a2e; stroke-opacity: .5; stroke-width: 1; stroke-linecap: round; }
+.dot { fill: #1d1d1f; }
+
+.now .ln, .now .hl, .play-on .draw {
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  animation: draw .8s ease-in-out forwards;
+  animation-delay: calc(var(--i, 0) * .45s + var(--j, 0) * .04s);
+}
+.now .hl { animation-duration: .35s; }
+.now .cn, .now .fd, .now .dot {
+  opacity: 0;
+  animation: fade .6s ease forwards;
+  animation-delay: calc(var(--i, 0) * .45s);
+}
+.now .sh {
+  clip-path: inset(0 100% 0 0);
+  animation: wipe 1.2s ease-in-out forwards;
+  animation-delay: calc(var(--i, 0) * .45s);
+}
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes fade { to { opacity: 1; } }
+@keyframes wipe { to { clip-path: inset(0 0 0 0); } }
+.lbl { font-family: var(--font); font-size: 11px; font-weight: 700; letter-spacing: .06em; fill: #55534e; }
+.now .lbl { opacity: 0; animation: fade .6s ease forwards; animation-delay: calc(var(--i, 0) * .45s); }
+/* Rubbing out construction lines */
+.rub .cn, .rub .lbl.cnl { animation: rubout .9s ease forwards; }
+.gone .cn, .gone .lbl.cnl { display: none; }
+@keyframes rubout { to { opacity: 0; } }
+
+@media (max-width: 960px) {
+  .guide { grid-template-columns: 1fr; }
+  .gtext { min-height: 0; }
+}
+@media (max-width: 560px) {
+  .wrap { padding: 16px 16px 48px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001s !important; animation-delay: 0s !important; transition: none !important; }
+}
