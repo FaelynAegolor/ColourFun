@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Composition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="lesson.css">
+<style>
+/* ---------- Guides, not rules ---------- */
+.notes { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; margin: 0; padding: 0; }
+.notes li { list-style: none; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+.notes b { display: block; margin-bottom: 3px; font-size: 15px; }
+
+/* ---------- Overlay tool ---------- */
+.tool { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 20px; align-items: start; }
+.stage-wrap { display: flex; justify-content: center; padding: 12px; }
+.stage { position: relative; max-width: 100%; }
+.stage canvas, .stage svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.stage svg { touch-action: none; user-select: none; -webkit-user-select: none; }
+#stageSvg { cursor: crosshair; }
+#stageSvg [data-h="move"] { cursor: move; }
+#stageSvg [data-h="-1,-1"], #stageSvg [data-h="1,1"] { cursor: nwse-resize; }
+#stageSvg [data-h="1,-1"], #stageSvg [data-h="-1,1"] { cursor: nesw-resize; }
+#stageSvg [data-h="0,-1"], #stageSvg [data-h="0,1"] { cursor: ns-resize; }
+#stageSvg [data-h="-1,0"], #stageSvg [data-h="1,0"] { cursor: ew-resize; }
+.paper.over { box-shadow: 0 0 0 3px var(--accent); }
+.foot { border-top: 1px solid #e1ded6; padding: 10px 16px 12px; min-height: 64px; font-size: 14px; color: #333; }
+.foot b { display: block; font-size: 14px; color: #141414; }
+.foot p { margin: 3px 0 0; }
+.filebtn { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+.filebtn:focus-within { outline: 3px solid var(--ring); outline-offset: 2px; }
+.row { display: flex; flex-wrap: wrap; gap: 6px; }
+.row > * { flex: 1 1 auto; }
+.bgrid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.bgrid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ovrow { border-top: 1px solid var(--border); padding: 2px 0; }
+.ovrow:first-of-type { border-top: 0; }
+.ovrow .top { display: flex; align-items: center; gap: 8px; }
+.ovrow .top .check { flex: 1; }
+.ovrow .more { padding: 0 0 8px 30px; }
+.ovrow .more .range { margin: 0; }
+input[type="color"] {
+  width: 44px; height: 38px; padding: 3px; flex: none; cursor: pointer;
+  border: 2px solid var(--border); border-radius: 9px; background: var(--panel);
+}
+.nums { display: flex; gap: 12px; margin-top: 6px; }
+.nums label { display: grid; gap: 2px; font-size: 13px; }
+input[type="number"] {
+  width: 84px; min-height: 44px; padding: 4px 8px;
+  font: inherit; color: var(--ink); background: var(--panel);
+  border: 2px solid var(--border); border-radius: 9px;
+}
+.sub-lbl { font-size: 12px; color: var(--muted); margin: 6px 0 4px; }
+.spin-btns .tbtn { font-size: 18px; line-height: 1; }
+.actions { display: grid; gap: 8px; margin-top: 12px; }
+
+/* ---------- Focal point checker ---------- */
+.focal { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 20px; align-items: start; }
+#fSvg { cursor: crosshair; }
+.fplist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.fplist li { display: grid; grid-template-columns: 30px 1fr auto; gap: 10px; align-items: start; font-size: 13.5px; background: var(--bg); border-radius: 10px; padding: 8px 10px; }
+.fplist .num { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #E4252C; color: #fff; font-weight: 800; font-size: 13px; }
+.fplist .x { min-height: 36px; min-width: 44px; padding: 0 8px; font-size: 12px; }
+.fplist p { margin: 0 0 2px; }
+.fplist .tag { min-width: 58px; text-align: center; }
+.tag { display: inline-block; padding: 0 6px; border-radius: 6px; font-size: 11.5px; font-weight: 700; letter-spacing: .03em; }
+.tag.on { background: #2E8B57; color: #fff; }
+.tag.near { background: #d49a00; color: #141414; }
+.tag.off { background: var(--border); color: var(--ink); }
+.key { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12.5px; color: #333; margin-top: 6px; }
+.key span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* ---------- Overlay cards ---------- */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.card { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.card .paper { border-radius: 0; border: 0; border-bottom: 1px solid var(--border); box-shadow: none; padding: 12px; }
+.card svg { display: block; width: 100%; height: auto; max-height: 170px; }
+.card .txt { padding: 12px 14px 16px; font-size: 14px; }
+.card h3 { margin: 0 0 4px; font-size: 16px; }
+.card p { margin: 0 0 6px; }
+.card .caveat { color: var(--muted); font-size: 13px; margin: 0; }
+
+/* ---------- Printable thumbnail sheet ---------- */
+.sheet-ctl { display: grid; gap: 4px; margin-bottom: 16px; }
+.sheet-ctl .grp { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: flex-end; }
+.sheet-ctl .grp > div { display: grid; gap: 4px; }
+.sheet-ctl .label { margin: 8px 0 0; }
+.sheet-ctl .bgrid { display: flex; flex-wrap: wrap; gap: 6px; }
+.sheet-ctl .tbtn { padding: 6px 12px; }
+.sheet {
+  background: #fff; color: #141414;
+  max-width: 794px; margin: 0 auto;
+  aspect-ratio: 210 / 297;
+  padding: 26px 30px 20px;
+  border: 1px solid #cfcbc2; box-shadow: 0 2px 14px rgba(0, 0, 0, .18);
+  display: flex; flex-direction: column;
+  container-type: inline-size;
+}
+.sheet .head { display: flex; align-items: flex-end; gap: 20px; border-bottom: 2px solid #141414; padding-bottom: 8px; }
+.sheet h3 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: .12em; }
+.sheet .sub { margin: 2px 0 0; font-size: 12.5px; color: #333; }
+.sheet .who { margin-left: auto; display: flex; gap: 8px; align-items: flex-end; font-weight: 700; font-size: 12px; letter-spacing: .06em; }
+.sheet .who i { display: inline-block; border-bottom: 1px solid #141414; width: 140px; height: 14px; }
+.sheet .who i.short { width: 80px; }
+.sheet svg { display: block; width: 100%; flex: 1; min-height: 0; margin: 10px 0 6px; }
+.sheet .tip { margin: 0; font-size: 11.5px; color: #333; }
+@container (max-width: 560px) {
+  .sheet .head { flex-wrap: wrap; }
+  .sheet .who { margin-left: 0; }
+}
+
+@media (max-width: 960px) {
+  .tool, .focal { grid-template-columns: 1fr; }
+  .sheet { aspect-ratio: auto; padding: 16px; }
+  .sheet svg { height: auto; }
+}
+
+@page { size: A4 portrait; margin: 10mm; }
+@media print {
+  html, body { background: #fff; }
+  main > *:not(#sheetSec), #sheetSec > *:not(.sheet) { display: none !important; }
+  .wrap { padding: 0; max-width: none; }
+  #sheetSec { margin: 0; }
+  .sheet { box-shadow: none; border: 0; padding: 0; max-width: none; width: 100%; height: 276mm; aspect-ratio: auto; }
+  .sheet svg { height: auto; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Colour</button>
+        <ul>
+          <li><a href="colour-schemes.html">Colour schemes</a></li>
+          <li><a href="colour-interaction.html">Colour interaction</a></li>
+          <li><a href="paint-mixing.html">Paint mixing</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Form &amp; space</button>
+        <ul>
+          <li><a href="shape-shading.html">3D shape shading</a></li>
+          <li><a href="ellipses.html">Ellipses</a></li>
+          <li><a href="perspective.html">Perspective</a></li>
+          <li><a href="atmospheric-perspective.html">Atmospheric perspective</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Reference tools</button>
+        <ul>
+          <li><a href="value-notan.html">Value &amp; notan</a></li>
+          <li><a href="grid-proportion.html">Grid &amp; proportion</a></li>
+          <li><a href="composition.html" aria-current="page">Composition</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Practice</button>
+        <ul>
+          <li><a href="gesture-timer.html">Gesture timer</a></li>
+          <li><a href="mark-making.html">Mark-making &amp; media</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>Composition</h1>
+    <p>Lay compositional guides over a photo, reference or scan of your own work, crop it to a chosen format, and check where the focal points sit. The guides help you analyse a picture. They are not rules for making one.</p>
+    <ul class="jump">
+      <li><a href="#about">Guides, not rules</a></li>
+      <li><a href="#tool">Overlay and crop</a></li>
+      <li><a href="#focal">Focal point checker</a></li>
+      <li><a href="#cards">The overlays explained</a></li>
+      <li><a href="#sheetSec">Thumbnail sheet</a></li>
+    </ul>
+  </div>
+
+  <!-- ---------- Guides, not rules ---------- -->
+  <section id="about" aria-labelledby="aboutTitle">
+    <h2 class="sec-title" id="aboutTitle">Guides, not rules</h2>
+    <p class="sec-lead">A composition works because of how its shapes, values, edges and directions relate, not because a subject lands on a line. Use the overlays to ask questions of a picture, then decide for yourself.</p>
+    <ul class="notes">
+      <li><b>Use them to diagnose</b>An overlay makes some things obvious: a horizon cutting the picture exactly in half, a subject stuck dead centre by accident, a strong diagonal that leads out of the frame, or a crowded edge.</li>
+      <li><b>Something will always line up</b>With eight overlays and dozens of lines, some edge in any picture will fall near one of them. A match found after the fact is not evidence that the artist planned it.</li>
+      <li><b>Thirds and phi are close</b>The thirds lines sit at 33.3% and the phi lines at 38.2% of the frame. On a 30 cm canvas that is 1.5 cm. Neither is precise enough for &ldquo;on the line&rdquo; to mean much.</li>
+      <li><b>The golden ratio is overrated</b>Claims that the Parthenon, the Mona Lisa or most Old Masters were built on &phi; rest on selective measurement. Experiments since Fechner (1876) have found no consistent preference for golden rectangles.</li>
+      <li><b>Centre and symmetry are valid</b>Icons, formal portraits and many Renaissance altarpieces are centred and symmetrical on purpose. A central subject gives stability and directness. The thirds rule only warns against doing it by default.</li>
+      <li><b>Format comes first</b>Choose the shape of the picture before placing anything in it. The same subject reads differently in a square, a tall 4:5 or a wide 16:9, so try crops before you commit to a canvas.</li>
+    </ul>
+  </section>
+
+  <!-- ---------- Overlay tool ---------- -->
+  <section id="tool" aria-labelledby="toolTitle">
+    <h2 class="sec-title" id="toolTitle">Overlay and crop</h2>
+    <p class="sec-lead">Load an image (it stays on your device and is never uploaded), or use a sample. Drag inside the frame to move it, drag the handles to resize it, or drag outside it to draw a new frame. The overlays follow the crop.</p>
+    <div class="tool">
+      <div class="paper" id="stagePaper">
+        <div class="stage-wrap" id="stageWrap">
+          <div class="stage" id="stage">
+            <canvas id="stageCv" aria-hidden="true"></canvas>
+            <svg id="stageSvg" tabindex="0" role="img" aria-label="Image with a crop frame and composition overlays. Arrow keys move the frame, Shift and arrows move it further, plus and minus resize it."></svg>
+          </div>
+        </div>
+        <div class="foot"><b id="cropInfo" aria-live="polite"></b><p>Keyboard: focus the image, then use the arrow keys to move the frame (Shift for bigger steps) and + or &minus; to resize it. You can also drop an image file here.</p></div>
+      </div>
+
+      <div class="panel" aria-label="Overlay and crop controls">
+        <h3 class="label">Image</h3>
+        <div class="row">
+          <label class="btn primary filebtn">Load image&hellip;<input type="file" accept="image/*" id="fileIn" class="sr-only"></label>
+        </div>
+        <div class="bgrid two" role="group" aria-label="Sample image" id="sampleBtns" style="margin-top:6px"></div>
+
+        <h3 class="label" id="aspLbl">Crop format</h3>
+        <div class="bgrid four" role="group" aria-labelledby="aspLbl" id="aspBtns"></div>
+        <div class="bgrid two" role="group" aria-label="Frame orientation" id="orientBtns" style="margin-top:6px"></div>
+        <div class="actions" style="grid-template-columns:1fr 1fr">
+          <button type="button" class="btn ghost" id="fitBtn">Largest crop</button>
+          <button type="button" class="btn ghost" id="fullBtn">Whole image</button>
+        </div>
+
+        <h3 class="label">Overlays</h3>
+        <div id="ovList"></div>
+
+        <h3 class="label">Line style</h3>
+        <label class="range"><span>Line width <output id="lwOut"></output></span><input type="range" id="lw" min="1" max="5" step=".5" value="2"></label>
+        <label class="check"><input type="checkbox" id="halo" checked> Dark halo (easier to see on light images)</label>
+        <label class="check"><input type="checkbox" id="dim" checked> Darken outside the crop</label>
+
+        <h3 class="label">Export</h3>
+        <label class="check"><input type="checkbox" id="expOv"> Include overlays</label>
+        <div class="actions">
+          <button type="button" class="btn primary" id="expBtn">Export crop as PNG</button>
+        </div>
+        <p class="hint" id="expMsg" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Focal point checker ---------- -->
+  <section id="focal" aria-labelledby="focalTitle">
+    <h2 class="sec-title" id="focalTitle">Focal point checker</h2>
+    <p class="sec-lead">This shows the current crop. Click where the eye goes first (the area of strongest contrast, sharpest edge or most saturated colour) and anywhere else that holds attention. Each point is measured against the thirds and phi intersections. Distances are given as a percentage of the frame&rsquo;s diagonal.</p>
+    <div class="focal">
+      <div class="paper">
+        <div class="stage-wrap" id="fWrap">
+          <div class="stage" id="fStage">
+            <canvas id="fCv" aria-hidden="true"></canvas>
+            <svg id="fSvg" tabindex="0" role="img" aria-label="Cropped image. Click to mark a focal point. With the keyboard, arrow keys move a crosshair and Enter places a point."></svg>
+          </div>
+        </div>
+        <div class="foot">
+          <div class="key">
+            <span><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" fill="none" stroke="#1F5FBF" stroke-width="2.5"/></svg>Thirds intersection</span>
+            <span><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2l6 6-6 6-6-6z" fill="none" stroke="#b86e00" stroke-width="2.5"/></svg>Phi intersection</span>
+            <span><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#E4252C"/></svg>Your points</span>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3 class="label">Show</h3>
+        <label class="check"><input type="checkbox" id="fThirds" checked> Thirds lines</label>
+        <label class="check"><input type="checkbox" id="fPhi"> Phi lines</label>
+        <h3 class="label">Points</h3>
+        <p class="hint" id="fSummary" aria-live="polite" style="margin:0 0 10px"></p>
+        <ol class="fplist" id="fpList"></ol>
+        <div class="actions" style="grid-template-columns:1fr 1fr">
+          <button type="button" class="btn ghost" id="fUndo">Remove last</button>
+          <button type="button" class="btn ghost" id="fClear">Clear all</button>
+        </div>
+        <p class="hint">Points are pinned to the image, so they stay put if you move the crop above. That lets you compare how the same focal point sits in different crops.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Overlay cards ---------- -->
+  <section id="cards" aria-labelledby="cardsTitle">
+    <h2 class="sec-title" id="cardsTitle">The overlays explained</h2>
+    <p class="sec-lead">What each overlay is, how it is constructed, and what it is good for. The diagrams are drawn from the same geometry as the tool.</p>
+    <div class="cards" id="cardList"></div>
+  </section>
+
+  <!-- ---------- Printable thumbnail sheet ---------- -->
+  <section id="sheetSec" aria-labelledby="sheetTitle">
+    <h2 class="sec-title" id="sheetTitle">Thumbnail sheet</h2>
+    <p class="sec-lead">Print an A4 sheet of empty frames in your chosen proportion. Small tick marks on the edges show the thirds or phi divisions without drawing lines through the frame. Fill the frames with quick value sketches before you commit to a composition.</p>
+    <div class="sheet-ctl">
+      <div class="grp">
+        <div><h3 class="label" id="shAspLbl">Format</h3><div class="bgrid" role="group" aria-labelledby="shAspLbl" id="shAsp"></div></div>
+      </div>
+      <div class="grp">
+        <div><h3 class="label" id="shOriLbl">Frames</h3><div class="bgrid" role="group" aria-labelledby="shOriLbl" id="shOri"></div></div>
+        <div><h3 class="label" id="shTickLbl">Tick marks</h3><div class="bgrid" role="group" aria-labelledby="shTickLbl" id="shTick"></div></div>
+        <div><h3 class="label" id="shNLbl">Per sheet</h3><div class="bgrid" role="group" aria-labelledby="shNLbl" id="shN"></div></div>
+      </div>
+      <div class="grp" style="margin-top:12px">
+        <button type="button" class="btn ghost" id="shMatch">Match the crop above</button>
+        <button type="button" class="btn primary" id="shPrint">Print sheet</button>
+      </div>
+    </div>
+    <div class="sheet" id="sheet">
+      <div class="head">
+        <div><h3>THUMBNAIL SKETCHES</h3><p class="sub" id="shSub"></p></div>
+        <div class="who">NAME <i></i> DATE <i class="short"></i></div>
+      </div>
+      <svg id="shv" viewBox="0 0 1000 1250" aria-label="Empty thumbnail frames"></svg>
+      <p class="tip">Work small and fast: big shapes and three to five values only. Try the same subject in several frames with different placements, then pick the strongest.</p>
+    </div>
+  </section>
+</main>
+
+<script src="site.js"></script>
+<script>
+(function () {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const PHI = (1 + Math.sqrt(5)) / 2;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const f1 = n => Math.round(n * 10) / 10;
+const f2 = n => Math.round(n * 100) / 100;
+
+/* ================= Formats ================= */
+// r is the long side over the short side; orientation decides which way round it goes.
+const ASPECTS = [
+  { key: 'free', r: 0, name: 'Free' },
+  { key: '1:1', r: 1, a: '1', b: '1' },
+  { key: '4:5', r: 5 / 4, a: '4', b: '5' },
+  { key: '2:3', r: 3 / 2, a: '2', b: '3' },
+  { key: '3:4', r: 4 / 3, a: '3', b: '4' },
+  { key: '16:9', r: 16 / 9, a: '9', b: '16' },
+  { key: 'a', r: Math.SQRT2, a: '1', b: '√2', name: 'A-series' },
+  { key: 'phi', r: PHI, a: '1', b: '1.618', name: 'Golden' },
+];
+const aspOf = key => ASPECTS.find(a => a.key === key) || ASPECTS[0];
+// Button text for a format: short:long for portrait, long:short for landscape
+function aspLabel(a, port) {
+  if (!a.r) return a.name;
+  if (a.r === 1) return '1:1';
+  return port ? a.a + ':' + a.b : a.b + ':' + a.a;
+}
+const aspAria = (a, port) => a.name && a.r ? a.name + ', ' + aspLabel(a, port) : undefined;
+
+/* ================= Overlay geometry ================= */
+// Every overlay is built in crop-local pixels (0..w, 0..h) as polylines, split into
+// main lines and faint construction lines, so the stage, the export and the cards share it.
+
+const OVERLAYS = [
+  { key: 'thirds', name: 'Rule of thirds', col: '#ffffff', on: true },
+  { key: 'phi', name: 'Phi grid', col: '#FFE600' },
+  { key: 'spiral', name: 'Golden spiral', col: '#F7941D' },
+  { key: 'diag', name: 'Main diagonals', col: '#5EC8FF' },
+  { key: 'recip', name: 'Reciprocal diagonals', col: '#FF5A5F' },
+  { key: 'arm', name: 'Harmonic armature', col: '#7CE06A' },
+  { key: 'centre', name: 'Centre lines', col: '#FF7BD5' },
+  { key: 'grid', name: 'Custom grid', col: '#ffffff' },
+];
+
+// Whirling squares in a φ × 1 rectangle, scaled into the unit square. Squares are cut off
+// the left, top, right and bottom in turn; a quarter circle in each square forms the spiral.
+const SPIRAL = (function () {
+  let x = 0, y = 0, w = PHI, h = 1;
+  const arc = [], cuts = [];
+  const quarter = (cx, cy, r, a0) => {
+    for (let i = arc.length ? 1 : 0; i <= 18; i++) {
+      const a = (a0 + 90 * i / 18) * Math.PI / 180;
+      arc.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]);
+    }
+  };
+  for (let n = 0; n < 14; n++) {
+    const side = n % 4;
+    if (side === 0) { const s = h; quarter(x + s, y + s, s, 180); cuts.push([[x + s, y], [x + s, y + h]]); x += s; w -= s; }
+    else if (side === 1) { const s = w; quarter(x, y + s, s, 270); cuts.push([[x, y + s], [x + w, y + s]]); y += s; h -= s; }
+    else if (side === 2) { const s = h; quarter(x + w - s, y, s, 0); cuts.push([[x + w - s, y], [x + w - s, y + h]]); w -= s; }
+    else { const s = w; quarter(x + s, y + h - s, s, 90); cuts.push([[x, y + h - s], [x + w, y + h - s]]); h -= s; }
+  }
+  const norm = p => [p[0] / PHI, p[1]];
+  return { arc: arc.map(norm), cuts: cuts.map(c => c.map(norm)), end: norm(arc[arc.length - 1]) };
+})();
+
+// o.corner: where the spiral tightens ('tl' | 'tr' | 'bl' | 'br'); o.flip: start with the
+// other division (swaps the spiral's direction of turn). A portrait frame uses the transposed
+// construction so its squares stay square in a golden frame.
+function spiralGeom(w, h, o) {
+  const tr = (w < h) !== !!o.flip;
+  const sw = p => tr ? [p[1], p[0]] : p;
+  const end = sw(SPIRAL.end);
+  const fx = (end[0] < .5) !== (o.corner[1] === 'l');
+  const fy = (end[1] < .5) !== (o.corner[0] === 't');
+  const map = p => { const q = sw(p); return [(fx ? 1 - q[0] : q[0]) * w, (fy ? 1 - q[1] : q[1]) * h]; };
+  return { main: [SPIRAL.arc.map(map)], faint: SPIRAL.cuts.slice(0, 8).map(c => c.map(map)) };
+}
+
+// Lines from each corner, perpendicular to the diagonal that does not pass through it,
+// running until they meet the far side of the frame.
+function reciprocals(w, h) {
+  return [[0, 0], [w, 0], [w, h], [0, h]].map(([cx, cy]) => {
+    const dx = (cx === 0 ? 1 : -1) * h, dy = (cy === 0 ? 1 : -1) * w;
+    const t = Math.min(w / h, h / w);
+    return [[cx, cy], [cx + dx * t, cy + dy * t]];
+  });
+}
+// Sides of the two reciprocal rectangles (same proportion as the frame, turned 90°)
+function recipSides(w, h) {
+  if (Math.abs(w - h) < 1e-6) return [];
+  if (w > h) { const d = h * h / w; return [[[d, 0], [d, h]], [[w - d, 0], [w - d, h]]]; }
+  const d = w * w / h; return [[[0, d], [w, d]], [[0, h - d], [w, h - d]]];
+}
+
+function geom(key, w, h, o) {
+  const L = (x1, y1, x2, y2) => [[x1, y1], [x2, y2]];
+  const vl = x => L(x, 0, x, h), hl = y => L(0, y, w, y);
+  const a = 1 / (PHI * PHI), b = 1 / PHI;
+  switch (key) {
+    case 'thirds': return { main: [vl(w / 3), vl(2 * w / 3), hl(h / 3), hl(2 * h / 3)] };
+    case 'phi': return { main: [vl(a * w), vl(b * w), hl(a * h), hl(b * h)] };
+    case 'spiral': return spiralGeom(w, h, o);
+    case 'diag': return { main: [L(0, h, w, 0), L(0, 0, w, h)] };
+    case 'recip': return { main: reciprocals(w, h) };
+    case 'arm': return { main: [L(0, h, w, 0), L(0, 0, w, h)].concat(reciprocals(w, h)), faint: recipSides(w, h) };
+    case 'centre': return { main: [vl(w / 2), hl(h / 2)] };
+    case 'grid': {
+      const m = [];
+      for (let i = 1; i < o.n; i++) m.push(vl(w * i / o.n));
+      for (let j = 1; j < o.m; j++) m.push(hl(h * j / o.m));
+      return { main: m };
+    }
+  }
+  return { main: [] };
+}
+const pathD = (lines, ox, oy) => lines.map(l => 'M' + l.map(p => f1(p[0] + ox) + ' ' + f1(p[1] + oy)).join('L')).join('');
+
+/* ================= State and preferences ================= */
+
+const S = {
+  src: null, W: 1, H: 1, url: null, sample: 'land',
+  crop: { x: 0, y: 0, w: 1, h: 1 },
+  aspect: 'free', port: false,
+  lw: 2, halo: true, dim: true,
+  ov: {},
+  focal: [], fShow: { thirds: true, phi: false },
+  k: 1,
+};
+OVERLAYS.forEach(o => { S.ov[o.key] = { on: !!o.on, col: o.col, op: .9 }; });
+Object.assign(S.ov.spiral, { corner: 'br', flip: false });
+Object.assign(S.ov.grid, { n: 4, m: 4 });
+
+try {
+  const p = JSON.parse(localStorage.getItem('composition') || '{}');
+  if (p.ov) Object.keys(S.ov).forEach(k => { if (p.ov[k]) Object.assign(S.ov[k], p.ov[k]); });
+  if (p.aspect && aspOf(p.aspect).key === p.aspect) S.aspect = p.aspect;
+  if (typeof p.port === 'boolean') S.port = p.port;
+  if (p.lw) S.lw = clamp(+p.lw, 1, 5);
+  if (typeof p.halo === 'boolean') S.halo = p.halo;
+  if (typeof p.dim === 'boolean') S.dim = p.dim;
+} catch (e) { /* ignore */ }
+function save() {
+  try { localStorage.setItem('composition', JSON.stringify({ ov: S.ov, aspect: S.aspect, port: S.port, lw: S.lw, halo: S.halo, dim: S.dim })); } catch (e) { /* ignore */ }
+}
+
+/* ================= Sample images ================= */
+// Procedurally painted so the tool works with no image loaded.
+
+function seeded(a) {
+  return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+}
+
+function ridge(g, W, H, base, amp, waves, fill) {
+  g.beginPath(); g.moveTo(0, H);
+  for (let x = 0; x <= W; x += 6) {
+    let y = base;
+    waves.forEach(([f, a, ph]) => { y -= amp * a * Math.sin(x * f + ph); });
+    g.lineTo(x, y);
+  }
+  g.lineTo(W, H); g.closePath(); g.fillStyle = fill; g.fill();
+}
+
+function paintLandscape() {
+  const W = 1500, H = 1000, c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const g = c.getContext('2d'), rnd = seeded(11);
+  // Sky and sun glow
+  let gr = g.createLinearGradient(0, 0, 0, 620);
+  gr.addColorStop(0, '#5f86b8'); gr.addColorStop(.55, '#aac3dc'); gr.addColorStop(1, '#f1d9bb');
+  g.fillStyle = gr; g.fillRect(0, 0, W, 640);
+  gr = g.createRadialGradient(1080, 400, 5, 1080, 400, 300);
+  gr.addColorStop(0, 'rgba(255,248,225,1)'); gr.addColorStop(.18, 'rgba(255,236,200,.85)'); gr.addColorStop(1, 'rgba(255,230,190,0)');
+  g.fillStyle = gr; g.fillRect(700, 80, 800, 600);
+  // Soft clouds
+  g.fillStyle = 'rgba(255,255,255,.45)';
+  for (let i = 0; i < 26; i++) {
+    const cx = 120 + rnd() * 700, cy = 140 + rnd() * 120;
+    g.beginPath(); g.ellipse(cx, cy, 60 + rnd() * 90, 14 + rnd() * 16, 0, 0, Math.PI * 2); g.fill();
+  }
+  // Far mountains, mid hills
+  ridge(g, W, H, 540, 60, [[.004, 1, 1], [.011, .45, 2], [.027, .15, 0]], '#a3b1c3');
+  ridge(g, W, H, 600, 30, [[.006, 1, 3.2], [.019, .35, 1]], '#7f917f');
+  // Lake
+  gr = g.createLinearGradient(0, 628, 0, 700);
+  gr.addColorStop(0, '#dfe4e2'); gr.addColorStop(1, '#94aabd');
+  g.fillStyle = gr; g.fillRect(0, 628, W, 80);
+  g.fillStyle = 'rgba(255,245,215,.7)';
+  for (let i = 0; i < 20; i++) g.fillRect(1030 + (rnd() - .5) * 90 * (1 + i / 8), 634 + i * 3.2, 30 + rnd() * 50, 2);
+  // Near field
+  gr = g.createLinearGradient(0, 680, 0, H);
+  gr.addColorStop(0, '#78924a'); gr.addColorStop(1, '#34491f');
+  ridge(g, W, H, 700, 14, [[.005, 1, .5], [.013, .5, 2]], gr);
+  // Winding path
+  g.beginPath();
+  g.moveTo(1500, 1000); g.bezierCurveTo(1240, 900, 1320, 800, 1090, 745); g.bezierCurveTo(990, 720, 940, 712, 905, 706);
+  g.lineTo(915, 705); g.bezierCurveTo(990, 716, 1080, 735, 1150, 770); g.bezierCurveTo(1260, 830, 1180, 930, 1300, 1000);
+  g.closePath(); g.fillStyle = '#c9ab78'; g.fill();
+  // Grass strokes
+  for (let i = 0; i < 900; i++) {
+    const x = rnd() * W, y = 720 + Math.pow(rnd(), .7) * 280, l = 4 + (y - 700) * .05;
+    g.strokeStyle = rnd() < .5 ? 'rgba(40,60,20,.35)' : 'rgba(160,180,90,.3)';
+    g.lineWidth = 1 + (y - 700) / 200;
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - .5) * 4, y - l); g.stroke();
+  }
+  // Barn on the far shore
+  g.fillStyle = '#9b3a2a'; g.fillRect(930, 590, 70, 38);
+  g.fillStyle = '#4a2e28'; g.beginPath(); g.moveTo(924, 592); g.lineTo(965, 566); g.lineTo(1006, 592); g.closePath(); g.fill();
+  g.fillStyle = '#e8d6b8'; g.fillRect(958, 606, 12, 22);
+  // Tree: shadow, trunk, then foliage clusters lit from the right
+  g.fillStyle = 'rgba(20,30,10,.35)'; g.beginPath(); g.ellipse(420, 792, 150, 18, 0, 0, Math.PI * 2); g.fill();
+  g.fillStyle = '#3b2a1c';
+  g.beginPath(); g.moveTo(462, 790); g.lineTo(474, 600); g.lineTo(490, 600); g.lineTo(500, 790); g.closePath(); g.fill();
+  g.lineWidth = 9; g.strokeStyle = '#3b2a1c';
+  g.beginPath(); g.moveTo(480, 660); g.lineTo(420, 590); g.moveTo(485, 640); g.lineTo(560, 580); g.stroke();
+  for (let i = 0; i < 70; i++) {
+    const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * 150;
+    const x = 482 + Math.cos(a) * r * 1.2, y = 520 + Math.sin(a) * r * .8;
+    const lit = (x - 420) / 250 + (560 - y) / 400;
+    g.fillStyle = lit > .7 ? '#6f9440' : lit > .3 ? '#4d7030' : '#2f4a1f';
+    g.beginPath(); g.arc(x, y, 30 + rnd() * 26, 0, Math.PI * 2); g.fill();
+  }
+  return c;
+}
+
+function paintStillLife() {
+  const W = 1400, H = 1050, c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  // Wall with light falling from the upper left
+  let gr = g.createRadialGradient(300, 150, 50, 400, 250, 1200);
+  gr.addColorStop(0, '#e2dbcc'); gr.addColorStop(1, '#8f8676');
+  g.fillStyle = gr; g.fillRect(0, 0, W, 700);
+  // Table top and front edge
+  gr = g.createLinearGradient(0, 640, 0, 900);
+  gr.addColorStop(0, '#6c4a30'); gr.addColorStop(1, '#8a6040');
+  g.fillStyle = gr; g.fillRect(0, 640, W, 280);
+  g.fillStyle = '#3e2818'; g.fillRect(0, 900, W, 150);
+  g.fillStyle = 'rgba(255,230,190,.25)'; g.fillRect(0, 898, W, 4);
+  // Cloth
+  gr = g.createLinearGradient(120, 0, 760, 0);
+  gr.addColorStop(0, '#f4f1ea'); gr.addColorStop(1, '#b8b3a8');
+  g.fillStyle = gr;
+  g.beginPath(); g.moveTo(80, 700); g.bezierCurveTo(300, 660, 560, 690, 760, 720); g.lineTo(700, 900);
+  g.bezierCurveTo(640, 980, 560, 1020, 520, 1050); g.lineTo(260, 1050); g.bezierCurveTo(230, 990, 170, 950, 130, 900); g.closePath(); g.fill();
+  g.strokeStyle = 'rgba(90,85,75,.35)'; g.lineWidth = 6;
+  g.beginPath(); g.moveTo(330, 700); g.bezierCurveTo(360, 800, 330, 900, 380, 1050); g.moveTo(560, 700); g.bezierCurveTo(540, 800, 600, 880, 560, 990); g.stroke();
+  // Cast shadows, falling to the right
+  g.fillStyle = 'rgba(30,18,10,.38)';
+  g.beginPath(); g.ellipse(640, 745, 150, 26, -.05, 0, Math.PI * 2); g.fill();
+  g.beginPath(); g.ellipse(1000, 790, 190, 34, 0, 0, Math.PI * 2); g.fill();
+  g.beginPath(); g.ellipse(1200, 842, 80, 18, 0, 0, Math.PI * 2); g.fill();
+  // Bottle
+  gr = g.createLinearGradient(430, 0, 590, 0);
+  gr.addColorStop(0, '#2c5a3a'); gr.addColorStop(.18, '#9cc3a2'); gr.addColorStop(.3, '#2f5e3d'); gr.addColorStop(1, '#0f2416');
+  g.fillStyle = gr;
+  g.beginPath(); g.moveTo(430, 740); g.lineTo(430, 420); g.bezierCurveTo(430, 360, 488, 350, 492, 300);
+  g.lineTo(492, 190); g.lineTo(528, 190); g.lineTo(528, 300); g.bezierCurveTo(532, 350, 590, 360, 590, 420); g.lineTo(590, 740);
+  g.bezierCurveTo(560, 752, 460, 752, 430, 740); g.closePath(); g.fill();
+  g.fillStyle = '#6b1e1e'; g.fillRect(488, 170, 44, 26);
+  // Bowl
+  gr = g.createLinearGradient(820, 0, 1200, 0);
+  gr.addColorStop(0, '#dfe6ea'); gr.addColorStop(.35, '#9fb3c2'); gr.addColorStop(1, '#3e5566');
+  g.fillStyle = gr;
+  g.beginPath(); g.moveTo(820, 690); g.bezierCurveTo(830, 790, 900, 810, 1010, 810); g.bezierCurveTo(1120, 810, 1190, 790, 1200, 690); g.closePath(); g.fill();
+  // Fruit in the bowl, then the rim in front
+  const fruit = (x, y, r, c1, c2) => {
+    const q = g.createRadialGradient(x - r * .4, y - r * .45, r * .1, x, y, r * 1.05);
+    q.addColorStop(0, c1); q.addColorStop(1, c2);
+    g.fillStyle = q; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+  };
+  fruit(930, 660, 62, '#f07a5c', '#6e1410');
+  fruit(1060, 650, 70, '#f39a5a', '#7a2a0c');
+  fruit(1000, 610, 56, '#d9e27a', '#5f6a14');
+  g.fillStyle = '#6b8190'; g.beginPath(); g.ellipse(1010, 690, 190, 26, 0, 0, Math.PI); g.fill();
+  g.strokeStyle = '#eef3f5'; g.lineWidth = 4; g.beginPath(); g.ellipse(1010, 690, 190, 26, 0, Math.PI, 0, true); g.stroke();
+  // Lemon on the table
+  const q = g.createRadialGradient(1170, 800, 8, 1190, 820, 90);
+  q.addColorStop(0, '#fff6a8'); q.addColorStop(1, '#a88a0a');
+  g.fillStyle = q; g.beginPath(); g.ellipse(1190, 818, 78, 46, -.15, 0, Math.PI * 2); g.fill();
+  return c;
+}
+const SAMPLES = { land: paintLandscape, still: paintStillLife };
+
+/* ================= Stage (overlay and crop) ================= */
+
+const stage = $('stage'), cv = $('stageCv'), svg = $('stageSvg');
+
+function ratio() {
+  const a = aspOf(S.aspect);
+  if (!a.r) return 0;
+  return a.r === 1 ? 1 : S.port ? 1 / a.r : a.r;
+}
+function clampCrop() {
+  const c = S.crop;
+  c.w = Math.min(c.w, S.W); c.h = Math.min(c.h, S.H);
+  c.x = clamp(c.x, 0, S.W - c.w); c.y = clamp(c.y, 0, S.H - c.h);
+}
+// Largest crop of the chosen format, centred where the current crop is
+function fitAspect() {
+  const r = ratio(), c = S.crop;
+  if (!r) return;
+  const cx = c.x + c.w / 2, cy = c.y + c.h / 2;
+  const w = Math.min(S.W, S.H * r), h = w / r;
+  S.crop = { x: cx - w / 2, y: cy - h / 2, w, h };
+  clampCrop();
+}
+function minSize() { return Math.max(12, Math.min(S.W, S.H) * .04); }
+
+// Resize from an anchor. hx, hy: which way the moving edge lies (1, -1, or 0 for an
+// untouched axis, which then stays centred on the anchor).
+function sized(ax, ay, hx, hy, p, c) {
+  const r = ratio(), MIN = minSize();
+  let w = hx ? Math.max(MIN, hx * (p.x - ax)) : c.w;
+  let h = hy ? Math.max(MIN, hy * (p.y - ay)) : c.h;
+  if (r) {
+    if (hx && hy) { if (w / h > r) h = w / r; else w = h * r; }
+    else if (hx) h = w / r;
+    else w = h * r;
+  }
+  const maxW = hx === 1 ? S.W - ax : hx === -1 ? ax : 2 * Math.min(ax, S.W - ax);
+  const maxH = hy === 1 ? S.H - ay : hy === -1 ? ay : 2 * Math.min(ay, S.H - ay);
+  if (r) { const s = Math.min(1, maxW / w, maxH / h); w *= s; h *= s; }
+  else { w = Math.min(w, maxW); h = Math.min(h, maxH); }
+  w = Math.max(w, 1); h = Math.max(h, 1);
+  return { x: hx === 1 ? ax : hx === -1 ? ax - w : ax - w / 2, y: hy === 1 ? ay : hy === -1 ? ay - h : ay - h / 2, w, h };
+}
+function scaleCrop(f) {
+  const c = S.crop, cx = c.x + c.w / 2, cy = c.y + c.h / 2;
+  let w = c.w * f, h = c.h * f;
+  const s = Math.min(1, S.W / w, S.H / h); w *= s; h *= s;
+  if (Math.min(w, h) < minSize()) return;
+  S.crop = { x: cx - w / 2, y: cy - h / 2, w, h };
+  clampCrop();
+}
+
+// Enabled overlays with their geometry, for a crop of w × h
+function activeOverlays(w, h) {
+  return OVERLAYS.filter(o => S.ov[o.key].on).map(o => Object.assign({ key: o.key }, S.ov[o.key], geom(o.key, w, h, S.ov[o.key])));
+}
+
+function layoutStage() {
+  const avail = $('stageWrap').clientWidth - 24;
+  const maxH = Math.min(window.innerHeight * .72, 760);
+  const dw = Math.max(100, Math.min(avail, maxH * S.W / S.H)), dh = dw * S.H / S.W;
+  stage.style.width = dw + 'px'; stage.style.height = dh + 'px';
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = Math.round(dw * dpr); cv.height = Math.round(dh * dpr);
+  const g = cv.getContext('2d');
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(S.src, 0, 0, cv.width, cv.height);
+  svg.setAttribute('viewBox', '0 0 ' + S.W + ' ' + S.H);
+  S.k = S.W / dw;
+  drawStage();
+}
+
+function drawStage() {
+  const c = S.crop, k = S.k, W = S.W, H = S.H;
+  let s = '';
+  if (S.dim) s += '<path d="M0 0H' + W + 'V' + H + 'H0Z M' + f1(c.x) + ' ' + f1(c.y) + 'v' + f1(c.h) + 'h' + f1(c.w) + 'v' + f1(-c.h) + 'Z" fill="rgba(12,12,12,.58)" fill-rule="evenodd" pointer-events="none"/>';
+  s += '<rect data-h="move" x="' + f1(c.x) + '" y="' + f1(c.y) + '" width="' + f1(c.w) + '" height="' + f1(c.h) + '" fill="transparent"/>';
+  // Overlays
+  s += '<g pointer-events="none" stroke-linecap="round" stroke-linejoin="round" fill="none">';
+  activeOverlays(c.w, c.h).forEach(o => {
+    const lw = S.lw * k;
+    const main = pathD(o.main, c.x, c.y), faint = o.faint ? pathD(o.faint, c.x, c.y) : '';
+    const dash = ' stroke-dasharray="' + f1(6 * k) + ' ' + f1(5 * k) + '"';
+    if (S.halo) {
+      s += '<path d="' + main + '" stroke="#000" stroke-opacity="' + f2(o.op * .45) + '" stroke-width="' + f1(lw + 2 * k) + '"/>';
+      if (faint) s += '<path d="' + faint + '" stroke="#000" stroke-opacity="' + f2(o.op * .3) + '" stroke-width="' + f1(lw * .7 + 2 * k) + '"' + dash + '/>';
+    }
+    if (faint) s += '<path d="' + faint + '" stroke="' + o.col + '" stroke-opacity="' + f2(o.op * .7) + '" stroke-width="' + f1(lw * .7) + '"' + dash + '/>';
+    s += '<path d="' + main + '" stroke="' + o.col + '" stroke-opacity="' + f2(o.op) + '" stroke-width="' + f1(lw) + '"/>';
+  });
+  // Focal points (pinned to the image)
+  S.focal.forEach((p, i) => {
+    s += '<circle cx="' + f1(p.x) + '" cy="' + f1(p.y) + '" r="' + f1(7 * k) + '" fill="#E4252C" stroke="#fff" stroke-width="' + f1(2 * k) + '"/>';
+    s += '<text x="' + f1(p.x) + '" y="' + f1(p.y + 3.6 * k) + '" text-anchor="middle" font-size="' + f1(10 * k) + '" font-weight="800" fill="#fff" font-family="Archivo, sans-serif">' + (i + 1) + '</text>';
+  });
+  s += '</g>';
+  // Frame and handles
+  s += '<rect x="' + f1(c.x) + '" y="' + f1(c.y) + '" width="' + f1(c.w) + '" height="' + f1(c.h) + '" fill="none" stroke="#000" stroke-opacity=".5" stroke-width="' + f1(4 * k) + '" pointer-events="none"/>';
+  s += '<rect x="' + f1(c.x) + '" y="' + f1(c.y) + '" width="' + f1(c.w) + '" height="' + f1(c.h) + '" fill="none" stroke="#fff" stroke-width="' + f1(1.6 * k) + '" pointer-events="none"/>';
+  const hs = 11 * k, hit = 30 * k;
+  [-1, 0, 1].forEach(hy => [-1, 0, 1].forEach(hx => {
+    if (!hx && !hy) return;
+    const x = c.x + (hx + 1) / 2 * c.w, y = c.y + (hy + 1) / 2 * c.h;
+    s += '<g data-h="' + hx + ',' + hy + '"><rect x="' + f1(x - hit / 2) + '" y="' + f1(y - hit / 2) + '" width="' + f1(hit) + '" height="' + f1(hit) + '" fill="transparent"/>';
+    s += '<rect x="' + f1(x - hs / 2) + '" y="' + f1(y - hs / 2) + '" width="' + f1(hs) + '" height="' + f1(hs) + '" fill="#fff" stroke="#141414" stroke-width="' + f1(1.5 * k) + '"/></g>';
+  }));
+  svg.innerHTML = s;
+}
+
+// Crop readout, saved state and the focal view update once a change is finished
+function commit() {
+  const c = S.crop, r = c.w / c.h;
+  const a = aspOf(S.aspect);
+  const fmt = a.r ? aspLabel(a, c.h > c.w) + (a.name ? ' (' + a.name + ')' : '') : f2(r >= 1 ? r : 1 / r) + ':1 ' + (r >= 1 ? 'landscape' : 'portrait');
+  $('cropInfo').textContent = 'Crop ' + Math.round(c.w) + ' × ' + Math.round(c.h) + ' px · ' + fmt + ' · ' + Math.round(c.w * c.h / (S.W * S.H) * 100) + '% of the image';
+  save();
+  drawFocal();
+}
+
+/* ----- Pointer: move, resize or draw a new frame ----- */
+let drag = null;
+function toImg(e, el, w, h) {
+  const r = el.getBoundingClientRect();
+  return { x: clamp((e.clientX - r.left) * w / r.width, 0, w), y: clamp((e.clientY - r.top) * h / r.height, 0, h) };
+}
+svg.addEventListener('pointerdown', e => {
+  if (e.button > 0) return;
+  const p = toImg(e, svg, S.W, S.H), c = Object.assign({}, S.crop);
+  const t = e.target.closest('[data-h]');
+  if (t && t.dataset.h === 'move') drag = { mode: 'move', p, c };
+  else if (t) {
+    const [hx, hy] = t.dataset.h.split(',').map(Number);
+    drag = { mode: 'size', hx, hy, c, ax: hx === 1 ? c.x : hx === -1 ? c.x + c.w : c.x + c.w / 2, ay: hy === 1 ? c.y : hy === -1 ? c.y + c.h : c.y + c.h / 2 };
+  } else drag = { mode: 'new', ax: p.x, ay: p.y, c };
+  try { svg.setPointerCapture(e.pointerId); } catch (err) { /* synthetic events */ }
+  e.preventDefault();
+  svg.focus({ preventScroll: true });
+});
+svg.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const p = toImg(e, svg, S.W, S.H), d = drag;
+  if (d.mode === 'move') {
+    S.crop.x = clamp(d.c.x + p.x - d.p.x, 0, S.W - d.c.w);
+    S.crop.y = clamp(d.c.y + p.y - d.p.y, 0, S.H - d.c.h);
+  } else if (d.mode === 'size') {
+    S.crop = sized(d.ax, d.ay, d.hx, d.hy, p, d.c);
+  } else {
+    if (Math.hypot(p.x - d.ax, p.y - d.ay) < 6 * S.k) return;
+    S.crop = sized(d.ax, d.ay, p.x >= d.ax ? 1 : -1, p.y >= d.ay ? 1 : -1, p, null);
+    d.moved = true;
+  }
+  drawStage();
+});
+function endDrag() { if (drag) { drag = null; commit(); } }
+svg.addEventListener('pointerup', endDrag);
+svg.addEventListener('pointercancel', endDrag);
+
+/* ----- Keyboard: nudge and resize ----- */
+svg.addEventListener('keydown', e => {
+  const c = S.crop, step = (e.shiftKey ? .1 : .01) * Math.min(S.W, S.H);
+  switch (e.key) {
+    case 'ArrowLeft': c.x -= step; break;
+    case 'ArrowRight': c.x += step; break;
+    case 'ArrowUp': c.y -= step; break;
+    case 'ArrowDown': c.y += step; break;
+    case '+': case '=': scaleCrop(1.04); break;
+    case '-': case '_': scaleCrop(1 / 1.04); break;
+    default: return;
+  }
+  e.preventDefault();
+  clampCrop(); drawStage(); commit();
+});
+
+/* ----- Loading images ----- */
+function setSource(src, W, H) {
+  S.src = src; S.W = W; S.H = H;
+  S.focal = [];
+  S.crop = { x: 0, y: 0, w: W, h: H };
+  if (ratio()) fitAspect();
+  layoutStage(); commit(); renderFocalList();
+}
+function loadSample(key) {
+  if (S.url) { URL.revokeObjectURL(S.url); S.url = null; }
+  S.sample = key;
+  const c = SAMPLES[key]();
+  setSource(c, c.width, c.height);
+  $('expMsg').textContent = '';
+}
+function loadFile(file) {
+  if (!file || !/^image\//.test(file.type)) { $('expMsg').textContent = 'That file is not an image.'; return; }
+  const url = URL.createObjectURL(file), img = new Image();
+  img.onload = () => {
+    if (S.url) URL.revokeObjectURL(S.url);
+    S.url = url; S.sample = null;
+    $('sampleBtns').querySelectorAll('.tbtn').forEach(b => b.setAttribute('aria-pressed', 'false'));
+    setSource(img, img.naturalWidth, img.naturalHeight);
+    $('expMsg').textContent = 'Loaded ' + file.name + ' (' + img.naturalWidth + ' × ' + img.naturalHeight + ' px).';
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); $('expMsg').textContent = 'That image could not be opened.'; };
+  img.src = url;
+}
+$('fileIn').addEventListener('change', e => { loadFile(e.target.files[0]); e.target.value = ''; });
+const paper = $('stagePaper');
+['dragenter', 'dragover'].forEach(t => paper.addEventListener(t, e => { e.preventDefault(); paper.classList.add('over'); }));
+['dragleave', 'drop'].forEach(t => paper.addEventListener(t, e => { e.preventDefault(); if (t === 'drop' || !paper.contains(e.relatedTarget)) paper.classList.remove('over'); }));
+paper.addEventListener('drop', e => { const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) loadFile(f); });
+
+/* ----- Controls ----- */
+function pickButtons(el, items, current, onPick) {
+  el.innerHTML = '';
+  items.forEach(([key, label, aria]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tbtn'; b.textContent = label; b.dataset.key = key;
+    if (aria) b.setAttribute('aria-label', aria);
+    b.setAttribute('aria-pressed', String(key === current));
+    b.addEventListener('click', () => {
+      el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      onPick(key);
+    });
+    el.appendChild(b);
+  });
+}
+
+pickButtons($('sampleBtns'), [['land', 'Landscape sample'], ['still', 'Still life sample']], 'land', loadSample);
+
+function aspButtons() {
+  pickButtons($('aspBtns'), ASPECTS.map(a => [a.key, aspLabel(a, S.port), aspAria(a, S.port)]), S.aspect, key => {
+    S.aspect = key; fitAspect(); drawStage(); commit();
+  });
+}
+pickButtons($('orientBtns'), [[false, 'Landscape'], [true, 'Portrait']], S.port, port => {
+  S.port = port;
+  aspButtons();
+  if (ratio()) fitAspect();
+  else {
+    // Free format: swap the crop's width and height about its centre
+    const c = S.crop, cx = c.x + c.w / 2, cy = c.y + c.h / 2;
+    if ((c.w > c.h) === port) {
+      let w = c.h, h = c.w;
+      const s = Math.min(1, S.W / w, S.H / h); w *= s; h *= s;
+      S.crop = { x: cx - w / 2, y: cy - h / 2, w, h }; clampCrop();
+    }
+  }
+  drawStage(); commit();
+});
+aspButtons();
+$('fitBtn').addEventListener('click', () => {
+  if (ratio()) fitAspect(); else S.crop = { x: 0, y: 0, w: S.W, h: S.H };
+  drawStage(); commit();
+});
+$('fullBtn').addEventListener('click', () => {
+  S.aspect = 'free'; aspButtons();
+  S.crop = { x: 0, y: 0, w: S.W, h: S.H }; drawStage(); commit();
+});
+
+// One row per overlay: on/off, colour, opacity and any extra settings
+function buildOverlayRows() {
+  const list = $('ovList');
+  OVERLAYS.forEach(o => {
+    const st = S.ov[o.key], id = 'ov-' + o.key;
+    const row = document.createElement('div');
+    row.className = 'ovrow';
+    row.innerHTML =
+      '<div class="top"><label class="check"><input type="checkbox" id="' + id + '"' + (st.on ? ' checked' : '') + '> ' + o.name + '</label>' +
+      '<input type="color" value="' + st.col + '" aria-label="' + o.name + ' colour"></div>' +
+      '<div class="more"' + (st.on ? '' : ' hidden') + '>' +
+      '<label class="range"><span>Opacity <output>' + Math.round(st.op * 100) + '%</output></span><input type="range" min="10" max="100" step="5" value="' + Math.round(st.op * 100) + '" aria-label="' + o.name + ' opacity"></label>' +
+      '<div class="extra"></div></div>';
+    const chk = row.querySelector('input[type=checkbox]'), more = row.querySelector('.more');
+    chk.addEventListener('change', () => { st.on = chk.checked; more.hidden = !st.on; drawStage(); save(); });
+    row.querySelector('input[type=color]').addEventListener('input', e => { st.col = e.target.value; drawStage(); save(); });
+    const rng = row.querySelector('input[type=range]');
+    rng.addEventListener('input', () => { st.op = rng.value / 100; row.querySelector('output').textContent = rng.value + '%'; drawStage(); save(); });
+    const extra = row.querySelector('.extra');
+    if (o.key === 'spiral') {
+      extra.innerHTML = '<p class="sub-lbl" id="spLbl">Tightens towards</p><div class="bgrid four spin-btns" role="group" aria-labelledby="spLbl"></div>' +
+        '<label class="check"><input type="checkbox"' + (st.flip ? ' checked' : '') + '> Flip (turn the other way)</label>';
+      pickButtons(extra.querySelector('.bgrid'), [['tl', '↖', 'Top left'], ['tr', '↗', 'Top right'], ['bl', '↙', 'Bottom left'], ['br', '↘', 'Bottom right']], st.corner, k => { st.corner = k; drawStage(); save(); });
+      extra.querySelector('input').addEventListener('change', e => { st.flip = e.target.checked; drawStage(); save(); });
+    }
+    if (o.key === 'grid') {
+      extra.innerHTML = '<div class="nums"><label>Columns<input type="number" min="1" max="24" value="' + st.n + '"></label><label>Rows<input type="number" min="1" max="24" value="' + st.m + '"></label></div>';
+      const [ni, mi] = extra.querySelectorAll('input');
+      const upd = () => { st.n = clamp(Math.round(+ni.value) || 1, 1, 24); st.m = clamp(Math.round(+mi.value) || 1, 1, 24); drawStage(); save(); };
+      ni.addEventListener('input', upd); mi.addEventListener('input', upd);
+    }
+    list.appendChild(row);
+  });
+}
+buildOverlayRows();
+
+$('lw').value = S.lw; $('lwOut').textContent = S.lw + ' px';
+$('lw').addEventListener('input', e => { S.lw = +e.target.value; $('lwOut').textContent = S.lw + ' px'; drawStage(); save(); });
+$('halo').checked = S.halo;
+$('halo').addEventListener('change', e => { S.halo = e.target.checked; drawStage(); save(); });
+$('dim').checked = S.dim;
+$('dim').addEventListener('change', e => { S.dim = e.target.checked; drawStage(); save(); });
+
+/* ----- Export ----- */
+$('expBtn').addEventListener('click', () => {
+  const c = S.crop, cw = Math.max(1, Math.round(c.w)), ch = Math.max(1, Math.round(c.h));
+  const out = document.createElement('canvas');
+  out.width = cw; out.height = ch;
+  const g = out.getContext('2d');
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(S.src, c.x, c.y, c.w, c.h, 0, 0, cw, ch);
+  if ($('expOv').checked) {
+    // Same line weight relative to the image as on screen
+    const lw = S.lw * Math.max(1, S.k);
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    const stroke = (lines, col, a, w, dash) => {
+      g.setLineDash(dash ? [6 * lw / S.lw, 5 * lw / S.lw] : []);
+      g.strokeStyle = col; g.globalAlpha = a; g.lineWidth = w;
+      g.beginPath();
+      lines.forEach(l => l.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])));
+      g.stroke();
+    };
+    const hk = 2 * lw / S.lw;
+    activeOverlays(cw, ch).forEach(o => {
+      if (S.halo) {
+        stroke(o.main, '#000', o.op * .45, lw + hk);
+        if (o.faint) stroke(o.faint, '#000', o.op * .3, lw * .7 + hk, true);
+      }
+      if (o.faint) stroke(o.faint, o.col, o.op * .7, lw * .7, true);
+      stroke(o.main, o.col, o.op, lw);
+    });
+    g.globalAlpha = 1; g.setLineDash([]);
+  }
+  try {
+    out.toBlob(b => {
+      if (!b) { $('expMsg').textContent = 'Export failed.'; return; }
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(b);
+      a.download = 'composition-crop-' + cw + 'x' + ch + '.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      $('expMsg').textContent = 'Saved a ' + cw + ' × ' + ch + ' px PNG' + ($('expOv').checked ? ' with overlays.' : '.');
+    }, 'image/png');
+  } catch (err) { $('expMsg').textContent = 'Export failed: ' + err.message; }
+});
+
+/* ================= Focal point checker ================= */
+
+const fStage = $('fStage'), fCv = $('fCv'), fSvg = $('fSvg');
+const A = 1 / (PHI * PHI), B = 1 / PHI;
+const SPOTS = {
+  thirds: [[1 / 3, 1 / 3, 'upper left'], [2 / 3, 1 / 3, 'upper right'], [1 / 3, 2 / 3, 'lower left'], [2 / 3, 2 / 3, 'lower right']],
+  phi: [[A, A, 'upper left'], [B, A, 'upper right'], [A, B, 'lower left'], [B, B, 'lower right']],
+};
+const F = { cross: { u: .5, v: .5 }, kb: false, k: 1 };
+
+function drawFocal() {
+  const c = S.crop;
+  const avail = $('fWrap').clientWidth - 24;
+  const maxH = Math.min(window.innerHeight * .62, 620);
+  const dw = Math.max(100, Math.min(avail, maxH * c.w / c.h)), dh = dw * c.h / c.w;
+  fStage.style.width = dw + 'px'; fStage.style.height = dh + 'px';
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  fCv.width = Math.round(dw * dpr); fCv.height = Math.round(dh * dpr);
+  const g = fCv.getContext('2d');
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(S.src, c.x, c.y, c.w, c.h, 0, 0, fCv.width, fCv.height);
+  fSvg.setAttribute('viewBox', '0 0 ' + f1(c.w) + ' ' + f1(c.h));
+  const k = F.k = c.w / dw, w = c.w, h = c.h;
+  let s = '<g fill="none" pointer-events="none">';
+  const lines = (fr, col) => {
+    const d = pathD([[[fr[0] * w, 0], [fr[0] * w, h]], [[fr[1] * w, 0], [fr[1] * w, h]], [[0, fr[0] * h], [w, fr[0] * h]], [[0, fr[1] * h], [w, fr[1] * h]]], 0, 0);
+    s += '<path d="' + d + '" stroke="#000" stroke-opacity=".35" stroke-width="' + f1(3.5 * k) + '"/><path d="' + d + '" stroke="' + col + '" stroke-opacity=".85" stroke-width="' + f1(1.5 * k) + '"/>';
+  };
+  if (S.fShow.thirds) lines([1 / 3, 2 / 3], '#ffffff');
+  if (S.fShow.phi) lines([A, B], '#FFE600');
+  SPOTS.thirds.forEach(([u, v]) => {
+    s += '<circle cx="' + f1(u * w) + '" cy="' + f1(v * h) + '" r="' + f1(8 * k) + '" stroke="#fff" stroke-width="' + f1(5 * k) + '"/>';
+    s += '<circle cx="' + f1(u * w) + '" cy="' + f1(v * h) + '" r="' + f1(8 * k) + '" stroke="#1F5FBF" stroke-width="' + f1(2.5 * k) + '"/>';
+  });
+  SPOTS.phi.forEach(([u, v]) => {
+    const x = u * w, y = v * h, r = 8 * k;
+    const d = 'M' + f1(x) + ' ' + f1(y - r) + 'L' + f1(x + r) + ' ' + f1(y) + 'L' + f1(x) + ' ' + f1(y + r) + 'L' + f1(x - r) + ' ' + f1(y) + 'Z';
+    s += '<path d="' + d + '" stroke="#fff" stroke-width="' + f1(5 * k) + '"/><path d="' + d + '" stroke="#b86e00" stroke-width="' + f1(2.5 * k) + '"/>';
+  });
+  S.focal.forEach((p, i) => {
+    const x = p.x - c.x, y = p.y - c.y;
+    if (x < 0 || y < 0 || x > w || y > h) return;
+    s += '<circle cx="' + f1(x) + '" cy="' + f1(y) + '" r="' + f1(11 * k) + '" fill="#E4252C" stroke="#fff" stroke-width="' + f1(2.5 * k) + '"/>';
+    s += '<text x="' + f1(x) + '" y="' + f1(y + 4.5 * k) + '" text-anchor="middle" font-size="' + f1(13 * k) + '" font-weight="800" fill="#fff" font-family="Archivo, sans-serif">' + (i + 1) + '</text>';
+  });
+  if (F.kb) {
+    const x = F.cross.u * w, y = F.cross.v * h, r = 16 * k;
+    const d = 'M' + f1(x - r) + ' ' + f1(y) + 'H' + f1(x + r) + 'M' + f1(x) + ' ' + f1(y - r) + 'V' + f1(y + r);
+    s += '<path d="' + d + '" stroke="#000" stroke-width="' + f1(4 * k) + '"/><path d="' + d + '" stroke="#fff" stroke-width="' + f1(2 * k) + '"/>';
+  }
+  s += '</g>';
+  fSvg.innerHTML = s;
+  renderFocalList();
+}
+
+// How a point sits relative to the thirds and phi intersections of the current crop
+function assess(p) {
+  const c = S.crop, u = (p.x - c.x) / c.w, v = (p.y - c.y) / c.h, diag = Math.hypot(c.w, c.h);
+  if (u < 0 || v < 0 || u > 1 || v > 1) return null;
+  const near = list => list.map(([a, b, name]) => ({ name, d: Math.hypot((u - a) * c.w, (v - b) * c.h) / diag * 100 })).sort((m, n) => m.d - n.d)[0];
+  return { u, v, t: near(SPOTS.thirds), f: near(SPOTS.phi), mid: Math.hypot((u - .5) * c.w, (v - .5) * c.h) / diag * 100 };
+}
+const verdict = d => d <= 2.5 ? '<span class="tag on">on it</span>' : d <= 6 ? '<span class="tag near">close</span>' : '<span class="tag off">not near</span>';
+
+function renderFocalList() {
+  const ol = $('fpList'), c = S.crop;
+  ol.innerHTML = '';
+  S.focal.forEach((p, i) => {
+    const a = assess(p), li = document.createElement('li');
+    let txt;
+    if (!a) txt = '<p><b>Outside this crop.</b> Move or enlarge the frame to include it.</p>';
+    else {
+      txt = '<p><b>' + Math.round(a.u * 100) + '% across, ' + Math.round(a.v * 100) + '% down.</b></p>' +
+        '<p>' + verdict(a.t.d) + ' ' + a.t.d.toFixed(1) + '% from thirds, ' + a.t.name + '</p>' +
+        '<p>' + verdict(a.f.d) + ' ' + a.f.d.toFixed(1) + '% from phi, ' + a.f.name + '</p>' +
+        '<p>Centre: ' + a.mid.toFixed(1) + '%' + (a.mid <= 3 ? ' <span class="tag near">centred</span>' : '') + '</p>';
+    }
+    li.innerHTML = '<span class="num" aria-hidden="true">' + (i + 1) + '</span><div><span class="sr-only">Point ' + (i + 1) + '. </span>' + txt + '</div>';
+    const del = document.createElement('button');
+    del.type = 'button'; del.className = 'tbtn x'; del.textContent = 'Remove';
+    del.setAttribute('aria-label', 'Remove point ' + (i + 1));
+    del.addEventListener('click', () => { S.focal.splice(i, 1); drawStage(); drawFocal(); });
+    li.appendChild(del);
+    ol.appendChild(li);
+  });
+  const gap = Math.hypot((A - 1 / 3) * c.w, (A - 1 / 3) * c.h) / Math.hypot(c.w, c.h) * 100;
+  $('fSummary').textContent = (S.focal.length ? S.focal.length + ' point' + (S.focal.length > 1 ? 's' : '') + ' marked. ' : 'No points yet: click the picture to add one. ') +
+    'In this frame each thirds intersection is only ' + gap.toFixed(1) + '% of the diagonal from its phi neighbour.';
+  $('fUndo').disabled = $('fClear').disabled = !S.focal.length;
+}
+
+function addFocal(u, v) {
+  const c = S.crop;
+  if (S.focal.length >= 9) { $('fSummary').textContent = 'Nine points is the limit. Remove one to add another.'; return; }
+  S.focal.push({ x: c.x + u * c.w, y: c.y + v * c.h });
+  drawStage(); drawFocal();
+}
+fSvg.addEventListener('pointerdown', e => {
+  if (e.button > 0) return;
+  const p = toImg(e, fSvg, 1, 1);
+  F.kb = false;
+  addFocal(p.x, p.y);
+});
+fSvg.addEventListener('keydown', e => {
+  const st = e.shiftKey ? .05 : .01;
+  switch (e.key) {
+    case 'ArrowLeft': F.cross.u -= st; break;
+    case 'ArrowRight': F.cross.u += st; break;
+    case 'ArrowUp': F.cross.v -= st; break;
+    case 'ArrowDown': F.cross.v += st; break;
+    case 'Enter': case ' ': e.preventDefault(); addFocal(F.cross.u, F.cross.v); return;
+    default: return;
+  }
+  e.preventDefault();
+  F.cross.u = clamp(F.cross.u, 0, 1); F.cross.v = clamp(F.cross.v, 0, 1);
+  F.kb = true; drawFocal();
+});
+fSvg.addEventListener('focus', () => { if (fSvg.matches(':focus-visible')) { F.kb = true; drawFocal(); } });
+fSvg.addEventListener('blur', () => { if (F.kb) { F.kb = false; drawFocal(); } });
+$('fUndo').addEventListener('click', () => { S.focal.pop(); drawStage(); drawFocal(); });
+$('fClear').addEventListener('click', () => { S.focal = []; drawStage(); drawFocal(); });
+$('fThirds').addEventListener('change', e => { S.fShow.thirds = e.target.checked; drawFocal(); });
+$('fPhi').addEventListener('change', e => { S.fShow.phi = e.target.checked; drawFocal(); });
+
+/* ================= Overlay cards ================= */
+
+const CARDS = [
+  ['thirds', 'Rule of thirds',
+    'Two lines each way divide the frame into equal thirds. Strong horizontals (a horizon, a tabletop edge) placed on a line, and centres of interest near an intersection, avoid splitting the picture into equal halves.',
+    'Named by John Thomas Smith in 1797 as a rule of thumb. It is a quick check against accidental symmetry, not a formula for a good picture.'],
+  ['phi', 'Phi grid',
+    'The same idea using the golden section: lines at 38.2% and 61.8% of each side, so the larger part is φ (about 1.618) times the smaller. The central cell is narrower than in the thirds grid.',
+    'Often presented as more “natural” than thirds, but the evidence for that is weak. The difference is small enough to be lost in the width of a brushstroke on a small canvas.'],
+  ['spiral', 'Golden spiral',
+    'Squares cut repeatedly from a golden rectangle leave a smaller golden rectangle each time. Quarter circles through the squares approximate a logarithmic spiral that widens by φ every quarter turn. It can describe a sweeping movement that curls into a focal area.',
+    'Exact only in a 1.618 frame; in other formats the tool stretches it to fit. Spirals &ldquo;found&rdquo; in famous paintings are usually drawn after the fact and fit loosely, and nautilus shells are not golden spirals.'],
+  ['diag', 'Main diagonals',
+    'Corner-to-corner lines. The one rising from lower left to upper right is often called the baroque diagonal; the one falling from upper left to lower right, the sinister diagonal. Limbs, roads, shadows and gazes that align with or oppose them set up movement.',
+    'Naming varies between sources, and claims that one direction feels “rising” depend partly on reading direction. Check that a strong diagonal does not lead the eye straight out of a corner.'],
+  ['recip', 'Reciprocal diagonals',
+    'A reciprocal is a line from a corner that meets a diagonal at a right angle. Where it reaches the long side it marks off a smaller rectangle with the same proportions as the whole frame, turned 90°.',
+    'Unlike thirds, reciprocals depend on the frame&rsquo;s proportions: in a square they coincide with the diagonals, and in a long frame they become steep.'],
+  ['arm', 'Harmonic armature',
+    'The two diagonals plus the four reciprocals (with the reciprocal rectangle sides dashed). Their many intersections give related angles and points for placing edges and accents. It comes from Jay Hambidge&rsquo;s <i>dynamic symmetry</i> (1920s).',
+    'Some painters, such as George Bellows, used it deliberately. Its application to Greek vases and Old Masters is largely Hambidge&rsquo;s own retrospective analysis, so treat historical claims with care.'],
+  ['centre', 'Centre lines',
+    'Halve the frame each way to find its centre. Useful for symmetrical designs, for checking whether a horizon or figure sits exactly halfway, and for placing a subject deliberately at the centre.',
+    'A central subject is stable and direct, which is often exactly what you want. Accidental near-centring, just off the middle, tends to look like a mistake.'],
+  ['grid', 'Custom grid',
+    'Any number of equal columns and rows. Use it to grid up a reference for transfer at a new size, to measure proportions, or to check how evenly shapes and values are spread.',
+    'When transferring, draw the same number of cells on your support in the same proportion (match the crop format first) so the grid squares stay similar.'],
+];
+
+function cardSVG(key, title) {
+  const w = 240, h = key === 'spiral' ? 240 / PHI : key === 'recip' || key === 'arm' ? 150 : 160;
+  const o = key === 'spiral' ? { corner: 'br', flip: false } : key === 'grid' ? { n: 4, m: 3 } : {};
+  const gm = geom(key, w, h, o);
+  let s = '<svg viewBox="-14 ' + f1(-14 - (160 - h) / 2) + ' ' + (w + 28) + ' 188" role="img" aria-label="Diagram: ' + title + '">';
+  s += '<rect x="0" y="0" width="' + w + '" height="' + f1(h) + '" fill="#efece4" stroke="#141414" stroke-width="2"/>';
+  if (gm.faint) s += '<path d="' + pathD(gm.faint, 0, 0) + '" fill="none" stroke="#8b8882" stroke-width="1.3" stroke-dasharray="5 4"/>';
+  s += '<path d="' + pathD(gm.main, 0, 0) + '" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linecap="round"/>';
+  if (key === 'thirds' || key === 'phi') {
+    const fr = key === 'thirds' ? [1 / 3, 2 / 3] : [A, B];
+    fr.forEach(u => fr.forEach(v => { s += '<circle cx="' + f1(u * w) + '" cy="' + f1(v * h) + '" r="4" fill="#E4252C"/>'; }));
+  }
+  if (key === 'diag') {
+    s += '<text x="' + f1(w * .62) + '" y="' + f1(h * .28) + '" class="lbl" transform="rotate(' + f1(-Math.atan2(h, w) * 180 / Math.PI) + ' ' + f1(w * .62) + ' ' + f1(h * .28) + ')">BAROQUE</text>';
+    s += '<text x="' + f1(w * .56) + '" y="' + f1(h * .62) + '" class="lbl" transform="rotate(' + f1(Math.atan2(h, w) * 180 / Math.PI) + ' ' + f1(w * .56) + ' ' + f1(h * .62) + ')">SINISTER</text>';
+  }
+  if (key === 'recip') {
+    const d = h * h / w;
+    s += '<rect x="0" y="0" width="' + f1(d) + '" height="' + f1(h) + '" fill="#1F5FBF" fill-opacity=".1"/>';
+    s += '<path d="M0 ' + h + 'L' + w + ' 0M0 0L' + w + ' ' + h + '" stroke="#8b8882" stroke-width="1.3" stroke-dasharray="5 4"/>';
+  }
+  if (key === 'centre') s += '<circle cx="' + w / 2 + '" cy="' + h / 2 + '" r="4" fill="#E4252C"/>';
+  return s + '</svg>';
+}
+$('cardList').innerHTML = CARDS.map(([key, t, p, c]) =>
+  '<article class="panel card"><div class="paper">' + cardSVG(key, t) + '</div><div class="txt"><h3>' + t + '</h3><p>' + p + '</p><p class="caveat">' + c + '</p></div></article>').join('');
+
+/* ================= Printable thumbnail sheet ================= */
+
+const SH = { key: '4:5', port: true, ticks: 'thirds', n: 6, r: 0 };
+const shv = $('shv');
+
+function sheetRatio() {
+  if (SH.key === 'crop') return SH.r;
+  const a = aspOf(SH.key);
+  return a.r === 1 ? 1 : SH.port ? 1 / a.r : a.r;
+}
+function drawSheet() {
+  const VW = 1000, VH = 1250, r = sheetRatio(), n = SH.n, gap = 52;
+  // Choose the column count that gives the biggest frames
+  let best = null;
+  for (let cols = 1; cols <= n; cols++) {
+    const rows = Math.ceil(n / cols);
+    const cw = (VW - 40 - (cols - 1) * gap) / cols, ch = (VH - 40 - (rows - 1) * gap) / rows;
+    const fw = Math.min(cw, ch * r), fh = fw / r;
+    if (!best || fw * fh > best.fw * best.fh + 1) best = { cols, rows, cw, ch, fw, fh };
+  }
+  const { cols, rows, cw, ch, fw, fh } = best;
+  const offX = (VW - (cols * cw + (cols - 1) * gap)) / 2, offY = (VH - (rows * ch + (rows - 1) * gap)) / 2;
+  const fr = SH.ticks === 'thirds' ? [1 / 3, 2 / 3] : SH.ticks === 'phi' ? [A, B] : [];
+  const tk = 12;
+  let s = '';
+  for (let i = 0; i < n; i++) {
+    const cx = offX + (i % cols) * (cw + gap) + cw / 2, cy = offY + Math.floor(i / cols) * (ch + gap) + ch / 2;
+    const x = cx - fw / 2, y = cy - fh / 2;
+    s += '<rect x="' + f1(x) + '" y="' + f1(y) + '" width="' + f1(fw) + '" height="' + f1(fh) + '" fill="none" stroke="#141414" stroke-width="2"/>';
+    let t = '';
+    fr.forEach(f => {
+      const tx = x + f * fw, ty = y + f * fh;
+      t += 'M' + f1(tx) + ' ' + f1(y - tk) + 'V' + f1(y) + 'M' + f1(tx) + ' ' + f1(y + fh) + 'V' + f1(y + fh + tk);
+      t += 'M' + f1(x - tk) + ' ' + f1(ty) + 'H' + f1(x) + 'M' + f1(x + fw) + ' ' + f1(ty) + 'H' + f1(x + fw + tk);
+    });
+    if (t) s += '<path d="' + t + '" stroke="#8b8882" stroke-width="1.6"/>';
+    s += '<text x="' + f1(x) + '" y="' + f1(y + fh + 26) + '" font-family="Archivo, sans-serif" font-size="15" font-weight="700" fill="#8b8882">' + (i + 1) + '</text>';
+  }
+  shv.setAttribute('viewBox', '0 0 ' + VW + ' ' + VH);
+  shv.innerHTML = s;
+  const sa = aspOf(SH.key), name = SH.key === 'crop' ? f2(r >= 1 ? r : 1 / r) + ':1 (from your crop)' : aspLabel(sa, SH.port) + (sa.name ? ' ' + sa.name.toLowerCase() : '');
+  const tickTxt = SH.ticks === 'thirds' ? 'ticks mark the thirds' : SH.ticks === 'phi' ? 'ticks mark the phi divisions (38.2% and 61.8%)' : 'no tick marks';
+  $('shSub').textContent = n + ' frames · ' + name + (r === 1 ? '' : r > 1 ? ' landscape' : ' portrait') + ' · ' + tickTxt;
+}
+function shAspButtons() {
+  const items = ASPECTS.filter(a => a.r).map(a => [a.key, aspLabel(a, SH.port), aspAria(a, SH.port)]);
+  if (SH.key === 'crop') items.push(['crop', 'From crop']);
+  pickButtons($('shAsp'), items, SH.key, k => { SH.key = k; if (k !== 'crop') shAspButtons(); drawSheet(); });
+}
+function shOriButtons() {
+  pickButtons($('shOri'), [[true, 'Portrait'], [false, 'Landscape']], SH.port, p => {
+    if (SH.key === 'crop' && (SH.r > 1) === p) SH.r = 1 / SH.r;
+    SH.port = p; shAspButtons(); drawSheet();
+  });
+}
+shAspButtons(); shOriButtons();
+pickButtons($('shTick'), [['thirds', 'Thirds'], ['phi', 'Phi'], ['none', 'None']], SH.ticks, k => { SH.ticks = k; drawSheet(); });
+pickButtons($('shN'), [[4, '4'], [6, '6'], [9, '9'], [12, '12']], SH.n, k => { SH.n = k; drawSheet(); });
+$('shMatch').addEventListener('click', () => {
+  const r = S.crop.w / S.crop.h;
+  const a = ASPECTS.find(x => x.r && Math.abs(Math.log((r >= 1 ? r : 1 / r) / x.r)) < .01);
+  SH.port = r < 1;
+  if (a) SH.key = a.key; else { SH.key = 'crop'; SH.r = r; }
+  shAspButtons(); shOriButtons(); drawSheet();
+});
+$('shPrint').addEventListener('click', () => window.print());
+drawSheet();
+
+/* ================= Start ================= */
+
+loadSample('land');
+let rt = 0;
+window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { layoutStage(); drawFocal(); }, 120); });
+
+})();
+</script>
+</body>
+</html>

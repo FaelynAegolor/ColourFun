@@ -119,6 +119,16 @@ Grade values and textures are indicative drawings, not measurements of real prod
 - **Measuring tools**: angle, proportion (in units such as heads), and plumb and level lines.
 - **Enlargement calculator**: scale factor, photocopier %, point mapping and grid spacing.
 
+## Composition
+
+`composition.html` lays composition guides over your own images. It treats them as analysis tools, not rules, with honest caveats.
+
+- **Overlays**: rule of thirds, phi grid, golden spiral (4 orientations, flippable), main diagonals, reciprocal diagonals, harmonic armature, centre lines and a custom grid. Each has its own colour and opacity.
+- **Crop frame**: format presets (free, 1:1, 5:4, 3:2, 4:3, 16:9, √2, 1.618). Drag, resize or use the keyboard; export the crop as PNG with or without overlays.
+- **Focal point checker**: measures distances to the thirds and phi intersections.
+- **Explanations**: a card for each overlay.
+- **Thumbnail sheet**: a printable A4 sheet of frames in any format, with thirds or phi tick marks.
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
