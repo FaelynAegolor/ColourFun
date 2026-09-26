@@ -96,6 +96,19 @@ The wheel is fully keyboard accessible: Tab to a segment, arrow keys step around
 - **Step-by-step guides**: circle in a square (8-point method), cylinder, cup or bowl, and wheel.
 - **Guess the degree** game, and a printable A4 practice sheet of degree references and correctly proportioned boxes.
 
+## Mark-making & Media
+
+`mark-making.html` is a studio reference for drawing media.
+
+- **Graphite grades**: 9H–9B, each with a drawn pressure, hatching and smudge swatch, plus hardness, smudging, value range and uses.
+- **Media**: 12 media cards with procedurally drawn textures (charcoal, conté, pastels, graphite stick, fineliner, dip pen, brush pen, ink wash, coloured pencil). Each covers characteristics, paper, erasing/blending/fixing and safety.
+- **Paper guide**: weight, tooth and surface.
+- **Marks and techniques**: 13 animated technique swatches.
+- **Tools**: erasers, blending tools, sharpening and fixative.
+- **Test sheet**: a printable A4 media test sheet with value strips.
+
+Grade values and textures are indicative drawings, not measurements of real products.
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
