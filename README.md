@@ -85,6 +85,17 @@ The wheel is fully keyboard accessible: Tab to a segment, arrow keys step around
 - **Tints, tones, shades and neutralising**: ladders for the current mix, plus warm/cool split-primary pairs.
 - **Printable A4 sheets**: a mixing grid or a tint and shade ladder sheet for 3–6 chosen paints.
 
+## Ellipses in Perspective
+
+`ellipses.html` covers how circles become ellipses.
+
+- **Key terms**: ellipse, major axis, minor axis, ellipse degree (minor ÷ major = sin(degree)), eye level, central axis.
+- **Eye level**: a true perspective camera draws a stack of circles or a cylinder. Drag eye level to see each ellipse's degree change. Axes, degree labels and the perspective centre can be shown.
+- **Tilted axis**: rotate a cylinder and see the minor axis stay on the central axis, with near and far degrees.
+- **Common mistakes**: right-vs-wrong comparisons of four classic errors.
+- **Step-by-step guides**: circle in a square (8-point method), cylinder, cup or bowl, and wheel.
+- **Guess the degree** game, and a printable A4 practice sheet of degree references and correctly proportioned boxes.
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
