@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Design Principles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="lesson.css">
+<style>
+/* ---------- Brief ---------- */
+.brief { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.brief ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 15px; }
+.brief h3 { margin: 0 0 8px; font-size: 15px; }
+.brief .grp { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 12px 0 4px; }
+.brief .grp:first-of-type { margin-top: 0; }
+.rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.rules li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+.rules b { display: block; }
+.rules i { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-style: normal; font-weight: 800; display: grid; place-items: center; font-size: 13px; }
+
+/* ---------- Method + timer ---------- */
+.method { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; counter-reset: s; }
+.steps li { counter-increment: s; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px 10px 48px; position: relative; font-size: 14px; }
+.steps li::before { content: counter(s); position: absolute; left: 12px; top: 10px; width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--ink); display: grid; place-items: center; font-weight: 800; font-size: 13px; }
+.steps b { display: block; font-size: 15px; }
+.timer { text-align: center; }
+.timer .clock { font-size: 64px; font-weight: 800; letter-spacing: .02em; font-variant-numeric: tabular-nums; line-height: 1; margin: 6px 0 4px; }
+.timer .bar { height: 8px; background: var(--bg); border-radius: 99px; overflow: hidden; margin: 10px 0 14px; }
+.timer .bar i { display: block; height: 100%; width: 100%; background: var(--accent); transform-origin: left; }
+.timer .bgrid { margin-bottom: 10px; }
+.timer .row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.timer .box-now { font-size: 13px; color: var(--muted); min-height: 1.3em; }
+.timer.done .clock { color: #D2402A; }
+
+/* ---------- Examples ---------- */
+.ex-tools { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 14px; }
+.ex-group { font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 22px 0 10px; }
+.ex-group:first-of-type { margin-top: 0; }
+.ex-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.ex { display: grid; grid-template-rows: auto 1fr; }
+.ex svg { display: block; width: 100%; height: auto; border-bottom: 1px solid #e1ded6; }
+.ex .txt { padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 6px; }
+.ex h3 { margin: 0; font-size: 17px; display: flex; gap: 10px; align-items: baseline; }
+.ex h3 span { font-size: 12px; font-weight: 800; color: #fff; background: #1d1d1f; border-radius: 6px; padding: 2px 7px; }
+.ex p { margin: 0; font-size: 14px; color: #333; }
+.ex .how { font-size: 13px; color: #444; }
+.ex .check { font-size: 13px; color: #1d1d1f; border-left: 3px solid #1F5FBF; padding-left: 8px; }
+.ex .acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.ex .acts button {
+  min-height: 36px; padding: 0 12px; border-radius: 8px;
+  border: 1.5px solid #bdb9b0; background: #fff; color: #141414;
+  font: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.ex .acts button:hover { border-color: #141414; }
+.ex .acts button[aria-pressed="true"] { border-color: #1F5FBF; box-shadow: 0 0 0 1px #1F5FBF; background: #eef3fb; }
+.note-line { stroke: #1d1d1f; stroke-width: 1.3; fill: none; }
+.note-dash { stroke: #1d1d1f; stroke-width: 1.3; stroke-dasharray: 5 4; fill: none; }
+.note-txt { font-family: var(--font); font-size: 11px; font-weight: 700; fill: #1d1d1f; paint-order: stroke; stroke: #fbfaf6; stroke-width: 3px; }
+.no-notes .note { display: none; }
+
+.pitfalls { margin: 20px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.pitfalls li { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+.pitfalls b { display: block; margin-bottom: 2px; }
+
+/* ---------- Printable sheet ---------- */
+.sheet-ctl { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 16px; }
+.sheet-ctl .bgrid { display: flex; gap: 6px; }
+.sheet-ctl .spacer { margin-left: auto; }
+.sheet-wrap { max-width: 620px; margin: 0 auto; background: #fff; box-shadow: 0 2px 14px rgba(0, 0, 0, .18); border: 1px solid #cfcbc2; }
+.sheet-wrap svg { display: block; width: 100%; height: auto; }
+.sheet-wrap text { font-family: var(--font); }
+
+@media (max-width: 960px) {
+  .brief, .method { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .ex-row { grid-template-columns: 1fr; }
+  .timer .clock { font-size: 52px; }
+}
+
+@page { size: A4 portrait; margin: 0; }
+@media print {
+  html, body { background: #fff; }
+  main > *:not(#sheetSec), #sheetSec > *:not(.sheet-wrap) { display: none !important; }
+  .wrap, #sheetSec { padding: 0; margin: 0; max-width: none; }
+  .sheet-wrap { max-width: none; width: 210mm; height: 296mm; box-shadow: none; border: 0; margin: 0; }
+  .sheet-wrap svg { width: 210mm; height: 296mm; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Colour</button>
+        <ul>
+          <li><a href="colour-schemes.html">Colour schemes</a></li>
+          <li><a href="colour-interaction.html">Colour interaction</a></li>
+          <li><a href="paint-mixing.html">Paint mixing</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Form &amp; space</button>
+        <ul>
+          <li><a href="shape-shading.html">3D shape shading</a></li>
+          <li><a href="ellipses.html">Ellipses</a></li>
+          <li><a href="perspective.html">Perspective</a></li>
+          <li><a href="atmospheric-perspective.html">Atmospheric perspective</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Reference tools</button>
+        <ul>
+          <li><a href="value-notan.html">Value &amp; notan</a></li>
+          <li><a href="grid-proportion.html">Grid &amp; proportion</a></li>
+          <li><a href="composition.html">Composition</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Practice</button>
+        <ul>
+          <li><a href="design-principles.html" aria-current="page">Design principles</a></li>
+          <li><a href="gesture-timer.html">Gesture timer</a></li>
+          <li><a href="mark-making.html">Mark-making &amp; media</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>Design principles</h1>
+    <p>Six quick abstract compositions on one A4 sheet: two for balance, two for contrast, two for hierarchy. Read the brief, look at the example ideas, print the sheet, then work fast and bold with coloured pencils or markers.</p>
+    <ul class="jump">
+      <li><a href="#brief">The brief</a></li>
+      <li><a href="#method">Working method</a></li>
+      <li><a href="#examples">Example ideas</a></li>
+      <li><a href="#sheetSec">Print the sheet</a></li>
+    </ul>
+  </div>
+
+  <!-- ---------- Brief ---------- -->
+  <section id="brief" aria-labelledby="briefTitle">
+    <h2 class="sec-title" id="briefTitle">The brief</h2>
+    <p class="sec-lead">Use the A4 sheet with six rectangles to make quick compositions with coloured pencils or markers.</p>
+    <div class="brief">
+      <div class="panel">
+        <div class="grp">Balance</div>
+        <ol start="1">
+          <li>Show <b>symmetrical</b> balance.</li>
+          <li>Show <b>asymmetrical</b> balance.</li>
+        </ol>
+        <div class="grp">Contrast</div>
+        <ol start="3">
+          <li>Show contrast with <b>size</b> (big vs small).</li>
+          <li>Show contrast with <b>colour or shape</b>.</li>
+        </ol>
+        <div class="grp">Hierarchy</div>
+        <ol start="5">
+          <li>Create a hierarchy using <b>size</b> (at least 3 levels).</li>
+          <li>Create a hierarchy using <b>colour or placement</b> (at least 3 levels).</li>
+        </ol>
+      </div>
+      <div class="panel">
+        <h3>Guidelines</h3>
+        <ul class="rules">
+          <li><i>1</i><div><b>Keep it abstract</b>Shapes, lines and colours only: no objects, faces or scenes.</div></li>
+          <li><i>2</i><div><b>One principle per box</b>Each box should show its principle so clearly that someone could name it without the label.</div></li>
+          <li><i>3</i><div><b>Work fast and bold</b>Big shapes, flat solid colour, confident edges. Decide, draw, move on.</div></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Method ---------- -->
+  <section id="method" aria-labelledby="methodTitle">
+    <h2 class="sec-title" id="methodTitle">Working method</h2>
+    <p class="sec-lead">Speed helps here: a short time limit stops you adding extra ideas that blur the principle.</p>
+    <div class="method">
+      <ol class="steps">
+        <li><b>Pick a small palette</b>Three or four markers or pencils plus black. Include one strong warm, one strong cool and one pale colour, so you can make contrast and hierarchy when you need them.</li>
+        <li><b>Decide the one idea (30 seconds)</b>Say it in a sentence before you draw, e.g. "one huge red circle, three tiny ones".</li>
+        <li><b>Big shapes first</b>Place the dominant shape first and let things touch or leave the frame. Small, timid shapes floating in the middle rarely read clearly.</li>
+        <li><b>Fill flat and solid</b>Press hard and fill evenly. No shading or texture: it adds information that competes with the principle.</li>
+        <li><b>Check and label</b>Step back, squint, and ask the check question for that box (on each example card below). Fix the one thing that's unclear, then stop.</li>
+      </ol>
+      <div class="panel timer" id="timer" aria-labelledby="timerTitle">
+        <h3 class="label" id="timerTitle">Box timer</h3>
+        <div class="bgrid" role="group" aria-label="Minutes per box" id="tMins"></div>
+        <div class="clock" id="tClock" aria-live="off">5:00</div>
+        <div class="box-now" id="tNow" aria-live="polite">Box 1 of 6: symmetrical balance</div>
+        <div class="bar" aria-hidden="true"><i id="tBar"></i></div>
+        <div class="row">
+          <button type="button" class="btn primary" id="tStart">Start</button>
+          <button type="button" class="btn ghost" id="tNext">Next box</button>
+          <button type="button" class="btn ghost" id="tReset">Reset</button>
+        </div>
+        <label class="check" style="justify-content:center"><input type="checkbox" id="tBeep" checked> Beep when time is up</label>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Examples ---------- -->
+  <section id="examples" aria-labelledby="exTitle">
+    <h2 class="sec-title" id="exTitle">Example ideas</h2>
+    <p class="sec-lead">One way to show each principle. Press <em>New idea</em> for another version. Use these to understand what each box needs, then make your own rather than copying.</p>
+    <div class="ex-tools">
+      <label class="check"><input type="checkbox" id="showNotes" checked> Show how it works</label>
+      <button type="button" class="btn ghost" id="allNew">New ideas for all six</button>
+    </div>
+    <div id="exList"></div>
+    <ul class="pitfalls">
+      <li><b>Two ideas in one box</b>If the size contrast box also has wild colour contrast, it's no longer clear which one you're showing. Keep other properties uniform.</li>
+      <li><b>Weak differences</b>A circle slightly bigger than another isn't contrast. Make differences extreme.</li>
+      <li><b>Only two levels</b>A hierarchy needs at least three: a dominant element, a secondary group, and the rest.</li>
+      <li><b>Nearly symmetrical</b>Symmetry has to be exact enough to read as a mirror. Asymmetry has to be clearly different on each side.</li>
+      <li><b>Drifting into pictures</b>A circle and a line quickly become a sun and a horizon. Keep shapes abstract.</li>
+      <li><b>Unbalanced "asymmetry"</b>Asymmetrical isn't the same as lopsided. If it looks like it would tip over, add weight to the light side.</li>
+    </ul>
+  </section>
+
+  <!-- ---------- Printable sheet ---------- -->
+  <section id="sheetSec" aria-labelledby="sheetTitle">
+    <h2 class="sec-title" id="sheetTitle">Print the sheet</h2>
+    <p class="sec-lead">A4 portrait with the six rectangles, labelled and grouped. The example version prints the current ideas from above as a reference copy.</p>
+    <div class="sheet-ctl">
+      <div class="bgrid" role="group" aria-label="Sheet version" id="shMode"></div>
+      <label class="check"><input type="checkbox" id="shPrompts" checked> Prompt under each box</label>
+      <label class="check"><input type="checkbox" id="shMarks" checked> Centre marks on box edges</label>
+      <button type="button" class="btn primary spacer" id="shPrint">Print sheet</button>
+    </div>
+    <div class="sheet-wrap"><svg id="sheet" viewBox="0 0 210 297" role="img" aria-label="A4 worksheet with six rectangles"></svg></div>
+  </section>
+</main>
+
+<script src="site.js"></script>
+<script>
+(function () {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const W = 296, H = 200, CX = W / 2;
+const INK = '#1d1d1f';
+const COL = {
+  red: '#E4252C', orange: '#F7941D', yellow: '#FFD400', green: '#2FA84F', blue: '#1F5FBF',
+  violet: '#7B3F99', pink: '#E75A9A', black: '#1d1d1f', teal: '#12908E',
+};
+// Visual weight per colour: dark and saturated colours feel heavier than light ones
+const WEIGHT = { black: 1.25, blue: 1, violet: 1.05, red: .95, green: .9, teal: .9, pink: .75, orange: .75, yellow: .55 };
+const PALE = ['#d5d9e0', '#e2dccf', '#d9e3d6', '#e8d9df'];
+const f1 = n => Math.round(n * 10) / 10;
+
+function mulberry(seed) {
+  let t = seed >>> 0;
+  return () => { t += 0x6D2B79F5; let r = Math.imul(t ^ t >>> 15, 1 | t); r ^= r + Math.imul(r ^ r >>> 7, 61 | r); return ((r ^ r >>> 14) >>> 0) / 4294967296; };
+}
+const newSeed = () => Math.floor(Math.random() * 1e9);
+
+/* ================= Shapes ================= */
+// A shape is { k: kind, x, y, r: radius-ish size, c: fill, rot: degrees }
+
+function shapeSVG(s) {
+  const { k, x, y, r, c } = s;
+  const rot = s.rot ? ' transform="rotate(' + f1(s.rot) + ' ' + f1(x) + ' ' + f1(y) + ')"' : '';
+  const st = ' fill="' + c + '" stroke="' + INK + '" stroke-width="2.4" stroke-linejoin="round"';
+  const pts = (n, start, rr) => Array.from({ length: n }, (_, i) => {
+    const a = (start + i * 360 / n) * Math.PI / 180;
+    return f1(x + Math.cos(a) * rr) + ',' + f1(y + Math.sin(a) * rr);
+  }).join(' ');
+  if (k === 'circle') return '<circle cx="' + f1(x) + '" cy="' + f1(y) + '" r="' + f1(r) + '"' + st + '/>';
+  if (k === 'square') return '<rect x="' + f1(x - r * .88) + '" y="' + f1(y - r * .88) + '" width="' + f1(r * 1.76) + '" height="' + f1(r * 1.76) + '"' + st + rot + '/>';
+  if (k === 'tri') return '<polygon points="' + pts(3, -90, r * 1.18) + '"' + st + rot + '/>';
+  if (k === 'diamond') return '<polygon points="' + pts(4, -90, r * 1.1) + '"' + st + rot + '/>';
+  if (k === 'bar') return '<rect x="' + f1(x - r * 1.4) + '" y="' + f1(y - r * .32) + '" width="' + f1(r * 2.8) + '" height="' + f1(r * .64) + '"' + st + rot + '/>';
+  return '';
+}
+
+// Random non-overlapping placement inside a region
+function place(rnd, list, r, x0, x1, y0, y1, gap = 6) {
+  for (let t = 0; t < 200; t++) {
+    const x = x0 + r + rnd() * Math.max(0, x1 - x0 - 2 * r), y = y0 + r + rnd() * Math.max(0, y1 - y0 - 2 * r);
+    if (list.every(o => Math.hypot(o.x - x, o.y - y) > o.r + r + gap)) return { x, y };
+  }
+  return null;
+}
+const pick = (rnd, arr) => arr[Math.floor(rnd() * arr.length)];
+const shuffle = (rnd, arr) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+const txt = (x, y, t, anchor = 'middle') => '<text class="note-txt" x="' + f1(x) + '" y="' + f1(y) + '" text-anchor="' + anchor + '">' + t + '</text>';
+const badge = (x, y, n) => '<g class="note"><circle cx="' + f1(x) + '" cy="' + f1(y) + '" r="8" fill="#fff" stroke="' + INK + '" stroke-width="1.4"/><text x="' + f1(x) + '" y="' + f1(y + 3.8) + '" text-anchor="middle" style="font:800 11px Archivo,sans-serif;fill:#1d1d1f">' + n + '</text></g>';
+
+/* ================= Example generators ================= */
+// Each returns { body, notes, caption } where body and notes are SVG markup in a W×H box.
+
+function symmetrical(rnd) {
+  const cols = shuffle(rnd, ['red', 'blue', 'yellow', 'orange', 'green', 'violet', 'teal']).slice(0, 3);
+  const left = [], shapes = [];
+  const axis = [];
+  // Optional shapes sitting on the axis (only kinds that are symmetrical themselves)
+  const nAxis = 1 + Math.floor(rnd() * 2);
+  for (let i = 0; i < nAxis; i++) {
+    const r = 16 + rnd() * 22;
+    const p = place(rnd, axis, r, CX - r, CX + r, 14, H - 14, 8);
+    if (p) axis.push({ k: pick(rnd, ['circle', 'square', 'diamond', 'tri']), x: CX, y: p.y, r, c: COL[cols[i % 3]] });
+  }
+  const n = 3 + Math.floor(rnd() * 3);
+  for (let i = 0; i < n; i++) {
+    const r = 10 + rnd() * 24;
+    const p = place(rnd, left.concat(axis), r, 10, CX - 6, 10, H - 10, 7);
+    if (!p) continue;
+    left.push({ k: pick(rnd, ['circle', 'square', 'tri', 'diamond', 'bar']), x: p.x, y: p.y, r, c: COL[pick(rnd, cols)], rot: Math.round(rnd() * 8) * 15 });
+  }
+  left.forEach(s => { shapes.push(s, { ...s, x: W - s.x, rot: -(s.rot || 0) }); });
+  const body = axis.concat(shapes).map(shapeSVG).join('');
+  const notes = '<g class="note"><path class="note-dash" d="M' + CX + ' 4V' + (H - 4) + '"/>' + txt(CX + 6, 14, 'axis', 'start') + '</g>';
+  return { body, notes, caption: 'Every shape on the left is mirrored on the right; shapes on the axis are symmetrical themselves.' };
+}
+
+function asymmetrical(rnd) {
+  const heavy = pick(rnd, ['black', 'blue', 'violet']);
+  const bigR = 44 + rnd() * 16;
+  const big = { k: pick(rnd, ['circle', 'square']), x: 62 + rnd() * 26, y: 90 + rnd() * 24, r: bigR, c: COL[heavy] };
+  const wBig = bigR * bigR * WEIGHT[heavy], mBig = wBig * (CX - big.x);
+  // Several small, lighter shapes further out on the other side. Place them once to estimate
+  // their moment, scale them so both sides balance, then place them again at the final size.
+  const smallCols = shuffle(rnd, ['yellow', 'orange', 'pink', 'red']);
+  const n = 3 + Math.floor(rnd() * 2);
+  const specs = Array.from({ length: n }, (_, i) => ({ k: pick(rnd, ['circle', 'tri', 'square', 'diamond']), r: 9 + rnd() * 8, name: smallCols[i % smallCols.length], rot: Math.round(rnd() * 6) * 15 }));
+  const layout = scale => {
+    const out = [];
+    specs.forEach(sp => {
+      const r = sp.r * scale;
+      const p = place(rnd, out, r * 1.25, CX + 30, W - 6, 8, H - 20, 6);
+      if (p) out.push({ ...sp, x: p.x, y: p.y, r, c: COL[sp.name] });
+    });
+    return out;
+  };
+  const moment = list => list.reduce((s, o) => s + o.r * o.r * WEIGHT[o.name] * (o.x - CX), 0);
+  let small = layout(1);
+  const f = Math.max(.7, Math.min(1.6, Math.sqrt(mBig / Math.max(1, moment(small)))));
+  small = layout(f);
+  const all = [{ ...big, w: wBig }].concat(small.map(o => ({ ...o, w: o.r * o.r * WEIGHT[o.name] })));
+  const fx = all.reduce((s, o) => s + o.w * o.x, 0) / all.reduce((s, o) => s + o.w, 0);
+  const body = [big].concat(small).map(shapeSVG).join('');
+  const by = H - 9;
+  const notes = '<g class="note"><path class="note-line" d="M14 ' + by + 'H' + (W - 14) + '"/>' +
+    '<polygon points="' + f1(fx) + ',' + (by + 1) + ' ' + f1(fx - 7) + ',' + (by + 9) + ' ' + f1(fx + 7) + ',' + (by + 9) + '" fill="#1d1d1f"/>' +
+    txt(big.x, Math.min(H - 16, big.y + big.r + 13), 'heavy, near centre') + txt((CX + W) / 2 + 10, 10, 'light, further out') + '</g>';
+  return { body, notes, caption: 'One large dark shape near the centre balances several small, lighter shapes further out, like a see-saw. The triangle marks the balance point.' };
+}
+
+function sizeContrast(rnd) {
+  const kind = pick(rnd, ['circle', 'square', 'tri', 'diamond']);
+  const c = COL[pick(rnd, ['red', 'blue', 'orange', 'violet', 'green', 'teal'])];
+  const leftSide = rnd() < .5;
+  const bigR = 72 + rnd() * 26;
+  const big = { k: kind, x: leftSide ? 70 + rnd() * 40 : W - 70 - rnd() * 40, y: H / 2 + (rnd() - .5) * 50, r: bigR, c, rot: kind === 'square' ? Math.round(rnd() * 4) * 10 : 0 };
+  const small = [];
+  const n = 1 + Math.floor(rnd() * 3);
+  for (let i = 0; i < n; i++) {
+    const r = 5 + rnd() * 5;
+    // A rotated square's corners reach about 1.25 × its radius, so keep clear of that
+    const reach = bigR * 1.3;
+    const x0 = leftSide ? big.x + bigR * .9 + 14 : 12, x1 = leftSide ? W - 12 : big.x - bigR * .9 - 14;
+    const p = place(rnd, small.concat([{ x: big.x, y: big.y, r: reach }]), r, x0, x1, 16, H - 16, 12);
+    if (p) small.push({ k: kind, x: p.x, y: p.y, r, c, rot: big.rot });
+  }
+  const s0 = small[0];
+  const notes = s0 ? '<g class="note">' + txt(big.x, Math.max(16, big.y - bigR * .2), 'BIG') +
+    '<path class="note-line" d="M' + f1(s0.x) + ' ' + f1(s0.y + s0.r + 3) + 'V' + f1(Math.min(H - 20, s0.y + s0.r + 20)) + '"/>' + txt(s0.x, Math.min(H - 8, s0.y + s0.r + 32), 'small') + '</g>' : '';
+  return { body: [big].concat(small).map(shapeSVG).join(''), notes, caption: 'Same shape, same colour: size is the only difference, and it is extreme.' };
+}
+
+const COMPLEMENTS = [['blue', 'orange'], ['green', 'red'], ['violet', 'yellow'], ['teal', 'red']];
+function colourShapeContrast(rnd, mode) {
+  const cols = 5, rows = 3;
+  const cw = W / cols, rh = H / rows;
+  const odd = [Math.floor(rnd() * cols), Math.floor(rnd() * rows)];
+  const [base, comp] = pick(rnd, COMPLEMENTS);
+  const baseKind = pick(rnd, ['circle', 'square']);
+  const oddKind = baseKind === 'circle' ? pick(rnd, ['tri', 'diamond']) : pick(rnd, ['circle', 'tri']);
+  const r = Math.min(cw, rh) * .32;
+  let body = '', ox = 0, oy = 0;
+  for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+    const x = cw * (i + .5) + (rnd() - .5) * 6, y = rh * (j + .5) + (rnd() - .5) * 6;
+    const isOdd = i === odd[0] && j === odd[1];
+    if (isOdd) { ox = x; oy = y; }
+    body += shapeSVG({ k: isOdd && mode === 'shape' ? oddKind : baseKind, x, y, r, c: COL[isOdd && mode === 'colour' ? comp : base] });
+  }
+  const notes = '<g class="note"><circle class="note-dash" cx="' + f1(ox) + '" cy="' + f1(oy) + '" r="' + f1(r + 10) + '"/>' +
+    txt(Math.max(36, Math.min(W - 36, ox)), oy + r + 24 > H - 4 ? oy - r - 16 : oy + r + 24, 'odd one out') + '</g>';
+  const caption = mode === 'colour'
+    ? 'Complementary colour contrast: one ' + comp + ' shape among ' + base + ' ones. Shape and size stay the same.'
+    : 'Shape contrast: one angular shape among ' + (baseKind === 'circle' ? 'circles' : 'squares') + '. Colour and size stay the same.';
+  return { body, notes, caption };
+}
+
+function sizeHierarchy(rnd) {
+  const fam = pick(rnd, [['#1F5FBF', '#3f7fd6', '#7fa8e6'], ['#E4252C', '#ef5a4a', '#f59a8a'], ['#12908E', '#2fb0a8', '#86d2cb'], ['#7B3F99', '#9a62b6', '#c4a3d6']]);
+  const kind = pick(rnd, ['circle', 'square', 'diamond']);
+  const list = [];
+  const l1r = 48 + rnd() * 10;
+  const l1 = { k: kind, x: pick(rnd, [W / 3, 2 * W / 3]) + (rnd() - .5) * 20, y: H / 2 + (rnd() - .5) * 30, r: l1r, c: fam[0], lvl: 1 };
+  list.push(l1);
+  const n2 = 2 + Math.floor(rnd() * 2), n3 = 5 + Math.floor(rnd() * 3);
+  for (let i = 0; i < n2; i++) { const r = 20 + rnd() * 5; const p = place(rnd, list, r, 8, W - 8, 8, H - 8, 10); if (p) list.push({ k: kind, x: p.x, y: p.y, r, c: fam[1], lvl: 2 }); }
+  for (let i = 0; i < n3; i++) { const r = 7 + rnd() * 3; const p = place(rnd, list, r, 8, W - 8, 8, H - 8, 8); if (p) list.push({ k: kind, x: p.x, y: p.y, r, c: fam[2], lvl: 3 }); }
+  const body = list.map(shapeSVG).join('');
+  const notes = list.map(o => badge(o.x + o.r * .7, o.y - o.r * .7, o.lvl)).join('');
+  return { body, notes, caption: 'Three clear size steps: one dominant shape, a few medium, several small. The numbers show reading order.' };
+}
+
+function colourPlacementHierarchy(rnd, mode) {
+  const list = [];
+  const kind = pick(rnd, ['circle', 'square']);
+  const r0 = 16 + rnd() * 3;
+  let body = '', notes = '';
+  if (mode === 'colour') {
+    // Similar sizes scattered; order comes only from colour strength
+    const l1c = pick(rnd, ['red', 'orange']);
+    const l2c = pick(rnd, ['blue', 'teal', 'violet']);
+    const specs = [[1, COL[l1c]], [2, COL[l2c]], [2, COL[l2c]], [2, COL[l2c]]];
+    for (let i = 0; i < 6; i++) specs.push([3, pick(rnd, PALE)]);
+    specs.forEach(([lvl, c]) => { const p = place(rnd, list, r0, 8, W - 8, 8, H - 8, 12); if (p) list.push({ k: kind, x: p.x, y: p.y, r: r0, c, lvl }); });
+    body = list.map(shapeSVG).join('');
+    notes = list.map(o => badge(o.x + o.r * .75, o.y - o.r * .75, o.lvl)).join('');
+    return { body, notes, caption: 'Same size and shape: a saturated warm colour leads, mid-strength cool colours follow, pale tints recede.' };
+  }
+  // Placement: one colour; the leader is isolated at a strong point, a secondary group nearby, the rest along the edge
+  const c = COL[pick(rnd, ['blue', 'black', 'violet', 'teal'])];
+  const fx = pick(rnd, [W / 3, 2 * W / 3]), fy = H / 3 + (rnd() < .5 ? 0 : H / 3);
+  list.push({ k: kind, x: fx, y: fy, r: r0, c, lvl: 1 });
+  const dir = fx < CX ? 1 : -1;
+  const gx = fx + dir * 70, gy = fy < CX ? fy + 38 : fy - 38;
+  for (let i = 0; i < 3; i++) list.push({ k: kind, x: gx + dir * i * (r0 * 2.3), y: gy + (i % 2) * 10, r: r0, c, lvl: 2 });
+  const edgeY = fy < H / 2 ? H - r0 - 6 : r0 + 6;
+  const n3 = 7;
+  for (let i = 0; i < n3; i++) list.push({ k: kind, x: 22 + i * (W - 44) / (n3 - 1), y: edgeY, r: r0 * .95, c, lvl: 3 });
+  body = list.map(shapeSVG).join('');
+  notes = badge(fx + r0 * .75, fy - r0 * .75, 1) + list.filter(o => o.lvl === 2).map(o => badge(o.x + o.r * .75, o.y - o.r * .75, 2)).join('') + badge(list[list.length - 1].x - r0 * .75, edgeY - r0 * .8, 3) +
+    '<g class="note"><circle class="note-dash" cx="' + f1(fx) + '" cy="' + f1(fy) + '" r="' + f1(r0 + 26) + '"/></g>';
+  return { body, notes, caption: 'Same size, shape and colour: the leader sits alone at a thirds point with space around it, a group follows, the rest line the edge.' };
+}
+
+const EXAMPLES = [
+  { n: 1, group: 'Balance', title: 'Symmetrical balance', gen: symmetrical,
+    show: 'The two halves mirror each other across a central axis.',
+    how: 'Mirror shape, size, colour and spacing exactly. You can use a vertical, horizontal or radial axis. It feels formal, calm and stable.',
+    check: 'Fold it in your head: do the two halves match?' },
+  { n: 2, group: 'Balance', title: 'Asymmetrical balance', gen: asymmetrical,
+    show: 'Different elements on each side carry equal visual weight.',
+    how: 'Large, dark or saturated shapes are heavy; small, light ones are light. A heavy shape near the centre balances lighter shapes further out. It feels dynamic but still settled.',
+    check: 'Does it look as if it would tip over? If so, add weight to the light side.' },
+  { n: 3, group: 'Contrast', title: 'Contrast of size', gen: sizeContrast,
+    show: 'One element is dramatically bigger than the others.',
+    how: 'Make the difference extreme (ten times, not twice). Keep colour and shape the same so that size is the only difference.',
+    check: 'Is size the very first thing you notice?' },
+  { n: 4, group: 'Contrast', title: 'Contrast of colour or shape', gen: colourShapeContrast, modes: [['colour', 'Colour'], ['shape', 'Shape']],
+    show: 'One element differs in colour or in shape from everything else.',
+    how: 'Colour: complementary, warm vs cool, or light vs dark. Shape: geometric vs organic, round vs angular. Change one property only and keep the rest uniform.',
+    check: 'Could someone name the contrast in one word?' },
+  { n: 5, group: 'Hierarchy', title: 'Hierarchy by size', gen: sizeHierarchy,
+    show: 'At least three clearly different sizes: dominant, secondary and tertiary.',
+    how: 'One dominant shape, a few medium ones, many small ones. Leave big steps between levels so they never blur into each other.',
+    check: 'Can you number the levels 1, 2, 3 at a glance?' },
+  { n: 6, group: 'Hierarchy', title: 'Hierarchy by colour or placement', gen: colourPlacementHierarchy, modes: [['colour', 'Colour'], ['placement', 'Placement']],
+    show: 'Similar sizes; the order comes from colour strength or from position.',
+    how: 'Colour: one saturated, high-contrast element, a few mid-strength, the rest muted. Placement: isolate the leader at a strong point with space around it, group the secondary elements, push the rest to the edges.',
+    check: 'Where does your eye go first, second and third?' },
+];
+
+/* ================= Example cards ================= */
+
+const state = EXAMPLES.map(e => ({ seed: newSeed(), mode: e.modes ? e.modes[0][0] : null, out: null }));
+const exList = $('exList');
+
+function render(i) {
+  const e = EXAMPLES[i], s = state[i];
+  s.out = e.gen(mulberry(s.seed), s.mode);
+  const card = exList.querySelector('[data-i="' + i + '"]');
+  card.querySelector('svg').innerHTML = '<rect width="' + W + '" height="' + H + '" fill="#fbfaf6"/>' + s.out.body + s.out.notes;
+  card.querySelector('.cap').textContent = s.out.caption;
+}
+
+function buildCards() {
+  let group = '', html = '';
+  EXAMPLES.forEach((e, i) => {
+    if (e.group !== group) {
+      if (group) html += '</div>';
+      group = e.group;
+      html += '<h3 class="ex-group">' + group + '</h3><div class="ex-row">';
+    }
+    html += '<article class="ex paper" data-i="' + i + '">' +
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Example: ' + e.title + '"></svg>' +
+      '<div class="txt"><h3><span>' + e.n + '</span>' + e.title + '</h3>' +
+      '<p><b>Show:</b> ' + e.show + '</p><p class="how">' + e.how + '</p>' +
+      '<p class="how cap" aria-live="polite"></p>' +
+      '<p class="check"><b>Check:</b> ' + e.check + '</p>' +
+      '<div class="acts">' + (e.modes || []).map(m => '<button type="button" data-mode="' + m[0] + '" aria-pressed="false">' + m[1] + '</button>').join('') +
+      '<button type="button" data-new>New idea</button></div></div></article>';
+  });
+  exList.innerHTML = html + '</div>';
+  exList.querySelectorAll('.ex').forEach(card => {
+    const i = +card.dataset.i;
+    card.querySelectorAll('[data-mode]').forEach(b => {
+      b.setAttribute('aria-pressed', String(b.dataset.mode === state[i].mode));
+      b.addEventListener('click', () => {
+        state[i].mode = b.dataset.mode;
+        card.querySelectorAll('[data-mode]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+        render(i); drawSheet();
+      });
+    });
+    card.querySelector('[data-new]').addEventListener('click', () => { state[i].seed = newSeed(); render(i); drawSheet(); });
+  });
+}
+buildCards();
+EXAMPLES.forEach((_, i) => render(i));
+
+$('showNotes').addEventListener('change', e => { exList.classList.toggle('no-notes', !e.target.checked); drawSheet(); });
+$('allNew').addEventListener('click', () => { state.forEach(s => { s.seed = newSeed(); }); EXAMPLES.forEach((_, i) => render(i)); drawSheet(); });
+
+/* ================= Box timer ================= */
+
+const T = { mins: 5, left: 300000, end: 0, running: false, box: 0, raf: 0 };
+let actx = null;
+function beep() {
+  if (!$('tBeep').checked) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    [0, .25, .5].forEach(d => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.frequency.value = 880; o.connect(g); g.connect(actx.destination);
+      const t = actx.currentTime + d;
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.25, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + .18);
+      o.start(t); o.stop(t + .2);
+    });
+  } catch (e) { /* audio unavailable */ }
+}
+function showTimer() {
+  const ms = Math.max(0, T.left);
+  const s = Math.ceil(ms / 1000);
+  $('tClock').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  $('tBar').style.transform = 'scaleX(' + (ms / (T.mins * 60000)) + ')';
+  $('tNow').textContent = 'Box ' + (T.box + 1) + ' of 6: ' + EXAMPLES[T.box].title.toLowerCase();
+  $('tStart').textContent = T.running ? 'Pause' : T.left < T.mins * 60000 && T.left > 0 ? 'Resume' : 'Start';
+  $('timer').classList.toggle('done', T.left <= 0);
+}
+function tick() {
+  T.raf = 0;
+  if (!T.running) return;
+  T.left = T.end - performance.now();
+  if (T.left <= 0) { T.left = 0; T.running = false; beep(); showTimer(); $('tNow').textContent = 'Time: check box ' + (T.box + 1) + ', then press Next box.'; return; }
+  showTimer();
+  T.raf = requestAnimationFrame(tick);
+}
+// Keep counting when the tab is in the background (rAF pauses there)
+setInterval(() => { if (T.running && document.hidden) tick(); }, 500);
+function resetTimer() { T.running = false; T.left = T.mins * 60000; showTimer(); }
+$('tStart').addEventListener('click', () => {
+  if (T.running) { T.running = false; T.left = T.end - performance.now(); showTimer(); return; }
+  if (T.left <= 0) T.left = T.mins * 60000;
+  T.running = true; T.end = performance.now() + T.left;
+  if (actx && actx.state === 'suspended') actx.resume();
+  showTimer(); if (!T.raf) T.raf = requestAnimationFrame(tick);
+});
+$('tNext').addEventListener('click', () => { T.box = (T.box + 1) % 6; resetTimer(); });
+$('tReset').addEventListener('click', () => { T.box = 0; resetTimer(); });
+function pickButtons(el, items, current, onPick) {
+  el.innerHTML = '';
+  items.forEach(([key, label]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tbtn'; b.textContent = label;
+    b.setAttribute('aria-pressed', String(key === current));
+    b.addEventListener('click', () => { el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b))); onPick(key); });
+    el.appendChild(b);
+  });
+}
+pickButtons($('tMins'), [[3, '3 min'], [5, '5 min'], [8, '8 min']], 5, k => { T.mins = k; resetTimer(); });
+showTimer();
+
+/* ================= Printable sheet ================= */
+// Drawn in millimetres on an A4 viewBox (210 × 297)
+
+const SH = { mode: 'blank' };
+const BOX_W = 89, BOX_H = 60, GAP = 8, M = 12;
+const SEC_Y = [38, 118, 198];
+const PROMPT = [
+  'Mirror image either side of a central axis.',
+  'Different sides, equal visual weight.',
+  'Big vs small: size is the only difference.',
+  'One element differs in colour or shape.',
+  'At least 3 levels, set by size.',
+  'At least 3 levels, set by colour or placement.',
+];
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+function drawSheet() {
+  const withEx = SH.mode === 'examples', prompts = $('shPrompts').checked, marks = $('shMarks').checked;
+  const notesOn = $('showNotes').checked;
+  let s = '<rect width="210" height="297" fill="#fff"/>';
+  s += '<text x="' + M + '" y="20" style="font:800 7px Archivo,sans-serif;letter-spacing:.9px;fill:#141414">DESIGN PRINCIPLES</text>';
+  s += '<text x="' + M + '" y="26.5" style="font:400 3.2px Archivo,sans-serif;fill:#333">Coloured pencil or marker · abstract shapes, lines and colours · one clear principle per box · fast and bold</text>';
+  s += '<text x="118" y="20" style="font:700 3px Archivo,sans-serif;letter-spacing:.3px;fill:#141414">NAME</text><path d="M128 20.3H198" stroke="#141414" stroke-width=".3"/>';
+  s += '<path d="M' + M + ' 30H' + (210 - M) + '" stroke="#141414" stroke-width=".6"/>';
+  ['BALANCE', 'CONTRAST', 'HIERARCHY'].forEach((g, k) => {
+    const y = SEC_Y[k];
+    s += '<text x="' + M + '" y="' + (y + 3.5) + '" style="font:800 4px Archivo,sans-serif;letter-spacing:.8px;fill:#141414">' + g + '</text>';
+    for (let j = 0; j < 2; j++) {
+      const i = k * 2 + j, x = M + j * (BOX_W + GAP), by = y + 6;
+      if (withEx && state[i].out) {
+        s += '<svg x="' + x + '" y="' + by + '" width="' + BOX_W + '" height="' + BOX_H + '" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid slice"><rect width="' + W + '" height="' + H + '" fill="#fff"/>' + state[i].out.body + (notesOn ? state[i].out.notes : '') + '</svg>';
+      }
+      s += '<rect x="' + x + '" y="' + by + '" width="' + BOX_W + '" height="' + BOX_H + '" fill="none" stroke="#141414" stroke-width=".5"/>';
+      if (marks) {
+        const mx = x + BOX_W / 2, my = by + BOX_H / 2;
+        s += '<path d="M' + mx + ' ' + by + 'v2.5M' + mx + ' ' + (by + BOX_H) + 'v-2.5M' + x + ' ' + my + 'h2.5M' + (x + BOX_W) + ' ' + my + 'h-2.5" stroke="#141414" stroke-width=".3"/>';
+      }
+      const ly = by + BOX_H + 4.6;
+      s += '<text x="' + x + '" y="' + ly + '" style="font:700 3.4px Archivo,sans-serif;fill:#141414">' + (i + 1) + '  ' + esc(EXAMPLES[i].title) + '</text>';
+      if (prompts) s += '<text x="' + x + '" y="' + (ly + 4.2) + '" style="font:400 2.8px Archivo,sans-serif;fill:#555">' + esc(PROMPT[i]) + '</text>';
+    }
+  });
+  s += '<path d="M' + M + ' 283H' + (210 - M) + '" stroke="#141414" stroke-width=".3"/>';
+  s += '<text x="' + M + '" y="288.5" style="font:400 2.8px Archivo,sans-serif;fill:#555">' + (withEx ? 'Example sheet: one possible answer for each box. Make your own versions rather than copying.' : 'Check each box: could someone name its principle without reading the label?') + '</text>';
+  $('sheet').innerHTML = s;
+}
+pickButtons($('shMode'), [['blank', 'Blank sheet'], ['examples', 'With examples']], 'blank', k => { SH.mode = k; drawSheet(); });
+$('shPrompts').addEventListener('change', drawSheet);
+$('shMarks').addEventListener('change', drawSheet);
+$('shPrint').addEventListener('click', () => window.print());
+drawSheet();
+
+})();
+</script>
+</body>
+</html>

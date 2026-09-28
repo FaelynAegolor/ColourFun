@@ -129,6 +129,15 @@ Grade values and textures are indicative drawings, not measurements of real prod
 - **Explanations**: a card for each overlay.
 - **Thumbnail sheet**: a printable A4 sheet of frames in any format, with thirds or phi tick marks.
 
+## Design Principles
+
+`design-principles.html` supports an assignment of six quick abstract compositions: symmetrical and asymmetrical balance, contrast of size and of colour or shape, and hierarchy by size and by colour or placement.
+
+- **The brief**: the assignment text and guidelines, plus a fast working method.
+- **Box timer**: 3, 5 or 8 minutes per box, stepping through the six boxes.
+- **Example ideas**: an abstract example for each box that regenerates on demand. Optional notes show how each one works (axis, see-saw fulcrum, odd one out, 1-2-3 levels), with a check question per box.
+- **Printable A4 sheet**: six labelled rectangles grouped as Balance, Contrast and Hierarchy, with optional prompts and centre marks. A "with examples" version prints the current ideas as a reference.
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
