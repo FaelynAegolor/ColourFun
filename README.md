@@ -131,10 +131,11 @@ Grade values and textures are indicative drawings, not measurements of real prod
 
 ## Design Principles
 
-`design-principles.html` supports two assignments, each of six quick abstract compositions on an A4 sheet:
+`design-principles.html` has three A4 sheets of quick abstract compositions:
 
 - **Sheet 1**: symmetrical and asymmetrical balance, contrast of size and of colour or shape, and hierarchy by size and by colour or placement.
 - **Sheet 2**: emphasis using colour and using placement, movement along a line or path and through a sequence of shapes, and unity through repeated colour and repeated shape.
+- **Sheet 3** (eight boxes): regular and organic pattern, regular/alternating and progressive/flowing rhythm, variety of elements and variety within a theme, and harmonious and exaggerated proportion.
 
 The page has:
 

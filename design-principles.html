@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="lesson.css">
 <style>
 /* ---------- Brief ---------- */
-.brief { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.brief { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; align-items: start; }
 .brief ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 15px; }
 .brief h3 { margin: 0 0 8px; font-size: 15px; }
 .brief .grp { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 12px 0 4px; }
@@ -33,7 +33,7 @@
 .timer .bar { height: 8px; background: var(--bg); border-radius: 99px; overflow: hidden; margin: 10px 0 14px; }
 .timer .bar i { display: block; height: 100%; width: 100%; background: var(--accent); transform-origin: left; }
 .timer .bgrid { margin-bottom: 10px; }
-.timer .bgrid.two { grid-template-columns: 1fr 1fr; }
+.timer .bgrid.two { grid-template-columns: 1fr; }
 .timer .bgrid.two .tbtn { font-size: 12px; }
 .timer .row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 .timer .box-now { font-size: 13px; color: var(--muted); min-height: 1.3em; }
@@ -150,12 +150,13 @@
 <main class="wrap">
   <div class="intro">
     <h1>Design principles</h1>
-    <p>Quick abstract compositions on A4 sheets of six boxes. Sheet 1 covers balance, contrast and hierarchy; sheet 2 covers emphasis, movement and unity. Read the brief, look at the example ideas, print the sheet, then work fast and bold with coloured pencils or markers.</p>
+    <p>Quick abstract compositions on A4 sheets of six boxes. Sheet 1 covers balance, contrast and hierarchy; sheet 2 covers emphasis, movement and unity; sheet 3 (eight boxes) covers pattern, rhythm, variety and proportion. Read the brief, look at the example ideas, print the sheet, then work fast and bold with coloured pencils or markers.</p>
     <ul class="jump">
       <li><a href="#brief">The brief</a></li>
       <li><a href="#method">Working method</a></li>
       <li><a href="#examples">Sheet 1 ideas</a></li>
       <li><a href="#sheet2">Sheet 2 ideas</a></li>
+      <li><a href="#sheet3">Sheet 3 ideas</a></li>
       <li><a href="#sheetSec">Print the sheet</a></li>
     </ul>
   </div>
@@ -200,6 +201,28 @@
         </ol>
       </div>
       <div class="panel">
+        <div class="grp">Sheet 3: Pattern</div>
+        <ol start="1">
+          <li>A <b>regular</b> pattern (a motif on a grid).</li>
+          <li>An <b>irregular</b> or organic pattern.</li>
+        </ol>
+        <div class="grp">Rhythm</div>
+        <ol start="3">
+          <li><b>Regular or alternating</b> rhythm.</li>
+          <li><b>Progressive or flowing</b> rhythm.</li>
+        </ol>
+        <div class="grp">Variety</div>
+        <ol start="5">
+          <li>Variety of <b>elements</b>.</li>
+          <li>Variety <b>within a theme</b>.</li>
+        </ol>
+        <div class="grp">Proportion</div>
+        <ol start="7">
+          <li><b>Harmonious</b> proportion.</li>
+          <li><b>Exaggerated</b> proportion.</li>
+        </ol>
+      </div>
+      <div class="panel">
         <h3>Guidelines</h3>
         <ul class="rules">
           <li><i>1</i><div><b>Keep it abstract</b>Shapes, lines and colours only: no objects, faces or scenes.</div></li>
@@ -224,7 +247,7 @@
       </ol>
       <div class="panel timer" id="timer" aria-labelledby="timerTitle">
         <h3 class="label" id="timerTitle">Box timer</h3>
-        <div class="bgrid two" role="group" aria-label="Which sheet" id="tSet"></div>
+        <div class="bgrid two" role="group" aria-label="Which sheet" id="tSet" style="margin-bottom:8px"></div>
         <div class="bgrid" role="group" aria-label="Minutes per box" id="tMins"></div>
         <div class="clock" id="tClock" aria-live="off">5:00</div>
         <div class="box-now" id="tNow" aria-live="polite">Box 1 of 6: symmetrical balance</div>
@@ -261,7 +284,7 @@
   <!-- ---------- Printable sheet ---------- -->
   <section id="sheetSec" aria-labelledby="sheetTitle">
     <h2 class="sec-title" id="sheetTitle">Print the sheet</h2>
-    <p class="sec-lead">A4 portrait with six rectangles, labelled and grouped. Choose sheet 1 (balance, contrast, hierarchy) or sheet 2 (emphasis, movement, unity). The example version prints the current ideas from above as a reference copy.</p>
+    <p class="sec-lead">A4 portrait with six rectangles, labelled and grouped. Choose sheet 1 (balance, contrast, hierarchy), sheet 2 (emphasis, movement, unity) or sheet 3 (pattern, rhythm, variety, proportion, with eight boxes). The example version prints the current ideas from above as a reference copy.</p>
     <div class="sheet-ctl">
       <div class="bgrid" role="group" aria-label="Which sheet" id="shSet"></div>
       <div class="bgrid" role="group" aria-label="Sheet version" id="shMode"></div>
@@ -627,6 +650,181 @@ function unityShape(rnd) {
   return { body: list.map(shapeSVG).join(''), notes, caption: 'Colours and sizes vary freely, but every element is one of the ' + name + ', so the repeated shape unifies the box.' };
 }
 
+
+/* ---------- Sheet 3: pattern, rhythm, variety and proportion ---------- */
+
+function motifSVG(x, y, u, c1, c2, kind) {
+  // One pattern motif, u = cell size
+  if (kind === 0) return shapeSVG({ k: 'circle', x, y, r: u * .32, c: c1 }) + shapeSVG({ k: 'circle', x, y, r: u * .12, c: c2 });
+  if (kind === 1) return shapeSVG({ k: 'diamond', x, y, r: u * .36, c: c1 }) + shapeSVG({ k: 'circle', x: x + u * .5, y: y + u * .5, r: u * .09, c: c2 });
+  return shapeSVG({ k: 'square', x, y, r: u * .26, c: c1, rot: 45 }) + shapeSVG({ k: 'bar', x: x + u * .5, y, r: u * .16, c: c2, rot: 90 });
+}
+
+function patternRegular(rnd, mode) {
+  // A motif repeated at fixed intervals on a grid; half-drop offsets every other column
+  const [a, b] = pick(rnd, [['blue', 'yellow'], ['red', 'teal'], ['violet', 'orange'], ['green', 'pink'], ['black', 'red']]);
+  const kind = Math.floor(rnd() * 3);
+  const u = 42 + rnd() * 10;
+  let body = '';
+  for (let i = -1; i * u < W + u; i++) for (let j = -1; j * u < H + u; j++) {
+    const x = u / 2 + i * u, y = u / 2 + j * u + (mode === 'halfdrop' && i % 2 ? u / 2 : 0);
+    body += motifSVG(x, y, u, COL[a], COL[b], kind);
+  }
+  const notes = '<g class="note"><rect class="note-dash" x="' + f1(u * 1) + '" y="' + f1(u * 1 + (mode === 'halfdrop' ? 0 : 0)) + '" width="' + f1(u) + '" height="' + f1(u) + '"/>' + txt(u * 1.5, u * 2 + 14, 'one motif') + '</g>';
+  return { body, notes, caption: mode === 'halfdrop'
+    ? 'Half-drop repeat: the same motif on a grid, with every other column dropped by half a step. It is still completely predictable.'
+    : 'Straight repeat: one motif (a small group of shapes) copied at a fixed interval across and down. Predictable and ordered.' };
+}
+
+function patternOrganic(rnd) {
+  // The same kind of mark scattered freely: repeated, but irregular in position, angle and size
+  const cols = pick(rnd, [['blue', 'teal', 'yellow'], ['red', 'orange', 'black'], ['violet', 'pink', 'teal'], ['green', 'yellow', 'blue']]);
+  const kind = pick(rnd, ['tri', 'bar', 'diamond']);
+  const list = [];
+  for (let i = 0; i < 140 && list.length < 44; i++) {
+    const r = 7 + rnd() * 6;
+    const p = place(rnd, list, r, -4, W + 4, -4, H + 4, 3);
+    if (p) list.push({ k: kind, x: p.x, y: p.y, r, c: COL[pick(rnd, cols)], rot: Math.round(rnd() * 360) });
+  }
+  const notes = '<g class="note">' + txt(W / 2, 14, 'same mark · no fixed grid') + '</g>';
+  return { body: list.map(shapeSVG).join(''), notes, caption: 'Irregular (organic) pattern: the same mark repeats all over the surface, but position, angle and colour vary, like confetti or terrazzo.' };
+}
+
+function rhythmRegular(rnd, mode) {
+  let body = '';
+  const [a, b] = pick(rnd, [['blue', 'orange'], ['red', 'teal'], ['violet', 'yellow'], ['black', 'red']]);
+  const rows = 3, n = 8;
+  for (let j = 0; j < rows; j++) for (let i = 0; i < n; i++) {
+    const x = 22 + i * (W - 44) / (n - 1), y = 40 + j * 60;
+    if (mode === 'regular') body += shapeSVG({ k: 'bar', x, y, r: 12, c: COL[a], rot: 90 });
+    else body += (i % 2 === 0) ? shapeSVG({ k: 'circle', x, y, r: 12, c: COL[a] }) : shapeSVG({ k: 'bar', x, y, r: 11, c: COL[b], rot: 90 });
+  }
+  const notes = '<g class="note">' + txt(W / 2, H - 6, mode === 'regular' ? 'same element · same interval' : 'A  B  A  B') + '</g>';
+  return { body, notes, caption: mode === 'regular'
+    ? 'Regular rhythm: one element repeated at exactly the same interval, like a steady drum beat.'
+    : 'Alternating rhythm: two elements take turns (A B A B), like a da-DUM beat.' };
+}
+
+function rhythmProgressive(rnd, mode) {
+  let body = '', caption;
+  const c = COL[pick(rnd, ['blue', 'teal', 'violet', 'red'])];
+  if (mode === 'progressive') {
+    const kind = pick(rnd, ['circle', 'square', 'diamond']);
+    let x = 12, r = 4;
+    while (x + r < W - 4) {
+      body += shapeSVG({ k: kind, x, y: H / 2 + 10, r, c });
+      x += r * 2 + 4 + r * .5; r *= 1.24;
+    }
+    caption = 'Progressive rhythm: each repeat changes a step (here bigger and further apart), so the beat builds as it goes.';
+  } else {
+    const amp = 16 + rnd() * 10, waves = 1.5 + rnd();
+    for (let j = 0; j < 7; j++) {
+      let d = '';
+      for (let x = -4; x <= W + 4; x += 6) d += (x < 0 ? 'M' : 'L') + x + ' ' + f1(24 + j * 26 + Math.sin(x / W * Math.PI * 2 * waves + j * .5) * amp);
+      body += '<path d="' + d + '" fill="none" stroke="' + (j % 2 ? c : INK) + '" stroke-width="6" stroke-linecap="round"/>';
+    }
+    caption = 'Flowing rhythm: repeated curves that undulate together, like waves or wind in grass.';
+  }
+  const notes = '<g class="note">' + txt(W / 2, 14, mode === 'progressive' ? 'small → large, close → far apart' : 'repeated waves') + '</g>';
+  return { body, notes, caption };
+}
+
+function varietyElements(rnd) {
+  // Many different kinds of element: shapes, lines, dots, sizes and colours, in one loose composition
+  const list = [];
+  let body = '';
+  const kinds = ['circle', 'square', 'tri', 'diamond', 'bar'];
+  const cols = ['red', 'orange', 'yellow', 'green', 'blue', 'violet', 'pink', 'teal', 'black'];
+  for (let i = 0; i < 60 && list.length < 11; i++) {
+    const r = 8 + rnd() * 26;
+    const p = place(rnd, list, r * 1.1, 6, W - 6, 6, H - 6, 6);
+    if (p) list.push({ k: kinds[list.length % kinds.length], x: p.x, y: p.y, r, c: COL[pick(rnd, cols)], rot: Math.round(rnd() * 8) * 15 });
+  }
+  body += list.map(shapeSVG).join('');
+  // A wavy line, a zigzag and a dotted row add variety of line
+  const y1 = 20 + rnd() * 40, y2 = H - 30 - rnd() * 30;
+  let d = ''; for (let x = 10; x <= W - 10; x += 6) d += (x === 10 ? 'M' : 'L') + x + ' ' + f1(y1 + Math.sin(x / 18) * 8);
+  body += '<path d="' + d + '" fill="none" stroke="' + INK + '" stroke-width="3" stroke-linecap="round"/>';
+  let z = ''; for (let i = 0; i <= 12; i++) z += (i ? 'L' : 'M') + f1(20 + i * (W - 40) / 12) + ' ' + f1(y2 + (i % 2 ? -10 : 10));
+  body += '<path d="' + z + '" fill="none" stroke="' + COL.red + '" stroke-width="3" stroke-linejoin="round"/>';
+  for (let i = 0; i < 14; i++) body += '<circle cx="' + f1(18 + i * 19) + '" cy="' + f1(H / 2 + (rnd() - .5) * 8) + '" r="2.6" fill="' + INK + '"/>';
+  const notes = '<g class="note">' + txt(W / 2, H - 6, 'different shapes, lines, sizes, colours') + '</g>';
+  return { body, notes, caption: 'Variety: lots of different elements (shapes, straight, wavy and zigzag lines, dots, many sizes and colours) keep the eye interested.' };
+}
+
+function varietyTheme(rnd) {
+  // One element (a circle) repeated on a grid, each one treated differently: variety within unity
+  const cols = shuffle(rnd, ['red', 'orange', 'yellow', 'green', 'blue', 'violet', 'pink', 'teal']);
+  const nx = 5, ny = 3, u = Math.min(W / nx, H / ny), r = u * .38;
+  let body = '', k = 0;
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    const x = (W - nx * u) / 2 + u * (i + .5), y = (H - ny * u) / 2 + u * (j + .5), c = COL[cols[k % cols.length]], t = k % 7;
+    const base = '<circle cx="' + f1(x) + '" cy="' + f1(y) + '" r="' + f1(r) + '"';
+    if (t === 0) body += base + ' fill="' + c + '" stroke="' + INK + '" stroke-width="2.4"/>';
+    else if (t === 1) body += base + ' fill="none" stroke="' + c + '" stroke-width="7"/>';
+    else if (t === 2) body += base + ' fill="#fbfaf6" stroke="' + INK + '" stroke-width="2.4"/><path d="M' + f1(x - r) + ' ' + f1(y) + 'A' + f1(r) + ' ' + f1(r) + ' 0 0 1 ' + f1(x + r) + ' ' + f1(y) + 'Z" fill="' + c + '" stroke="' + INK + '" stroke-width="2.4"/>';
+    else if (t === 3) body += base + ' fill="' + c + '" stroke="' + INK + '" stroke-width="2.4"/><circle cx="' + f1(x) + '" cy="' + f1(y) + '" r="' + f1(r * .35) + '" fill="#fbfaf6" stroke="' + INK + '" stroke-width="2"/>';
+    else if (t === 4) body += base + ' fill="#fbfaf6" stroke="' + INK + '" stroke-width="2.4"/><path d="M' + f1(x) + ' ' + f1(y - r) + 'V' + f1(y + r) + 'M' + f1(x - r) + ' ' + f1(y) + 'H' + f1(x + r) + '" stroke="' + c + '" stroke-width="5"/>';
+    else if (t === 5) { body += base + ' fill="' + c + '" stroke="' + INK + '" stroke-width="2.4"/>'; for (let q = -2; q <= 2; q++) body += '<path d="M' + f1(x - r * .8) + ' ' + f1(y + q * r * .3) + 'H' + f1(x + r * .8) + '" stroke="#fbfaf6" stroke-width="2.5"/>'; }
+    else body += base + ' fill="none" stroke="' + INK + '" stroke-width="2.4" stroke-dasharray="6 5"/><circle cx="' + f1(x) + '" cy="' + f1(y) + '" r="' + f1(r * .5) + '" fill="' + c + '"/>';
+    k++;
+  }
+  const notes = '<g class="note">' + txt(W / 2, 12, 'one theme (circle) · many variations') + '</g>';
+  return { body, notes, caption: 'Variety within unity: every element is a circle in the same place on a grid, but each one is treated differently (solid, ring, half, dotted, striped).' };
+}
+
+const PHI = 1.618;
+function proportionHarmonious(rnd, mode) {
+  let body = '', notes, caption;
+  const cols = shuffle(rnd, ['red', 'yellow', 'blue', 'black', 'orange', 'teal']);
+  if (mode === 'golden') {
+    // Split the box by the golden ratio again and again (a golden-rectangle subdivision)
+    let x = 0, y = 0, w = W, h = H, k = 0;
+    const rects = [];
+    for (let i = 0; i < 6; i++) {
+      if (w >= h) { const a = w / PHI; rects.push([x, y, a, h]); x += a; w -= a; }
+      else { const a = h / PHI; rects.push([x, y, w, a]); y += a; h -= a; }
+    }
+    rects.push([x, y, w, h]);
+    rects.forEach(([rx, ry, rw, rh], i) => {
+      const fill = i % 3 === 0 ? COL[cols[k++ % cols.length]] : '#fbfaf6';
+      body += '<rect x="' + f1(rx) + '" y="' + f1(ry) + '" width="' + f1(rw) + '" height="' + f1(rh) + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="4"/>';
+    });
+    notes = '<g class="note">' + txt(rects[0][2] / 2, 16, 'each part : the next ≈ 1.6 : 1') + '</g>';
+    caption = 'Golden-ratio divisions: each block is about 1.6 times the next. The parts relate to each other and to the whole, which tends to feel harmonious.';
+  } else {
+    // Three shapes whose sizes step in a clear ratio, 1 : 2 : 4
+    const kind = pick(rnd, ['circle', 'square']);
+    const base = H - 20, c = COL[cols[0]];
+    const rs = [11, 22, 44];
+    let x = 26;
+    rs.forEach((r, i) => { x += r; body += shapeSVG({ k: kind, x, y: base - r, r, c }); if (i < 2) x += r + 22; });
+    body = '<path d="M8 ' + base + 'H' + (W - 8) + '" stroke="' + INK + '" stroke-width="3"/>' + body;
+    notes = '<g class="note">' + txt(W / 2, 16, 'sizes 1 : 2 : 4') + '</g>';
+    caption = 'A simple proportion system: three sizes that double each time (1 : 2 : 4). Consistent ratios make different sizes feel related.';
+  }
+  return { body, notes, caption };
+}
+
+function proportionExaggerated(rnd) {
+  // A family of shapes with the same proportions, and one pushed to an extreme
+  const c = COL[pick(rnd, ['blue', 'teal', 'violet', 'red'])];
+  const pop = COL[pick(rnd, ['orange', 'yellow', 'pink'])];
+  const base = H - 16, n = 6, odd = 1 + Math.floor(rnd() * (n - 2)), tall = rnd() < .6;
+  let body = '<path d="M6 ' + base + 'H' + (W - 6) + '" stroke="' + INK + '" stroke-width="3"/>';
+  const slot = (W - 20) / n;
+  let ox = 0, oy = 0;
+  for (let i = 0; i < n; i++) {
+    let w = 28, h = 40;
+    if (i === odd) { if (tall) { w = 12; h = 176; } else { w = slot * 1.6; h = 12; } }
+    const x = 10 + slot * (i + .5) - w / 2;
+    if (i === odd) { ox = x + w / 2; oy = base - h; }
+    body += '<rect x="' + f1(x) + '" y="' + f1(base - h) + '" width="' + f1(w) + '" height="' + f1(h) + '" fill="' + (i === odd ? pop : c) + '" stroke="' + INK + '" stroke-width="2.4"/>';
+  }
+  const notes = '<g class="note">' + txt(Math.max(50, Math.min(W - 50, ox)), Math.max(14, oy - 8), tall ? 'stretched tall' : 'squashed flat') + '</g>';
+  return { body, notes, caption: 'Exaggerated proportion: a row of rectangles all 2 : 3, and one pushed to an extreme (' + (tall ? 'very tall and thin' : 'very long and flat') + '). Breaking the expected proportion creates drama or tension.' };
+}
+
 const EXAMPLES = [
   { n: 1, group: 'Balance', title: 'Symmetrical balance', gen: symmetrical,
     show: 'The two halves mirror each other across a central axis.',
@@ -676,9 +874,43 @@ const EXAMPLES = [
     show: 'Repeating one shape makes the whole box feel like one composition.',
     how: 'Use one shape (all circles, or all triangles) at different sizes and in different colours. The repeated shape is what holds the box together.',
     check: 'Is the shape the only thing that stays the same?' },
+  { n: 1, set: 2, group: 'Pattern', title: 'Regular pattern', gen: patternRegular, modes: [['grid', 'Straight'], ['halfdrop', 'Half-drop']],
+    show: 'A motif repeated at fixed intervals across the whole box.',
+    how: 'Design one small motif (two or three shapes), then repeat it exactly on a grid, edge to edge. A half-drop offsets every other column by half a step.',
+    check: 'Could you predict what is hidden under your hand?' },
+  { n: 2, set: 2, group: 'Pattern', title: 'Irregular or organic pattern', gen: patternOrganic,
+    show: 'The same mark repeated all over, but not on a grid.',
+    how: 'Pick one kind of mark and scatter it densely, varying its angle, position and colour. Keep the density fairly even so it reads as a surface, not a composition with a focus.',
+    check: 'Is it still clearly one repeated mark, with no single focal point?' },
+  { n: 3, set: 2, group: 'Rhythm', title: 'Regular or alternating rhythm', gen: rhythmRegular, modes: [['regular', 'Regular'], ['alternating', 'Alternating']],
+    show: 'Repetition with a steady beat.',
+    how: 'Regular: the same element at exactly the same interval. Alternating: two elements take turns (A B A B). The spacing is as important as the shapes.',
+    check: 'Could you clap it? Is the interval even?' },
+  { n: 4, set: 2, group: 'Rhythm', title: 'Progressive or flowing rhythm', gen: rhythmProgressive, modes: [['progressive', 'Progressive'], ['flowing', 'Flowing']],
+    show: 'Repetition that changes or undulates as it goes.',
+    how: 'Progressive: each repeat changes by a step (size, colour or spacing). Flowing: repeated curves that move together like waves.',
+    check: 'Does the rhythm have a direction or a swell, not just a steady beat?' },
+  { n: 5, set: 2, group: 'Variety', title: 'Variety of elements', gen: varietyElements,
+    show: 'Many different kinds of element that keep the eye interested.',
+    how: 'Mix shape types, line types (straight, wavy, zigzag, dotted), sizes and colours. Keep them in one loose arrangement so it is lively rather than chaotic.',
+    check: 'Can you count at least five different kinds of element?' },
+  { n: 6, set: 2, group: 'Variety', title: 'Variety within a theme', gen: varietyTheme,
+    show: 'One element repeated, but each repeat treated differently.',
+    how: 'Choose a theme (circles, say) and vary how each is drawn: filled, outlined, halved, striped, dotted. The theme gives unity; the treatments give variety.',
+    check: 'Is it obvious what they have in common, and just as obvious how they differ?' },
+  { n: 7, set: 2, group: 'Proportion', title: 'Harmonious proportion', gen: proportionHarmonious, modes: [['golden', 'Golden ratio'], ['ratio', '1 : 2 : 4']],
+    show: 'Parts whose sizes relate to each other and to the whole in a clear ratio.',
+    how: 'Divide the box by a ratio such as the golden ratio (about 1.6 : 1) again and again, or size shapes in a simple series like 1 : 2 : 4.',
+    check: 'Do the sizes look planned and related, rather than random?' },
+  { n: 8, set: 2, group: 'Proportion', title: 'Exaggerated proportion', gen: proportionExaggerated,
+    show: 'One element deliberately out of proportion with the rest.',
+    how: 'Set up a family of shapes with the same proportions (all 2 : 3 rectangles), then stretch or squash one to an extreme. The broken expectation creates tension or drama.',
+    check: 'Does the odd one look deliberately distorted, not just a different shape?' },
 ];
 
 /* ================= Example cards ================= */
+
+const SET_TITLES = ['Sheet 1: balance, contrast and hierarchy', 'Sheet 2: emphasis, movement and unity', 'Sheet 3: pattern, rhythm, variety and proportion'];
 
 const state = EXAMPLES.map(e => ({ seed: newSeed(), mode: e.modes ? e.modes[0][0] : null, out: null }));
 const exList = $('exList');
@@ -696,7 +928,7 @@ function buildCards() {
   EXAMPLES.forEach((e, i) => {
     if ((e.set || 0) !== set) {
       set = e.set;
-      html += '</div><h3 class="set-head" id="sheet2">Sheet 2: emphasis, movement and unity</h3>';
+      html += '</div><h3 class="set-head" id="sheet' + (set + 1) + '">' + SET_TITLES[set] + '</h3>';
       group = '';
     }
     if (e.group !== group) {
@@ -713,7 +945,7 @@ function buildCards() {
       '<div class="acts">' + (e.modes || []).map(m => '<button type="button" data-mode="' + m[0] + '" aria-pressed="false">' + m[1] + '</button>').join('') +
       '<button type="button" data-new>New idea</button></div></div></article>';
   });
-  exList.innerHTML = '<h3 class="set-head first">Sheet 1: balance, contrast and hierarchy</h3>' + html + '</div>';
+  exList.innerHTML = '<h3 class="set-head first">' + SET_TITLES[0] + '</h3>' + html + '</div>';
   exList.querySelectorAll('.ex').forEach(card => {
     const i = +card.dataset.i;
     card.querySelectorAll('[data-mode]').forEach(b => {
@@ -757,7 +989,7 @@ function showTimer() {
   const s = Math.ceil(ms / 1000);
   $('tClock').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
   $('tBar').style.transform = 'scaleX(' + (ms / (T.mins * 60000)) + ')';
-  $('tNow').textContent = 'Box ' + (T.box + 1) + ' of 6: ' + EXAMPLES[(sheetSet() ? 6 : 0) + T.box].title.toLowerCase();
+  $('tNow').textContent = 'Box ' + (T.box + 1) + ' of ' + [6, 6, 8][sheetSet()] + ': ' + EXAMPLES[[0, 6, 12][sheetSet()] + T.box].title.toLowerCase();
   $('tStart').textContent = T.running ? 'Pause' : T.left < T.mins * 60000 && T.left > 0 ? 'Resume' : 'Start';
   $('timer').classList.toggle('done', T.left <= 0);
 }
@@ -779,7 +1011,7 @@ $('tStart').addEventListener('click', () => {
   if (actx && actx.state === 'suspended') actx.resume();
   showTimer(); if (!T.raf) T.raf = requestAnimationFrame(tick);
 });
-$('tNext').addEventListener('click', () => { T.box = (T.box + 1) % 6; resetTimer(); });
+$('tNext').addEventListener('click', () => { T.box = (T.box + 1) % [6, 6, 8][sheetSet()]; resetTimer(); });
 $('tReset').addEventListener('click', () => { T.box = 0; resetTimer(); });
 function pickButtons(el, items, current, onPick) {
   el.innerHTML = '';
@@ -801,9 +1033,11 @@ const SH = { mode: 'blank', set: 0 };
 const SETS = [
   { groups: ['BALANCE', 'CONTRAST', 'HIERARCHY'], first: 0 },
   { groups: ['EMPHASIS', 'MOVEMENT', 'UNITY'], first: 6 },
+  { groups: ['PATTERN', 'RHYTHM', 'VARIETY', 'PROPORTION'], first: 12 },
 ];
-const BOX_W = 89, BOX_H = 60, GAP = 8, M = 12;
-const SEC_Y = [38, 118, 198];
+const boxCount = k => SETS[k].groups.length * 2;
+const BOX_W = 89, GAP = 8, M = 12;
+// Sections share the space between the header (y 36) and the footer (y 276)
 const PROMPT = [
   'Mirror image either side of a central axis.',
   'Different sides, equal visual weight.',
@@ -817,6 +1051,14 @@ const PROMPT = [
   'The eye follows a sequence of shapes.',
   'Unity through repetition of colour.',
   'Unity through repetition of shape.',
+  'A motif repeated at fixed intervals on a grid.',
+  'The same mark repeated freely, not on a grid.',
+  'Repetition with a steady or alternating beat.',
+  'Repetition that grows, changes or flows.',
+  'Many different kinds of element.',
+  'One element repeated, each treated differently.',
+  'Parts related by a clear ratio (golden, 1:2:4).',
+  'One element deliberately out of proportion.',
 ];
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
@@ -828,13 +1070,14 @@ function drawSheet() {
   s += '<text x="' + M + '" y="26.5" style="font:400 3.2px Archivo,sans-serif;fill:#333">Coloured pencil or marker · abstract shapes, lines and colours · one clear principle per box · fast and bold</text>';
   s += '<text x="118" y="20" style="font:700 3px Archivo,sans-serif;letter-spacing:.3px;fill:#141414">NAME</text><path d="M128 20.3H198" stroke="#141414" stroke-width=".3"/>';
   s += '<path d="M' + M + ' 30H' + (210 - M) + '" stroke="#141414" stroke-width=".6"/>';
-  SETS[SH.set].groups.forEach((g, k) => {
-    const y = SEC_Y[k];
+  const groups = SETS[SH.set].groups, secH = 240 / groups.length, BOX_H = secH - 20;
+  groups.forEach((g, k) => {
+    const y = 38 + k * secH;
     s += '<text x="' + M + '" y="' + (y + 3.5) + '" style="font:800 4px Archivo,sans-serif;letter-spacing:.8px;fill:#141414">' + g + '</text>';
     for (let j = 0; j < 2; j++) {
       const i = SETS[SH.set].first + k * 2 + j, x = M + j * (BOX_W + GAP), by = y + 6;
       if (withEx && state[i].out) {
-        s += '<svg x="' + x + '" y="' + by + '" width="' + BOX_W + '" height="' + BOX_H + '" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid slice"><rect width="' + W + '" height="' + H + '" fill="#fff"/>' + state[i].out.body + (notesOn ? state[i].out.notes : '') + '</svg>';
+        s += '<svg x="' + x + '" y="' + by + '" width="' + BOX_W + '" height="' + BOX_H + '" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet"><rect x="-2000" y="-2000" width="5000" height="5000" fill="#fff"/>' + state[i].out.body + (notesOn ? state[i].out.notes : '') + '</svg>';
       }
       s += '<rect x="' + x + '" y="' + by + '" width="' + BOX_W + '" height="' + BOX_H + '" fill="none" stroke="#141414" stroke-width=".5"/>';
       if (marks) {
@@ -855,7 +1098,7 @@ function setSheet(k) {
   ['shSet', 'tSet'].forEach(id => $(id).querySelectorAll('.tbtn').forEach((b, n) => b.setAttribute('aria-pressed', String(n === k))));
   T.box = 0; resetTimer(); drawSheet();
 }
-['shSet', 'tSet'].forEach(id => pickButtons($(id), [[0, 'Sheet 1: balance, contrast, hierarchy'], [1, 'Sheet 2: emphasis, movement, unity']], 0, setSheet));
+['shSet', 'tSet'].forEach(id => pickButtons($(id), [[0, 'Sheet 1: balance, contrast, hierarchy'], [1, 'Sheet 2: emphasis, movement, unity'], [2, 'Sheet 3: pattern, rhythm, variety, proportion']], 0, setSheet));
 pickButtons($('shMode'), [['blank', 'Blank sheet'], ['examples', 'With examples']], 'blank', k => { SH.mode = k; drawSheet(); });
 $('shPrompts').addEventListener('change', drawSheet);
 $('shMarks').addEventListener('change', drawSheet);
