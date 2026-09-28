@@ -131,12 +131,17 @@ Grade values and textures are indicative drawings, not measurements of real prod
 
 ## Design Principles
 
-`design-principles.html` supports an assignment of six quick abstract compositions: symmetrical and asymmetrical balance, contrast of size and of colour or shape, and hierarchy by size and by colour or placement.
+`design-principles.html` supports two assignments, each of six quick abstract compositions on an A4 sheet:
+
+- **Sheet 1**: symmetrical and asymmetrical balance, contrast of size and of colour or shape, and hierarchy by size and by colour or placement.
+- **Sheet 2**: emphasis using colour and using placement, movement along a line or path and through a sequence of shapes, and unity through repeated colour and repeated shape.
+
+The page has:
 
 - **The brief**: the assignment text and guidelines, plus a fast working method.
 - **Box timer**: 3, 5 or 8 minutes per box, stepping through the six boxes.
 - **Example ideas**: an abstract example for each box that regenerates on demand. Optional notes show how each one works (axis, see-saw fulcrum, odd one out, 1-2-3 levels), with a check question per box.
-- **Printable A4 sheet**: six labelled rectangles grouped as Balance, Contrast and Hierarchy, with optional prompts and centre marks. A "with examples" version prints the current ideas as a reference.
+- **Printable A4 sheets**: six labelled rectangles for either sheet, with optional prompts and centre marks. A "with examples" version prints the current ideas as a reference.
 
 ## Site structure
 

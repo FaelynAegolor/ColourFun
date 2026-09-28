@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="lesson.css">
 <style>
 /* ---------- Brief ---------- */
-.brief { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.brief { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
 .brief ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 15px; }
 .brief h3 { margin: 0 0 8px; font-size: 15px; }
 .brief .grp { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 12px 0 4px; }
@@ -33,6 +33,8 @@
 .timer .bar { height: 8px; background: var(--bg); border-radius: 99px; overflow: hidden; margin: 10px 0 14px; }
 .timer .bar i { display: block; height: 100%; width: 100%; background: var(--accent); transform-origin: left; }
 .timer .bgrid { margin-bottom: 10px; }
+.timer .bgrid.two { grid-template-columns: 1fr 1fr; }
+.timer .bgrid.two .tbtn { font-size: 12px; }
 .timer .row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 .timer .box-now { font-size: 13px; color: var(--muted); min-height: 1.3em; }
 .timer.done .clock { color: #D2402A; }
@@ -41,6 +43,9 @@
 .ex-tools { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 14px; }
 .ex-group { font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 22px 0 10px; }
 .ex-group:first-of-type { margin-top: 0; }
+.set-head { margin: 40px 0 0; font-size: 20px; font-weight: 800; padding-top: 18px; border-top: 2px solid var(--ink); }
+.set-head.first { margin-top: 0; padding-top: 0; border-top: 0; }
+.set-head + .ex-group { margin-top: 12px; }
 .ex-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .ex { display: grid; grid-template-rows: auto 1fr; }
 .ex svg { display: block; width: 100%; height: auto; border-bottom: 1px solid #e1ded6; }
@@ -145,11 +150,12 @@
 <main class="wrap">
   <div class="intro">
     <h1>Design principles</h1>
-    <p>Six quick abstract compositions on one A4 sheet: two for balance, two for contrast, two for hierarchy. Read the brief, look at the example ideas, print the sheet, then work fast and bold with coloured pencils or markers.</p>
+    <p>Quick abstract compositions on A4 sheets of six boxes. Sheet 1 covers balance, contrast and hierarchy; sheet 2 covers emphasis, movement and unity. Read the brief, look at the example ideas, print the sheet, then work fast and bold with coloured pencils or markers.</p>
     <ul class="jump">
       <li><a href="#brief">The brief</a></li>
       <li><a href="#method">Working method</a></li>
-      <li><a href="#examples">Example ideas</a></li>
+      <li><a href="#examples">Sheet 1 ideas</a></li>
+      <li><a href="#sheet2">Sheet 2 ideas</a></li>
       <li><a href="#sheetSec">Print the sheet</a></li>
     </ul>
   </div>
@@ -160,7 +166,7 @@
     <p class="sec-lead">Use the A4 sheet with six rectangles to make quick compositions with coloured pencils or markers.</p>
     <div class="brief">
       <div class="panel">
-        <div class="grp">Balance</div>
+        <div class="grp">Sheet 1: Balance</div>
         <ol start="1">
           <li>Show <b>symmetrical</b> balance.</li>
           <li>Show <b>asymmetrical</b> balance.</li>
@@ -174,6 +180,23 @@
         <ol start="5">
           <li>Create a hierarchy using <b>size</b> (at least 3 levels).</li>
           <li>Create a hierarchy using <b>colour or placement</b> (at least 3 levels).</li>
+        </ol>
+      </div>
+      <div class="panel">
+        <div class="grp">Sheet 2: Emphasis</div>
+        <ol start="1">
+          <li>Make one element stand out using <b>colour</b>.</li>
+          <li>Make one element stand out using <b>placement</b>.</li>
+        </ol>
+        <div class="grp">Movement</div>
+        <ol start="3">
+          <li>The eye follows a <b>line or path</b>.</li>
+          <li>The eye follows a <b>sequence of shapes</b>.</li>
+        </ol>
+        <div class="grp">Unity</div>
+        <ol start="5">
+          <li>Unity through repetition using <b>colour</b>.</li>
+          <li>Unity through repetition using <b>shape</b>.</li>
         </ol>
       </div>
       <div class="panel">
@@ -201,6 +224,7 @@
       </ol>
       <div class="panel timer" id="timer" aria-labelledby="timerTitle">
         <h3 class="label" id="timerTitle">Box timer</h3>
+        <div class="bgrid two" role="group" aria-label="Which sheet" id="tSet"></div>
         <div class="bgrid" role="group" aria-label="Minutes per box" id="tMins"></div>
         <div class="clock" id="tClock" aria-live="off">5:00</div>
         <div class="box-now" id="tNow" aria-live="polite">Box 1 of 6: symmetrical balance</div>
@@ -237,8 +261,9 @@
   <!-- ---------- Printable sheet ---------- -->
   <section id="sheetSec" aria-labelledby="sheetTitle">
     <h2 class="sec-title" id="sheetTitle">Print the sheet</h2>
-    <p class="sec-lead">A4 portrait with the six rectangles, labelled and grouped. The example version prints the current ideas from above as a reference copy.</p>
+    <p class="sec-lead">A4 portrait with six rectangles, labelled and grouped. Choose sheet 1 (balance, contrast, hierarchy) or sheet 2 (emphasis, movement, unity). The example version prints the current ideas from above as a reference copy.</p>
     <div class="sheet-ctl">
+      <div class="bgrid" role="group" aria-label="Which sheet" id="shSet"></div>
       <div class="bgrid" role="group" aria-label="Sheet version" id="shMode"></div>
       <label class="check"><input type="checkbox" id="shPrompts" checked> Prompt under each box</label>
       <label class="check"><input type="checkbox" id="shMarks" checked> Centre marks on box edges</label>
@@ -457,6 +482,151 @@ function colourPlacementHierarchy(rnd, mode) {
   return { body, notes, caption: 'Same size, shape and colour: the leader sits alone at a thirds point with space around it, a group follows, the rest line the edge.' };
 }
 
+
+/* ---------- Sheet 2: emphasis, movement and unity ---------- */
+
+const MUTED = ['#9fb1c9', '#a9b8c9', '#b3bfcc', '#98a9bf'];
+
+function emphasisColour(rnd) {
+  // Same shape and size everywhere; one element in a strong contrasting colour
+  const kind = pick(rnd, ['circle', 'square', 'diamond']);
+  const [base, pop] = pick(rnd, [[MUTED, 'red'], [MUTED, 'orange'], [['#2FA84F', '#3aa85a'], 'red'], [['#1F5FBF', '#2a6ccc'], 'orange'], [['#7B3F99', '#8a4aa8'], 'yellow']]);
+  const r = 13;
+  const list = [];
+  for (let i = 0; i < 40 && list.length < 22; i++) {
+    const p = place(rnd, list, r, 6, W - 6, 6, H - 6, 8);
+    if (p) list.push({ k: kind, x: p.x, y: p.y, r, c: pick(rnd, base) });
+  }
+  // Promote the shape nearest a thirds point to be the focal one
+  const tx = pick(rnd, [W / 3, 2 * W / 3]), ty = pick(rnd, [H / 3, 2 * H / 3]);
+  let fi = 0;
+  list.forEach((o, i) => { if (Math.hypot(o.x - tx, o.y - ty) < Math.hypot(list[fi].x - tx, list[fi].y - ty)) fi = i; });
+  const f = list[fi];
+  f.c = COL[pop];
+  const notes = '<g class="note"><circle class="note-dash" cx="' + f1(f.x) + '" cy="' + f1(f.y) + '" r="' + f1(r + 10) + '"/>' + txt(f.x, f.y + r + 24 > H - 4 ? f.y - r - 16 : f.y + r + 24, 'stands out') + '</g>';
+  return { body: list.map(shapeSVG).join(''), notes, caption: 'Every shape is the same size and shape; only colour differs, so the ' + pop + ' one takes all the attention.' };
+}
+
+function emphasisPlacement(rnd, mode) {
+  // Identical shapes and colours: position alone makes one stand out
+  const c = COL[pick(rnd, ['blue', 'violet', 'teal', 'black'])];
+  const kind = pick(rnd, ['circle', 'square']);
+  const r = 11;
+  if (mode === 'isolation') {
+    const left = rnd() < .5;
+    const list = [];
+    const x0 = left ? 8 : W * .48, x1 = left ? W * .52 : W - 8;
+    for (let i = 0; i < 60 && list.length < 20; i++) { const p = place(rnd, list, r, x0, x1, 8, H - 8, 4); if (p) list.push({ k: kind, x: p.x, y: p.y, r, c }); }
+    const lone = { k: kind, x: left ? W * .8 : W * .2, y: H * (.3 + rnd() * .4), r, c };
+    const notes = '<g class="note"><circle class="note-dash" cx="' + f1(lone.x) + '" cy="' + f1(lone.y) + '" r="28"/>' + txt(lone.x, lone.y + 44 > H - 4 ? lone.y - 36 : lone.y + 44, 'isolated') + '</g>';
+    return { body: list.map(shapeSVG).join('') + shapeSVG(lone), notes, caption: 'Isolation: every shape is identical, but one sits apart with empty space around it, so it is the one you look at.' };
+  }
+  // Centre of a ring: the others surround and frame it
+  const cx = pick(rnd, [W / 3, W / 2, 2 * W / 3]), cy = H / 2;
+  let body = '';
+  const n = 10, R = 64;
+  for (let i = 0; i < n; i++) {
+    const a = i / n * Math.PI * 2;
+    body += shapeSVG({ k: kind, x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R * .9, r, c });
+  }
+  // A few loose shapes elsewhere so the ring isn't the only thing in the box
+  const loose = [{ x: cx, y: cy, r: R + 20 }];
+  for (let i = 0; i < 6; i++) { const p = place(rnd, loose, r, 6, W - 6, 6, H - 6, 8); if (p) { loose.push({ x: p.x, y: p.y, r }); body += shapeSVG({ k: kind, x: p.x, y: p.y, r, c }); } }
+  body += shapeSVG({ k: kind, x: cx, y: cy, r, c });
+  const notes = '<g class="note"><circle class="note-dash" cx="' + f1(cx) + '" cy="' + f1(cy) + '" r="22"/>' + txt(cx, cy + 5 - 34, 'framed') + '</g>';
+  return { body, notes, caption: 'Framing: the same shape placed at the centre of a ring. The surrounding shapes point the eye inwards to it.' };
+}
+
+function bezier(p, t) {
+  const u = 1 - t;
+  return {
+    x: u * u * u * p[0].x + 3 * u * u * t * p[1].x + 3 * u * t * t * p[2].x + t * t * t * p[3].x,
+    y: u * u * u * p[0].y + 3 * u * u * t * p[1].y + 3 * u * t * t * p[2].y + t * t * t * p[3].y,
+  };
+}
+const curvePts = (rnd, flip) => {
+  const fx = x => flip ? W - x : x;
+  return [{ x: fx(16), y: H - 28 }, { x: fx(W * .42), y: H + 40 + rnd() * 30 }, { x: fx(W * .52), y: -40 - rnd() * 30 }, { x: fx(W - 30), y: 42 }];
+};
+
+function movementPath(rnd, mode) {
+  // A bold continuous line the eye rides from one end to the other, ending at a small shape
+  const flip = rnd() < .5;
+  const c = COL[pick(rnd, ['blue', 'red', 'black', 'violet'])];
+  let d, end;
+  if (mode === 'curve') {
+    const pts = curvePts(rnd, flip);
+    d = 'M' + f1(pts[0].x) + ' ' + f1(pts[0].y) + 'C' + [1, 2, 3].map(i => f1(pts[i].x) + ' ' + f1(pts[i].y)).join(' ');
+    end = pts[3];
+  } else {
+    const n = 5, pts = [];
+    for (let i = 0; i <= n; i++) pts.push({ x: 14 + i * (W - 28) / n, y: i % 2 ? 30 + rnd() * 20 : H - 30 - rnd() * 20 });
+    if (flip) pts.reverse();
+    d = 'M' + pts.map(p => f1(p.x) + ' ' + f1(p.y)).join('L');
+    end = pts[pts.length - 1];
+  }
+  const accent = COL[pick(rnd, ['yellow', 'orange', 'red'])];
+  const body = '<path d="' + d + '" fill="none" stroke="' + c + '" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '<path d="' + d + '" fill="none" stroke="' + c + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 16)" opacity=".5"/>' +
+    shapeSVG({ k: 'circle', x: end.x, y: end.y, r: 12, c: accent });
+  const notes = '<g class="note">' + txt(W / 2, 14, mode === 'curve' ? 'follow the curve to the end' : 'follow the zigzag to the end') + '</g>';
+  return { body, notes, caption: mode === 'curve'
+    ? 'One sweeping curve crosses the whole box. It has a clear start and a destination (the dot), so the eye travels along it.'
+    : 'A zigzag path: sharp changes of direction feel energetic and pull the eye back and forth across the box.' };
+}
+
+function movementSequence(rnd, mode) {
+  // Separate shapes placed along an invisible path; change along the sequence gives direction
+  const flip = rnd() < .5;
+  const pts = curvePts(rnd, flip);
+  let body = '';
+  const n = 9;
+  const warm = ['#FFD400', '#F7941D', '#E4252C'];
+  const cool = COL[pick(rnd, ['blue', 'teal', 'violet'])];
+  for (let i = 0; i < n; i++) {
+    const t = .05 + i * .9 / (n - 1);
+    const a = bezier(pts, t), b = bezier(pts, Math.min(1, t + .01));
+    const ang = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+    if (mode === 'growing') body += shapeSVG({ k: 'circle', x: a.x, y: a.y, r: 4 + i * 2, c: cool });
+    else body += shapeSVG({ k: 'tri', x: a.x, y: a.y, r: 11, c: warm[Math.min(2, Math.floor(i / n * 3))], rot: ang + 90 });
+  }
+  const notes = '<g class="note">' + txt(flip ? W - 90 : 90, 16, mode === 'growing' ? 'small → large: the eye steps along' : 'each shape points to the next') + '</g>';
+  return { body, notes, caption: mode === 'growing'
+    ? 'A sequence of circles that grow step by step along a curve. There is no line, but the eye jumps from one to the next like stepping stones.'
+    : 'A sequence of triangles, each pointing at the next and warming in colour, carries the eye across the box.' };
+}
+
+const FAMILIES = [['#1F5FBF', '#12908E', '#7fa8e6'], ['#E4252C', '#F7941D', '#FFD400'], ['#7B3F99', '#E75A9A', '#c4a3d6'], ['#2FA84F', '#12908E', '#b5d98a']];
+const FAMILY_NAMES = ['blues and teals', 'reds, oranges and yellows', 'violets and pinks', 'greens and teals'];
+
+function unityColour(rnd) {
+  // Many different shapes and sizes, held together by one small colour family
+  const fi = Math.floor(rnd() * FAMILIES.length), fam = FAMILIES[fi];
+  const list = [];
+  for (let i = 0; i < 60 && list.length < 16; i++) {
+    const r = 8 + rnd() * 20;
+    const p = place(rnd, list, r * 1.1, 4, W - 4, 4, H - 4, 4);
+    if (p) list.push({ k: pick(rnd, ['circle', 'square', 'tri', 'diamond', 'bar']), x: p.x, y: p.y, r, c: pick(rnd, fam), rot: Math.round(rnd() * 6) * 15 });
+  }
+  const notes = '<g class="note">' + txt(W / 2, 12, 'different shapes · one colour family') + '</g>';
+  return { body: list.map(shapeSVG).join(''), notes, caption: 'The shapes are all different, but they share one family of colours (' + FAMILY_NAMES[fi] + '), so the box reads as one piece.' };
+}
+
+function unityShape(rnd) {
+  // One shape repeated at varied sizes and colours: the shape is what ties it together
+  const kind = pick(rnd, ['circle', 'square', 'tri', 'diamond']);
+  const cols = shuffle(rnd, ['red', 'orange', 'yellow', 'green', 'blue', 'violet', 'pink', 'teal']).slice(0, 5);
+  const list = [];
+  for (let i = 0; i < 60 && list.length < 18; i++) {
+    const r = 7 + rnd() * 22;
+    const p = place(rnd, list, r * 1.15, 4, W - 4, 4, H - 4, 4);
+    if (p) list.push({ k: kind, x: p.x, y: p.y, r, c: COL[pick(rnd, cols)], rot: kind === 'circle' ? 0 : Math.round(rnd() * 3) * 15 });
+  }
+  const name = { circle: 'circles', square: 'squares', tri: 'triangles', diamond: 'diamonds' }[kind];
+  const notes = '<g class="note">' + txt(W / 2, 12, 'many colours · one shape') + '</g>';
+  return { body: list.map(shapeSVG).join(''), notes, caption: 'Colours and sizes vary freely, but every element is one of the ' + name + ', so the repeated shape unifies the box.' };
+}
+
 const EXAMPLES = [
   { n: 1, group: 'Balance', title: 'Symmetrical balance', gen: symmetrical,
     show: 'The two halves mirror each other across a central axis.',
@@ -482,6 +652,30 @@ const EXAMPLES = [
     show: 'Similar sizes; the order comes from colour strength or from position.',
     how: 'Colour: one saturated, high-contrast element, a few mid-strength, the rest muted. Placement: isolate the leader at a strong point with space around it, group the secondary elements, push the rest to the edges.',
     check: 'Where does your eye go first, second and third?' },
+  { n: 1, set: 1, group: 'Emphasis', title: 'Emphasis using colour', gen: emphasisColour,
+    show: 'One element stands out because of its colour.',
+    how: 'Keep shape and size the same for everything, and keep the other colours quiet or alike. Give one element a strong contrasting colour: complementary, warm among cool, or bright among muted.',
+    check: 'Is colour the only reason that element stands out?' },
+  { n: 2, set: 1, group: 'Emphasis', title: 'Emphasis using placement', gen: emphasisPlacement, modes: [['isolation', 'Isolation'], ['framed', 'Framed']],
+    show: 'One element stands out because of where it is.',
+    how: 'Use identical shapes and colours so position is the only difference. Isolate one element with empty space around it, or frame it at the centre of the others.',
+    check: 'If every shape is the same, can you still point to the important one?' },
+  { n: 3, set: 1, group: 'Movement', title: 'Movement along a line or path', gen: movementPath, modes: [['curve', 'Curve'], ['zigzag', 'Zigzag']],
+    show: 'The eye follows a line or path through the box.',
+    how: 'Draw one bold, continuous line that crosses the whole box, with a clear start and a destination. Curves feel smooth; zigzags and diagonals feel energetic; horizontals feel still.',
+    check: 'Trace it with your finger: is there one obvious route from start to end?' },
+  { n: 4, set: 1, group: 'Movement', title: 'Movement through a sequence of shapes', gen: movementSequence, modes: [['growing', 'Growing'], ['pointing', 'Pointing']],
+    show: 'The eye jumps from shape to shape in order.',
+    how: 'Place separate shapes along an invisible path, like stepping stones. Change something steadily along the sequence (size, colour or direction) so the order is unmistakable.',
+    check: 'Could someone number the shapes in the order their eye visits them?' },
+  { n: 5, set: 1, group: 'Unity', title: 'Unity through repeated colour', gen: unityColour,
+    show: 'Repeating colour makes the whole box feel like one composition.',
+    how: 'Vary shapes and sizes freely, but use one small colour family (2 or 3 related colours) throughout. The colour is the thread that ties it together.',
+    check: 'Would a shape in a new colour look like it came from a different drawing?' },
+  { n: 6, set: 1, group: 'Unity', title: 'Unity through repeated shape', gen: unityShape,
+    show: 'Repeating one shape makes the whole box feel like one composition.',
+    how: 'Use one shape (all circles, or all triangles) at different sizes and in different colours. The repeated shape is what holds the box together.',
+    check: 'Is the shape the only thing that stays the same?' },
 ];
 
 /* ================= Example cards ================= */
@@ -498,8 +692,13 @@ function render(i) {
 }
 
 function buildCards() {
-  let group = '', html = '';
+  let group = '', set = 0, html = '';
   EXAMPLES.forEach((e, i) => {
+    if ((e.set || 0) !== set) {
+      set = e.set;
+      html += '</div><h3 class="set-head" id="sheet2">Sheet 2: emphasis, movement and unity</h3>';
+      group = '';
+    }
     if (e.group !== group) {
       if (group) html += '</div>';
       group = e.group;
@@ -514,7 +713,7 @@ function buildCards() {
       '<div class="acts">' + (e.modes || []).map(m => '<button type="button" data-mode="' + m[0] + '" aria-pressed="false">' + m[1] + '</button>').join('') +
       '<button type="button" data-new>New idea</button></div></div></article>';
   });
-  exList.innerHTML = html + '</div>';
+  exList.innerHTML = '<h3 class="set-head first">Sheet 1: balance, contrast and hierarchy</h3>' + html + '</div>';
   exList.querySelectorAll('.ex').forEach(card => {
     const i = +card.dataset.i;
     card.querySelectorAll('[data-mode]').forEach(b => {
@@ -536,6 +735,8 @@ $('allNew').addEventListener('click', () => { state.forEach(s => { s.seed = newS
 
 /* ================= Box timer ================= */
 
+let currentSet = 0; // which sheet the timer and printout use (0 or 1)
+const sheetSet = () => currentSet;
 const T = { mins: 5, left: 300000, end: 0, running: false, box: 0, raf: 0 };
 let actx = null;
 function beep() {
@@ -556,7 +757,7 @@ function showTimer() {
   const s = Math.ceil(ms / 1000);
   $('tClock').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
   $('tBar').style.transform = 'scaleX(' + (ms / (T.mins * 60000)) + ')';
-  $('tNow').textContent = 'Box ' + (T.box + 1) + ' of 6: ' + EXAMPLES[T.box].title.toLowerCase();
+  $('tNow').textContent = 'Box ' + (T.box + 1) + ' of 6: ' + EXAMPLES[(sheetSet() ? 6 : 0) + T.box].title.toLowerCase();
   $('tStart').textContent = T.running ? 'Pause' : T.left < T.mins * 60000 && T.left > 0 ? 'Resume' : 'Start';
   $('timer').classList.toggle('done', T.left <= 0);
 }
@@ -596,7 +797,11 @@ showTimer();
 /* ================= Printable sheet ================= */
 // Drawn in millimetres on an A4 viewBox (210 × 297)
 
-const SH = { mode: 'blank' };
+const SH = { mode: 'blank', set: 0 };
+const SETS = [
+  { groups: ['BALANCE', 'CONTRAST', 'HIERARCHY'], first: 0 },
+  { groups: ['EMPHASIS', 'MOVEMENT', 'UNITY'], first: 6 },
+];
 const BOX_W = 89, BOX_H = 60, GAP = 8, M = 12;
 const SEC_Y = [38, 118, 198];
 const PROMPT = [
@@ -606,6 +811,12 @@ const PROMPT = [
   'One element differs in colour or shape.',
   'At least 3 levels, set by size.',
   'At least 3 levels, set by colour or placement.',
+  'One element stands out using colour.',
+  'One element stands out using placement.',
+  'The eye follows a line or path.',
+  'The eye follows a sequence of shapes.',
+  'Unity through repetition of colour.',
+  'Unity through repetition of shape.',
 ];
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
@@ -617,11 +828,11 @@ function drawSheet() {
   s += '<text x="' + M + '" y="26.5" style="font:400 3.2px Archivo,sans-serif;fill:#333">Coloured pencil or marker · abstract shapes, lines and colours · one clear principle per box · fast and bold</text>';
   s += '<text x="118" y="20" style="font:700 3px Archivo,sans-serif;letter-spacing:.3px;fill:#141414">NAME</text><path d="M128 20.3H198" stroke="#141414" stroke-width=".3"/>';
   s += '<path d="M' + M + ' 30H' + (210 - M) + '" stroke="#141414" stroke-width=".6"/>';
-  ['BALANCE', 'CONTRAST', 'HIERARCHY'].forEach((g, k) => {
+  SETS[SH.set].groups.forEach((g, k) => {
     const y = SEC_Y[k];
     s += '<text x="' + M + '" y="' + (y + 3.5) + '" style="font:800 4px Archivo,sans-serif;letter-spacing:.8px;fill:#141414">' + g + '</text>';
     for (let j = 0; j < 2; j++) {
-      const i = k * 2 + j, x = M + j * (BOX_W + GAP), by = y + 6;
+      const i = SETS[SH.set].first + k * 2 + j, x = M + j * (BOX_W + GAP), by = y + 6;
       if (withEx && state[i].out) {
         s += '<svg x="' + x + '" y="' + by + '" width="' + BOX_W + '" height="' + BOX_H + '" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid slice"><rect width="' + W + '" height="' + H + '" fill="#fff"/>' + state[i].out.body + (notesOn ? state[i].out.notes : '') + '</svg>';
       }
@@ -631,7 +842,7 @@ function drawSheet() {
         s += '<path d="M' + mx + ' ' + by + 'v2.5M' + mx + ' ' + (by + BOX_H) + 'v-2.5M' + x + ' ' + my + 'h2.5M' + (x + BOX_W) + ' ' + my + 'h-2.5" stroke="#141414" stroke-width=".3"/>';
       }
       const ly = by + BOX_H + 4.6;
-      s += '<text x="' + x + '" y="' + ly + '" style="font:700 3.4px Archivo,sans-serif;fill:#141414">' + (i + 1) + '  ' + esc(EXAMPLES[i].title) + '</text>';
+      s += '<text x="' + x + '" y="' + ly + '" style="font:700 3.4px Archivo,sans-serif;fill:#141414">' + (k * 2 + j + 1) + '  ' + esc(EXAMPLES[i].title) + '</text>';
       if (prompts) s += '<text x="' + x + '" y="' + (ly + 4.2) + '" style="font:400 2.8px Archivo,sans-serif;fill:#555">' + esc(PROMPT[i]) + '</text>';
     }
   });
@@ -639,6 +850,12 @@ function drawSheet() {
   s += '<text x="' + M + '" y="288.5" style="font:400 2.8px Archivo,sans-serif;fill:#555">' + (withEx ? 'Example sheet: one possible answer for each box. Make your own versions rather than copying.' : 'Check each box: could someone name its principle without reading the label?') + '</text>';
   $('sheet').innerHTML = s;
 }
+function setSheet(k) {
+  SH.set = k; currentSet = k;
+  ['shSet', 'tSet'].forEach(id => $(id).querySelectorAll('.tbtn').forEach((b, n) => b.setAttribute('aria-pressed', String(n === k))));
+  T.box = 0; resetTimer(); drawSheet();
+}
+['shSet', 'tSet'].forEach(id => pickButtons($(id), [[0, 'Sheet 1: balance, contrast, hierarchy'], [1, 'Sheet 2: emphasis, movement, unity']], 0, setSheet));
 pickButtons($('shMode'), [['blank', 'Blank sheet'], ['examples', 'With examples']], 'blank', k => { SH.mode = k; drawSheet(); });
 $('shPrompts').addEventListener('change', drawSheet);
 $('shMarks').addEventListener('change', drawSheet);
