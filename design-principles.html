@@ -11,6 +11,13 @@
 <link rel="stylesheet" href="site.css">
 <link rel="stylesheet" href="lesson.css">
 <style>
+/* ---------- Coverage ---------- */
+.cover { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.cover a { display: flex; flex-direction: column; gap: 2px; min-height: 56px; padding: 10px 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; color: var(--ink); text-decoration: none; }
+.cover a:hover { border-color: var(--ink); }
+.cover b { font-size: 15px; }
+.cover span { font-size: 12px; color: var(--muted); }
+
 /* ---------- Brief ---------- */
 .brief { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; align-items: start; }
 .brief ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 15px; }
@@ -150,16 +157,39 @@
 <main class="wrap">
   <div class="intro">
     <h1>Design principles</h1>
-    <p>Quick abstract compositions on A4 sheets of six boxes. Sheet 1 covers balance, contrast and hierarchy; sheet 2 covers emphasis, movement and unity; sheet 3 (eight boxes) covers pattern, rhythm, variety and proportion. Read the brief, look at the example ideas, print the sheet, then work fast and bold with coloured pencils or markers.</p>
+    <p>Quick abstract compositions on A4 sheets of six boxes. Sheet 1 covers balance, contrast and hierarchy; sheet 2 covers emphasis, movement and unity; sheet 3 (eight boxes) covers pattern, rhythm, variety and proportion; sheet 4 covers white space, repetition and alignment. Read the brief, look at the example ideas, print the sheet, then work fast and bold with coloured pencils or markers.</p>
     <ul class="jump">
+      <li><a href="#covered">All principles</a></li>
       <li><a href="#brief">The brief</a></li>
       <li><a href="#method">Working method</a></li>
       <li><a href="#examples">Sheet 1 ideas</a></li>
       <li><a href="#sheet2">Sheet 2 ideas</a></li>
       <li><a href="#sheet3">Sheet 3 ideas</a></li>
+      <li><a href="#sheet4">Sheet 4 ideas</a></li>
       <li><a href="#sheetSec">Print the sheet</a></li>
     </ul>
   </div>
+
+
+  <section id="covered" aria-labelledby="covTitle">
+    <h2 class="sec-title" id="covTitle">Every principle, and where to find it</h2>
+    <p class="sec-lead">Courses list 7 to 13 principles of design, and the "11 principles" differ from one source to the next. This page covers all of the commonly listed ones, so whichever list your course uses is here.</p>
+    <ul class="cover">
+      <li><a href="#sheet1"><b>Balance</b><span>Sheet 1 · boxes 1–2</span></a></li>
+      <li><a href="#sheet1"><b>Contrast</b><span>Sheet 1 · boxes 3–4</span></a></li>
+      <li><a href="#sheet1"><b>Hierarchy</b><span>Sheet 1 · boxes 5–6</span></a></li>
+      <li><a href="#sheet2"><b>Emphasis</b><span>Sheet 2 · boxes 1–2</span></a></li>
+      <li><a href="#sheet2"><b>Movement</b><span>Sheet 2 · boxes 3–4</span></a></li>
+      <li><a href="#sheet2"><b>Unity</b><span>Sheet 2 · boxes 5–6</span></a></li>
+      <li><a href="#sheet3"><b>Pattern</b><span>Sheet 3 · boxes 1–2</span></a></li>
+      <li><a href="#sheet3"><b>Rhythm</b><span>Sheet 3 · boxes 3–4</span></a></li>
+      <li><a href="#sheet3"><b>Variety</b><span>Sheet 3 · boxes 5–6</span></a></li>
+      <li><a href="#sheet3"><b>Proportion &amp; scale</b><span>Sheet 3 · boxes 7–8</span></a></li>
+      <li><a href="#sheet4"><b>White (negative) space</b><span>Sheet 4 · boxes 1–2</span></a></li>
+      <li><a href="#sheet4"><b>Repetition</b><span>Sheet 4 · boxes 3–4</span></a></li>
+      <li><a href="#sheet4"><b>Alignment</b><span>Sheet 4 · boxes 5–6</span></a></li>
+    </ul>
+  </section>
 
   <!-- ---------- Brief ---------- -->
   <section id="brief" aria-labelledby="briefTitle">
@@ -220,6 +250,23 @@
         <ol start="7">
           <li><b>Harmonious</b> proportion.</li>
           <li><b>Exaggerated</b> proportion.</li>
+        </ol>
+      </div>
+      <div class="panel">
+        <div class="grp">Sheet 4: White space</div>
+        <ol start="1">
+          <li>Negative space <b>as a shape</b>.</li>
+          <li><b>Generous</b> white space.</li>
+        </ol>
+        <div class="grp">Repetition</div>
+        <ol start="3">
+          <li>Repetition of <b>shape</b>.</li>
+          <li>Repetition of <b>line or mark</b>.</li>
+        </ol>
+        <div class="grp">Alignment</div>
+        <ol start="5">
+          <li><b>Edge</b> alignment.</li>
+          <li><b>Centre or grid</b> alignment.</li>
         </ol>
       </div>
       <div class="panel">
@@ -284,7 +331,7 @@
   <!-- ---------- Printable sheet ---------- -->
   <section id="sheetSec" aria-labelledby="sheetTitle">
     <h2 class="sec-title" id="sheetTitle">Print the sheet</h2>
-    <p class="sec-lead">A4 portrait with six rectangles, labelled and grouped. Choose sheet 1 (balance, contrast, hierarchy), sheet 2 (emphasis, movement, unity) or sheet 3 (pattern, rhythm, variety, proportion, with eight boxes). The example version prints the current ideas from above as a reference copy.</p>
+    <p class="sec-lead">A4 portrait with six rectangles, labelled and grouped. Choose sheet 1 (balance, contrast, hierarchy), sheet 2 (emphasis, movement, unity) sheet 3 (pattern, rhythm, variety, proportion, with eight boxes) or sheet 4 (white space, repetition, alignment). The example version prints the current ideas from above as a reference copy.</p>
     <div class="sheet-ctl">
       <div class="bgrid" role="group" aria-label="Which sheet" id="shSet"></div>
       <div class="bgrid" role="group" aria-label="Sheet version" id="shMode"></div>
@@ -825,6 +872,148 @@ function proportionExaggerated(rnd) {
   return { body, notes, caption: 'Exaggerated proportion: a row of rectangles all 2 : 3, and one pushed to an extreme (' + (tall ? 'very tall and thin' : 'very long and flat') + '). Breaking the expected proportion creates drama or tension.' };
 }
 
+
+/* ---------- Sheet 4: white space, repetition and alignment ---------- */
+
+function negativeShape(rnd) {
+  // A dense field of shapes with an empty region left out: the gap itself reads as a shape
+  const gap = pick(rnd, ['circle', 'tri', 'diamond']);
+  const gx = W / 2 + (rnd() - .5) * 60, gy = H / 2, R = 62;
+  const inside = (x, y) => {
+    const dx = x - gx, dy = y - gy;
+    if (gap === 'circle') return Math.hypot(dx, dy) < R;
+    if (gap === 'diamond') return Math.abs(dx) + Math.abs(dy) < R * 1.15;
+    // Upward triangle
+    return dy < R * .6 && dy > -R && Math.abs(dx) < (dy + R) * .62;
+  };
+  const cols = pick(rnd, [['blue', 'teal'], ['red', 'orange'], ['black', 'violet'], ['green', 'blue']]);
+  const u = 17;
+  let body = '';
+  for (let x = u / 2; x < W; x += u) for (let y = u / 2; y < H; y += u) {
+    if (inside(x, y)) continue;
+    body += shapeSVG({ k: 'square', x, y, r: u * .42, c: COL[pick(rnd, cols)] });
+  }
+  const name = { circle: 'circle', tri: 'triangle', diamond: 'diamond' }[gap];
+  const notes = '<g class="note">' + txt(gx, gy + 4, 'empty ' + name) + '</g>';
+  return { body, notes, caption: 'Active negative space: nothing is drawn in the middle, yet you see a ' + name + '. The empty space is a shape in its own right.' };
+}
+
+function generousSpace(rnd) {
+  // A small, tight group placed deliberately, with most of the box left empty
+  const cx = pick(rnd, [W * .28, W * .72]), cy = pick(rnd, [H * .3, H * .7]);
+  const cols = shuffle(rnd, ['red', 'blue', 'yellow', 'black', 'teal']);
+  const list = [];
+  for (let i = 0; i < 40 && list.length < 4; i++) {
+    const r = 7 + rnd() * 10;
+    const p = place(rnd, list, r, cx - 30, cx + 30, cy - 26, cy + 26, 2);
+    if (p) list.push({ k: pick(rnd, ['circle', 'square', 'tri']), x: p.x, y: p.y, r, c: COL[cols[list.length]], rot: Math.round(rnd() * 4) * 15 });
+  }
+  const ox = cx < W / 2 ? W * .7 : W * .3;
+  const notes = '<g class="note">' + txt(ox, H / 2, 'space left empty on purpose') + '</g>';
+  return { body: list.map(shapeSVG).join(''), notes, caption: 'Generous white space: a small group placed off-centre with most of the box left empty. It feels calm and deliberate, and the group gets all the attention.' };
+}
+
+function repetitionShape(rnd, mode) {
+  // Exact copies of one element: same shape, size and colour
+  const kind = pick(rnd, ['tri', 'circle', 'diamond', 'square']);
+  const c = COL[pick(rnd, ['red', 'blue', 'orange', 'teal', 'violet'])];
+  const r = 13;
+  let body = '';
+  if (mode === 'line') {
+    const n = 9, y0 = H * (.3 + rnd() * .4);
+    for (let i = 0; i < n; i++) body += shapeSVG({ k: kind, x: 22 + i * (W - 44) / (n - 1), y: y0 + Math.sin(i * .9) * 26, r, c, rot: 0 });
+  } else {
+    const list = [];
+    for (let i = 0; i < 60 && list.length < 14; i++) { const p = place(rnd, list, r, 10, W - 10, 10, H - 10, 14); if (p) list.push({ k: kind, x: p.x, y: p.y, r, c }); }
+    body = list.map(shapeSVG).join('');
+  }
+  const notes = '<g class="note">' + txt(W / 2, 14, 'the same element, again and again') + '</g>';
+  return { body, notes, caption: 'Repetition: one element copied exactly (same shape, size and colour). Unlike a pattern it does not need a grid; the sameness is what you notice.' };
+}
+
+function repetitionLine(rnd) {
+  // Repeated marks: groups of parallel strokes
+  const c = COL[pick(rnd, ['black', 'blue', 'red', 'violet'])];
+  let body = '';
+  const groups = 5 + Math.floor(rnd() * 3);
+  const list = [];
+  for (let g = 0; g < groups; g++) {
+    const p = place(rnd, list, 30, 6, W - 6, 6, H - 6, 6);
+    if (!p) continue;
+    list.push({ x: p.x, y: p.y, r: 30 });
+    const ang = rnd() * Math.PI;
+    const dx = Math.cos(ang), dy = Math.sin(ang), nx = -dy, ny = dx;
+    for (let k = -2; k <= 2; k++) {
+      const ox = p.x + nx * k * 9, oy = p.y + ny * k * 9;
+      body += '<path d="M' + f1(ox - dx * 26) + ' ' + f1(oy - dy * 26) + 'L' + f1(ox + dx * 26) + ' ' + f1(oy + dy * 26) + '" stroke="' + c + '" stroke-width="4" stroke-linecap="round"/>';
+    }
+  }
+  const notes = '<g class="note">' + txt(W / 2, H - 6, 'one mark: five parallel strokes, repeated') + '</g>';
+  return { body, notes, caption: 'Repetition of line: the same mark (a set of five parallel strokes) repeated at different angles. The repeated mark ties the box together.' };
+}
+
+function alignEdge(rnd, mode) {
+  // Different shapes that share one edge: an invisible line holds them in order
+  const kinds = ['square', 'circle', 'tri', 'bar', 'diamond'];
+  const cols = shuffle(rnd, ['red', 'blue', 'yellow', 'teal', 'violet', 'orange']);
+  let body = '', guide;
+  if (mode === 'baseline') {
+    const base = H * .72;
+    let x = 22;
+    kinds.forEach((k, i) => {
+      const r = 10 + rnd() * 16;
+      const h = { square: r * .88, circle: r, tri: r * .59, bar: r * .32, diamond: r * 1.1 }[k];
+      x += r;
+      body += shapeSVG({ k, x, y: base - h, r, c: COL[cols[i]] });
+      x += r + 14;
+    });
+    guide = '<path class="note-dash" d="M8 ' + f1(base) + 'H' + (W - 8) + '"/>' + txt(W - 60, base + 16, 'shared baseline');
+  } else {
+    const left = W * .3;
+    let y = 18;
+    kinds.slice(0, 4).forEach((k, i) => {
+      const r = 10 + rnd() * 12;
+      const w = { square: r * .88, circle: r, tri: r * 1.02, bar: r * 1.4, diamond: r * 1.1 }[k];
+      y += r;
+      body += shapeSVG({ k, x: left + w, y, r, c: COL[cols[i]] });
+      y += r + 10;
+    });
+    guide = '<path class="note-dash" d="M' + f1(left) + ' 6V' + (H - 6) + '"/>' + txt(left - 6, H - 10, 'shared left edge', 'end');
+  }
+  return { body, notes: '<g class="note">' + guide + '</g>', caption: 'Edge alignment: shapes of different sizes line up along one invisible line. It makes a loose group look organised.' };
+}
+
+function alignCentre(rnd, mode) {
+  const cols = shuffle(rnd, ['red', 'blue', 'yellow', 'teal', 'violet', 'orange', 'green']);
+  let body = '', guide;
+  if (mode === 'centre') {
+    const cx = W * (.35 + rnd() * .3);
+    let y = 14;
+    ['bar', 'circle', 'square', 'tri', 'bar'].forEach((k, i) => {
+      const r = [22, 16, 13, 18, 10][i] + rnd() * 4;
+      const hh = { bar: r * .32, circle: r, square: r * .88, tri: r * .9 }[k];
+      y += hh;
+      body += shapeSVG({ k, x: cx, y, r, c: COL[cols[i]] });
+      y += hh + 8;
+    });
+    guide = '<path class="note-dash" d="M' + f1(cx) + ' 4V' + (H - 4) + '"/>' + txt(cx + 8, H - 8, 'centre line', 'start');
+  } else {
+    // Three columns: every shape sits on a column line
+    const colsX = [W * .2, W * .5, W * .8];
+    const list = [];
+    for (let i = 0; i < 40 && list.length < 8; i++) {
+      const cx = pick(rnd, colsX), r = 9 + rnd() * 12;
+      const p = place(rnd, list, r, cx - r, cx + r, 8, H - 8, 8);
+      if (p) list.push({ k: pick(rnd, ['circle', 'square', 'diamond']), x: cx, y: p.y, r, c: COL[pick(rnd, cols)] });
+    }
+    body = list.map(shapeSVG).join('');
+    guide = colsX.map(x => '<path class="note-dash" d="M' + f1(x) + ' 4V' + (H - 4) + '"/>').join('') + txt(W / 2, 12, 'three column lines');
+  }
+  return { body, notes: '<g class="note">' + guide + '</g>', caption: mode === 'centre'
+    ? 'Centre alignment: different shapes stacked on one vertical centre line. Unlike symmetry, the shapes themselves differ.'
+    : 'Grid alignment: every shape sits on one of three column lines, so a scattered set of shapes still looks ordered.' };
+}
+
 const EXAMPLES = [
   { n: 1, group: 'Balance', title: 'Symmetrical balance', gen: symmetrical,
     show: 'The two halves mirror each other across a central axis.',
@@ -906,11 +1095,35 @@ const EXAMPLES = [
     show: 'One element deliberately out of proportion with the rest.',
     how: 'Set up a family of shapes with the same proportions (all 2 : 3 rectangles), then stretch or squash one to an extreme. The broken expectation creates tension or drama.',
     check: 'Does the odd one look deliberately distorted, not just a different shape?' },
+  { n: 1, set: 3, group: 'White space', title: 'Negative space as a shape', gen: negativeShape,
+    show: 'The empty space itself forms a recognisable shape.',
+    how: 'Fill the box around an area you leave blank, so the gap reads as a shape (figure–ground). Draw the surroundings, not the shape.',
+    check: 'Can you see a shape that you never actually drew?' },
+  { n: 2, set: 3, group: 'White space', title: 'Generous white space', gen: generousSpace,
+    show: 'Most of the box is left empty, on purpose.',
+    how: 'Keep the drawn elements small and grouped, and place them deliberately (for example on a thirds point). The empty space gives calm and makes the group matter.',
+    check: 'Does the emptiness look intended, not unfinished?' },
+  { n: 3, set: 3, group: 'Repetition', title: 'Repetition of shape', gen: repetitionShape, modes: [['free', 'Scattered'], ['line', 'In a line']],
+    show: 'One element repeated exactly, many times.',
+    how: 'Copy the same shape at the same size and colour. It does not need to be on a grid (that would make it a pattern); the sameness is the point.',
+    check: 'Are the copies really the same, not just similar?' },
+  { n: 4, set: 3, group: 'Repetition', title: 'Repetition of line or mark', gen: repetitionLine,
+    show: 'A line or mark repeated so it becomes the thread of the composition.',
+    how: 'Choose one mark (a set of parallel strokes, a wavy line, a dot cluster) and repeat it. Vary position and angle if you like, but keep the mark itself the same.',
+    check: 'Could someone describe the repeated mark in a few words?' },
+  { n: 5, set: 3, group: 'Alignment', title: 'Edge alignment', gen: alignEdge, modes: [['baseline', 'Baseline'], ['left', 'Left edge']],
+    show: 'Different shapes line up along one invisible edge.',
+    how: 'Use shapes of different sizes and kinds, but make them all touch the same line: a shared baseline, or a shared left edge.',
+    check: 'Can you see the invisible line without it being drawn?' },
+  { n: 6, set: 3, group: 'Alignment', title: 'Centre or grid alignment', gen: alignCentre, modes: [['centre', 'Centre line'], ['grid', 'Grid']],
+    show: 'Elements organised on a centre line or on grid columns.',
+    how: 'Centre: stack different shapes on one vertical axis. Grid: place shapes only on a few column lines, so a scattered set still looks ordered.',
+    check: 'Does it look organised even though the shapes are all different?' },
 ];
 
 /* ================= Example cards ================= */
 
-const SET_TITLES = ['Sheet 1: balance, contrast and hierarchy', 'Sheet 2: emphasis, movement and unity', 'Sheet 3: pattern, rhythm, variety and proportion'];
+const SET_TITLES = ['Sheet 1: balance, contrast and hierarchy', 'Sheet 2: emphasis, movement and unity', 'Sheet 3: pattern, rhythm, variety and proportion', 'Sheet 4: white space, repetition and alignment'];
 
 const state = EXAMPLES.map(e => ({ seed: newSeed(), mode: e.modes ? e.modes[0][0] : null, out: null }));
 const exList = $('exList');
@@ -945,7 +1158,7 @@ function buildCards() {
       '<div class="acts">' + (e.modes || []).map(m => '<button type="button" data-mode="' + m[0] + '" aria-pressed="false">' + m[1] + '</button>').join('') +
       '<button type="button" data-new>New idea</button></div></div></article>';
   });
-  exList.innerHTML = '<h3 class="set-head first">' + SET_TITLES[0] + '</h3>' + html + '</div>';
+  exList.innerHTML = '<h3 class="set-head first" id="sheet1">' + SET_TITLES[0] + '</h3>' + html + '</div>';
   exList.querySelectorAll('.ex').forEach(card => {
     const i = +card.dataset.i;
     card.querySelectorAll('[data-mode]').forEach(b => {
@@ -989,7 +1202,7 @@ function showTimer() {
   const s = Math.ceil(ms / 1000);
   $('tClock').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
   $('tBar').style.transform = 'scaleX(' + (ms / (T.mins * 60000)) + ')';
-  $('tNow').textContent = 'Box ' + (T.box + 1) + ' of ' + [6, 6, 8][sheetSet()] + ': ' + EXAMPLES[[0, 6, 12][sheetSet()] + T.box].title.toLowerCase();
+  $('tNow').textContent = 'Box ' + (T.box + 1) + ' of ' + [6, 6, 8, 6][sheetSet()] + ': ' + EXAMPLES[[0, 6, 12, 20][sheetSet()] + T.box].title.toLowerCase();
   $('tStart').textContent = T.running ? 'Pause' : T.left < T.mins * 60000 && T.left > 0 ? 'Resume' : 'Start';
   $('timer').classList.toggle('done', T.left <= 0);
 }
@@ -1011,7 +1224,7 @@ $('tStart').addEventListener('click', () => {
   if (actx && actx.state === 'suspended') actx.resume();
   showTimer(); if (!T.raf) T.raf = requestAnimationFrame(tick);
 });
-$('tNext').addEventListener('click', () => { T.box = (T.box + 1) % [6, 6, 8][sheetSet()]; resetTimer(); });
+$('tNext').addEventListener('click', () => { T.box = (T.box + 1) % [6, 6, 8, 6][sheetSet()]; resetTimer(); });
 $('tReset').addEventListener('click', () => { T.box = 0; resetTimer(); });
 function pickButtons(el, items, current, onPick) {
   el.innerHTML = '';
@@ -1034,6 +1247,7 @@ const SETS = [
   { groups: ['BALANCE', 'CONTRAST', 'HIERARCHY'], first: 0 },
   { groups: ['EMPHASIS', 'MOVEMENT', 'UNITY'], first: 6 },
   { groups: ['PATTERN', 'RHYTHM', 'VARIETY', 'PROPORTION'], first: 12 },
+  { groups: ['WHITE SPACE', 'REPETITION', 'ALIGNMENT'], first: 20 },
 ];
 const boxCount = k => SETS[k].groups.length * 2;
 const BOX_W = 89, GAP = 8, M = 12;
@@ -1059,6 +1273,12 @@ const PROMPT = [
   'One element repeated, each treated differently.',
   'Parts related by a clear ratio (golden, 1:2:4).',
   'One element deliberately out of proportion.',
+  'The empty space itself forms a shape.',
+  'Most of the box left empty, on purpose.',
+  'One element repeated exactly.',
+  'One line or mark repeated.',
+  'Different shapes share one edge.',
+  'Shapes organised on a centre line or grid.',
 ];
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
@@ -1098,7 +1318,7 @@ function setSheet(k) {
   ['shSet', 'tSet'].forEach(id => $(id).querySelectorAll('.tbtn').forEach((b, n) => b.setAttribute('aria-pressed', String(n === k))));
   T.box = 0; resetTimer(); drawSheet();
 }
-['shSet', 'tSet'].forEach(id => pickButtons($(id), [[0, 'Sheet 1: balance, contrast, hierarchy'], [1, 'Sheet 2: emphasis, movement, unity'], [2, 'Sheet 3: pattern, rhythm, variety, proportion']], 0, setSheet));
+['shSet', 'tSet'].forEach(id => pickButtons($(id), [[0, 'Sheet 1: balance, contrast, hierarchy'], [1, 'Sheet 2: emphasis, movement, unity'], [2, 'Sheet 3: pattern, rhythm, variety, proportion'], [3, 'Sheet 4: white space, repetition, alignment']], 0, setSheet));
 pickButtons($('shMode'), [['blank', 'Blank sheet'], ['examples', 'With examples']], 'blank', k => { SH.mode = k; drawSheet(); });
 $('shPrompts').addEventListener('change', drawSheet);
 $('shMarks').addEventListener('change', drawSheet);
