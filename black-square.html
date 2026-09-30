@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Black Square Problem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="lesson.css">
+<style>
+/* ---------- Brief ---------- */
+.brief { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: start; }
+.brief ol, .brief ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 15px; }
+.brief h3 { margin: 0 0 8px; font-size: 15px; }
+.words { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.words div { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+.words b { display: block; font-size: 20px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.words span { font-size: 13px; color: var(--muted); }
+
+/* ---------- Squares settings ---------- */
+.sizes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 20px; align-items: start; }
+.sizes .row { display: grid; grid-template-columns: 26px 1fr 72px; gap: 10px; align-items: center; margin-bottom: 8px; font-size: 14px; }
+.sizes .row i { width: 22px; height: 22px; background: #111; display: block; }
+.sizes input[type="range"] { width: 100%; accent-color: var(--accent); }
+.sizes output { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; text-align: right; }
+.sizes .cm { display: flex; gap: 10px; align-items: center; margin-top: 12px; font-size: 14px; flex-wrap: wrap; }
+.sizes .cm input { width: 80px; min-height: 40px; font: inherit; padding: 6px 8px; border: 2px solid var(--border); border-radius: 8px; background: var(--panel); color: var(--ink); }
+.sizes .sample svg { display: block; width: 100%; max-width: 360px; margin: 0 auto; height: auto; }
+.sizes .cmlist { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+/* ---------- Word studies ---------- */
+.study { margin-top: 26px; }
+.study-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; margin-bottom: 10px; }
+.study-head h3 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.study-head p { margin: 0; color: var(--muted); font-size: 14px; flex: 1 1 280px; }
+.study-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.thumbs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.thumbs button { padding: 0; border: 2px solid #cfcbc2; background: #fff; cursor: pointer; border-radius: 6px; overflow: hidden; position: relative; }
+.thumbs button:hover { border-color: #141414; }
+.thumbs button[aria-pressed="true"] { border-color: #1F5FBF; box-shadow: 0 0 0 2px #1F5FBF; }
+.thumbs button span { position: absolute; left: 4px; top: 2px; font-size: 10px; font-weight: 800; color: #777; }
+.thumbs svg, .big svg { display: block; width: 100%; height: auto; aspect-ratio: 1; }
+.chosen { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.big { padding: 10px; }
+.why { display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+.why h4 { margin: 0; font-size: 15px; }
+.why p { margin: 0; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tags span { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--bg); border: 1px solid var(--border); }
+.why .acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
+.tips { margin: 12px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.tips li { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; font-size: 13px; }
+.tips b { display: block; }
+
+/* ---------- Playground ---------- */
+.pg { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+.pg .stage { padding: 14px; }
+.pg svg { display: block; width: 100%; max-width: 560px; margin: 0 auto; height: auto; aspect-ratio: 1; touch-action: none; user-select: none; -webkit-user-select: none; }
+.pg svg rect[data-i] { cursor: grab; }
+.pg .row { display: flex; gap: 8px; flex-wrap: wrap; }
+.pg .row .btn { flex: 1 1 auto; min-height: 40px; padding: 6px 10px; font-size: 13px; }
+
+/* ---------- Print ---------- */
+.print-ctl { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 16px; }
+.print-ctl .bgrid { display: flex; gap: 6px; flex-wrap: wrap; }
+.print-ctl .spacer { margin-left: auto; }
+.preview { display: flex; gap: 14px; overflow-x: auto; padding: 4px 2px 12px; }
+.preview .pg-sheet { flex: 0 0 auto; width: min(300px, 80vw); background: #fff; border: 1px solid #cfcbc2; box-shadow: 0 2px 10px rgba(0, 0, 0, .15); }
+.preview svg { display: block; width: 100%; height: auto; }
+.preview text { font-family: var(--font); }
+
+@media (max-width: 960px) {
+  .study-body, .pg, .sizes { grid-template-columns: 1fr; }
+  .words { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .chosen { grid-template-columns: 1fr; }
+  .thumbs { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
+}
+
+@page { size: A4 portrait; margin: 0; }
+@media print {
+  html, body { background: #fff; }
+  main > *:not(#printSec), #printSec > *:not(.preview) { display: none !important; }
+  .wrap, #printSec { padding: 0; margin: 0; max-width: none; }
+  .preview { display: block; overflow: visible; padding: 0; }
+  .preview .pg-sheet { width: 210mm; height: 296mm; border: 0; box-shadow: none; break-after: page; page-break-after: always; }
+  .preview .pg-sheet:last-child { break-after: auto; page-break-after: auto; }
+  .preview svg { width: 210mm; height: 296mm; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Colour</button>
+        <ul>
+          <li><a href="colour-schemes.html">Colour schemes</a></li>
+          <li><a href="colour-interaction.html">Colour interaction</a></li>
+          <li><a href="paint-mixing.html">Paint mixing</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Form &amp; space</button>
+        <ul>
+          <li><a href="shape-shading.html">3D shape shading</a></li>
+          <li><a href="ellipses.html">Ellipses</a></li>
+          <li><a href="perspective.html">Perspective</a></li>
+          <li><a href="atmospheric-perspective.html">Atmospheric perspective</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Reference tools</button>
+        <ul>
+          <li><a href="value-notan.html">Value &amp; notan</a></li>
+          <li><a href="grid-proportion.html">Grid &amp; proportion</a></li>
+          <li><a href="composition.html">Composition</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Practice</button>
+        <ul>
+          <li><a href="design-principles.html">Design principles</a></li>
+          <li><a href="black-square.html" aria-current="page">Black square problem</a></li>
+          <li><a href="gesture-timer.html">Gesture timer</a></li>
+          <li><a href="mark-making.html">Mark-making &amp; media</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>Black square problem</h1>
+    <p>Four black squares of different sizes, one square frame, and four words to express: <b>Bold</b>, <b>Explosion</b>, <b>Doubt</b> and <b>Compression</b>. Only placement, scale, rotation, overlap, spacing and cropping by the frame edge can change, so every decision carries meaning.</p>
+    <ul class="jump">
+      <li><a href="#brief">The brief</a></li>
+      <li><a href="#squares">Your squares</a></li>
+      <li><a href="#studies">Example ideas</a></li>
+      <li><a href="#play">Try it</a></li>
+      <li><a href="#printSec">Print</a></li>
+    </ul>
+  </div>
+
+  <!-- ---------- Brief ---------- -->
+  <section id="brief" aria-labelledby="briefTitle">
+    <h2 class="sec-title" id="briefTitle">The brief</h2>
+    <p class="sec-lead">Work with four black squares of different sizes to create graphic images that express the meaning of four words.</p>
+    <div class="brief">
+      <div class="panel">
+        <h3>Instructions</h3>
+        <ol>
+          <li>For each word, make <b>eight small sketch ideas</b> in the boxes provided.</li>
+          <li>After sketching, <b>choose the most effective design</b> for each word.</li>
+          <li><b>Re-draw your chosen solution</b> in the larger box.</li>
+        </ol>
+      </div>
+      <div class="panel">
+        <h3>Remember</h3>
+        <ul>
+          <li>Sketch with pencil first, but make the final compositions from <b>black construction paper</b>.</li>
+          <li>You can <b>only use the four black squares</b>: no extra shapes, no cutting them smaller.</li>
+          <li>Think about <b>placement, scale, rotation, overlap and spacing</b>.</li>
+          <li>Squares <b>can go out of the frame</b>: the edge crops them, so a turned square can show as a triangle or just a corner.</li>
+          <li>Use design principles (balance, contrast, rhythm, movement, and so on) to communicate meaning.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Choosing the best of eight</h3>
+        <ul>
+          <li>Could someone guess the word without being told?</li>
+          <li>Does it read instantly, from across the room?</li>
+          <li>Are all four squares doing a job?</li>
+          <li>Does it use the frame edges (touching, cropping or empty space) on purpose?</li>
+        </ul>
+      </div>
+    </div>
+    <div class="words">
+      <div><b>Bold</b><span>Confident, heavy, stable, big</span></div>
+      <div><b>Explosion</b><span>Outward force, rotation, scatter</span></div>
+      <div><b>Doubt</b><span>Hesitation, instability, near-misses</span></div>
+      <div><b>Compression</b><span>Squeezed, crowded, pressed together</span></div>
+    </div>
+  </section>
+
+  <!-- ---------- Squares ---------- -->
+  <section id="squares" aria-labelledby="sqTitle">
+    <h2 class="sec-title" id="sqTitle">Your squares</h2>
+    <p class="sec-lead">Set the four square sizes as a percentage of the frame's width so the examples match your paper squares. If your teacher gave you sizes, enter your final box size in cm and adjust until the cm sizes match.</p>
+    <div class="sizes">
+      <div class="panel">
+        <div id="sizeRows"></div>
+        <div class="cm"><label for="boxCm">Final box width</label><input type="number" id="boxCm" min="5" max="40" step="0.5" value="12"> cm</div>
+        <p class="cmlist" id="cmList" aria-live="polite"></p>
+        <button type="button" class="btn ghost" id="sizeReset">Reset sizes</button>
+      </div>
+      <div class="paper sample"><svg id="sizeSample" viewBox="0 0 100 100" role="img" aria-label="The four squares side by side"></svg></div>
+    </div>
+  </section>
+
+  <!-- ---------- Studies ---------- -->
+  <section id="studies" aria-labelledby="stTitle">
+    <h2 class="sec-title" id="stTitle">Example ideas</h2>
+    <p class="sec-lead">Eight ideas for each word, like your eight sketch boxes. Press <em>Regenerate</em> for eight more. Click an idea to see it large with an explanation. These are starting points for your own sketches, not answers to copy.</p>
+    <div class="print-ctl">
+      <label class="check"><input type="checkbox" id="edges" checked> Show edges where squares overlap</label>
+      <button type="button" class="btn primary" id="regenAll">Regenerate all four words</button>
+    </div>
+    <div id="studyList"></div>
+  </section>
+
+  <!-- ---------- Playground ---------- -->
+  <section id="play" aria-labelledby="playTitle">
+    <h2 class="sec-title" id="playTitle">Try it</h2>
+    <p class="sec-lead">Drag the squares to move them. Select one to rotate it or change its stacking order. Parts outside the frame are cropped, just as they would be if your paper hung over the edge and you trimmed it. Turn a square 45° and push it half out of an edge to make a triangle.</p>
+    <div class="pg">
+      <div class="paper stage"><svg id="pgSvg" viewBox="0 0 100 100" tabindex="0" role="img" aria-label="Frame with four draggable black squares. Arrow keys move the selected square, [ and ] rotate it."></svg></div>
+      <div class="panel">
+        <h3 class="label" id="pgWordLbl">Word</h3>
+        <div class="bgrid two" role="group" aria-labelledby="pgWordLbl" id="pgWord"></div>
+        <h3 class="label">Selected square</h3>
+        <p class="hint" id="pgSel" aria-live="polite" style="margin-top:0">None selected: tap a square.</p>
+        <label class="range"><span>Rotation <output id="rotOut">0°</output></span><input type="range" id="rot" min="-90" max="90" step="1" value="0"></label>
+        <div class="row">
+          <button type="button" class="btn ghost" id="rotM">−15°</button>
+          <button type="button" class="btn ghost" id="rotP">+15°</button>
+          <button type="button" class="btn ghost" id="rot0">Straight</button>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button type="button" class="btn ghost" id="front">To front</button>
+          <button type="button" class="btn ghost" id="back">To back</button>
+        </div>
+        <h3 class="label">Layout</h3>
+        <div class="row">
+          <button type="button" class="btn ghost" id="pgReset">Reset</button>
+          <button type="button" class="btn ghost" id="pgRandom">Random idea</button>
+        </div>
+        <label class="check"><input type="checkbox" id="pgEdges" checked> Show edges</label>
+        <p class="hint">Keyboard: click the frame, then arrow keys move the selected square (Shift for bigger steps), [ and ] rotate it, 1–4 select a square.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Print ---------- -->
+  <section id="printSec" aria-labelledby="prTitle">
+    <h2 class="sec-title" id="prTitle">Print</h2>
+    <p class="sec-lead">A4 portrait pages. The worksheet has one page per word: eight sketch boxes and a larger box for the final design. The example pages fill the same layout with the current ideas. The cut-out page prints the four squares at your final box size to trace onto black paper.</p>
+    <div class="print-ctl">
+      <div class="bgrid" role="group" aria-label="What to print" id="prMode"></div>
+      <button type="button" class="btn primary spacer" id="prBtn">Print</button>
+    </div>
+    <div class="preview" id="preview"></div>
+  </section>
+</main>
+
+<script src="site.js"></script>
+<script>
+(function () {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const f1 = n => Math.round(n * 100) / 100;
+const INK = '#111';
+const DEFAULT_SIZES = [50, 30, 18, 9];
+let SZ = DEFAULT_SIZES.slice();
+try { const s = JSON.parse(localStorage.getItem('blackSquareSizes') || 'null'); if (Array.isArray(s) && s.length === 4) SZ = s.map(Number); } catch (e) { /* storage unavailable */ }
+let boxCm = 12;
+try { boxCm = +(localStorage.getItem('blackSquareBoxCm') || 12) || 12; } catch (e) { /* ignore */ }
+
+function mulberry(seed) {
+  let t = seed >>> 0;
+  return () => { t += 0x6D2B79F5; let r = Math.imul(t ^ t >>> 15, 1 | t); r ^= r + Math.imul(r ^ r >>> 7, 61 | r); return ((r ^ r >>> 14) >>> 0) / 4294967296; };
+}
+const newSeed = () => Math.floor(Math.random() * 1e9);
+
+/* ================= Drawing ================= */
+// A composition is a list of squares { i: size index 0-3, x, y: centre in frame units (0-100), r: degrees }
+
+function squaresSVG(list, edges, selected) {
+  let s = '<rect width="100" height="100" fill="#fff"/>';
+  list.forEach((q, k) => {
+    const size = SZ[q.i];
+    s += '<rect data-i="' + k + '" x="' + f1(q.x - size / 2) + '" y="' + f1(q.y - size / 2) + '" width="' + f1(size) + '" height="' + f1(size) + '"' +
+      (q.r ? ' transform="rotate(' + f1(q.r) + ' ' + f1(q.x) + ' ' + f1(q.y) + ')"' : '') + ' fill="' + INK + '"' +
+      (edges ? ' stroke="#8a8a8a" stroke-width=".35"' : '') + '/>';
+  });
+  if (selected != null && list[selected]) {
+    const q = list[selected], size = SZ[q.i] + 2;
+    s += '<rect x="' + f1(q.x - size / 2) + '" y="' + f1(q.y - size / 2) + '" width="' + f1(size) + '" height="' + f1(size) + '"' +
+      (q.r ? ' transform="rotate(' + f1(q.r) + ' ' + f1(q.x) + ' ' + f1(q.y) + ')"' : '') + ' fill="none" stroke="#1F5FBF" stroke-width=".9" stroke-dasharray="2 1.4" pointer-events="none"/>';
+  }
+  s += '<rect x=".3" y=".3" width="99.4" height="99.4" fill="none" stroke="#141414" stroke-width=".6" pointer-events="none"/>';
+  return s;
+}
+
+/* ================= Idea generators ================= */
+// Each returns { sq, note, tags }. Positions use the current sizes, so ideas adapt to your squares.
+
+const rr = (rnd, a, b) => a + rnd() * (b - a);
+const pick = (rnd, a) => a[Math.floor(rnd() * a.length)];
+// Mirror a composition horizontally and/or vertically so ideas come in every orientation
+function mirror(sq, mx, my) {
+  return sq.map(q => ({ ...q, x: mx ? 100 - q.x : q.x, y: my ? 100 - q.y : q.y, r: (mx !== my) ? -q.r : q.r }));
+}
+const H = i => SZ[i] / 2;
+// Half the width of a square's bounding box when rotated
+const reach = (i, r) => SZ[i] / 2 * (Math.abs(Math.cos(r * Math.PI / 180)) + Math.abs(Math.sin(r * Math.PI / 180)));
+
+const IDEAS = {
+  bold: [
+    rnd => {
+      // Biggest square bleeds off the edge; the rest line up on the same base
+      const bleed = rr(rnd, .25, .42);
+      const sq = [{ i: 0, x: H(0) - SZ[0] * bleed, y: 100 - H(0) + rr(rnd, 0, SZ[0] * .2), r: 0 }];
+      let x = sq[0].x + H(0);
+      [1, 2, 3].forEach(i => { x += H(i) + rr(rnd, 0, 2); sq.push({ i, x, y: 100 - H(i), r: 0 }); x += H(i); });
+      return { sq: mirror(sq, rnd() < .5, false), note: 'The biggest square runs off the edge of the frame, so it feels even larger than the page. The others sit firmly on the same base line: heavy, grounded, no hesitation.', tags: ['Scale', 'Cropping', 'Alignment', 'Weight'] };
+    },
+    rnd => {
+      // A solid tower standing on the base
+      const x0 = rr(rnd, 30, 70), left = rnd() < .5;
+      let y = 100;
+      const sq = [0, 1, 2, 3].map(i => { const x = left ? x0 - H(0) + H(i) : x0; const q = { i, x, y: y - H(i), r: 0 }; y -= SZ[i]; return q; });
+      return { sq, note: 'Stacked from largest to smallest on the base line, like a monument. Everything is square-on and aligned, so it feels solid and certain.', tags: ['Stability', 'Scale progression', 'Alignment'] };
+    },
+    rnd => {
+      // One huge square in charge, everything else small and orderly
+      const sq = [{ i: 0, x: rr(rnd, 44, 56), y: rr(rnd, 52, 60), r: 0 }];
+      const topY = 6;
+      let x = 6;
+      [1, 2, 3].forEach(i => { sq.push({ i, x: x + H(i), y: topY + H(i), r: 0 }); x += SZ[i] + 3; });
+      return { sq: mirror(sq, rnd() < .5, false), note: 'One big square dominates the centre with total confidence. The smaller squares are kept tidy and out of the way so nothing competes with it.', tags: ['Dominance', 'Contrast of scale', 'Hierarchy'] };
+    },
+    rnd => {
+      // Overlapping into one heavy stepped block anchored in a corner
+      const o = rr(rnd, .15, .3);
+      const sq = [{ i: 0, x: H(0), y: 100 - H(0), r: 0 }];
+      let cx = SZ[0], cy = 100 - SZ[0];
+      [1, 2, 3].forEach(i => { const q = { i, x: cx - SZ[i] * o + H(i), y: cy + SZ[i] * o - H(i), r: 0 }; sq.push(q); cx = q.x + H(i); cy = q.y - H(i); });
+      return { sq: mirror(sq, rnd() < .5, rnd() < .3), note: 'The squares overlap into one massive stepped block, locked into the corner. Black against white with big simple edges is as loud as this palette gets.', tags: ['Weight', 'Overlap', 'Mass'] };
+    },
+    rnd => {
+      // Cropped into a pyramid: the big square turned 45° with its centre on the base shows as a triangle
+      const cx = rr(rnd, 35, 65);
+      const sq = [{ i: 0, x: cx, y: 100, r: 45 }];
+      const side = rnd() < .5 ? -1 : 1;
+      let x = side < 0 ? 6 : 94;
+      [1, 2, 3].forEach(i => { x += side < 0 ? H(i) : -H(i); sq.push({ i, x, y: 6 + H(i), r: 0 }); x += side < 0 ? H(i) + 3 : -(H(i) + 3); });
+      return { sq, note: 'The biggest square is turned 45° and pushed half out of the bottom edge, so the frame crops it into a huge triangle: a solid pyramid that cannot be knocked over.', tags: ['Cropping', 'Stability', 'Scale'] };
+    },
+  ],
+  explosion: [
+    rnd => {
+      // Big square at the centre of the blast, smaller pieces flung outwards
+      const cx = rr(rnd, 38, 62), cy = rr(rnd, 38, 62), a0 = rnd() * Math.PI * 2;
+      const sq = [{ i: 0, x: cx, y: cy, r: rr(rnd, 12, 40) }];
+      [1, 2, 3].forEach((i, k) => {
+        const a = a0 + k * 2.1 + rr(rnd, -.3, .3), d = [34, 44, 52][k] + rr(rnd, -4, 6);
+        sq.push({ i, x: cx + Math.cos(a) * d, y: cy + Math.sin(a) * d, r: rr(rnd, 10, 80) });
+      });
+      return { sq, note: 'The biggest square is the blast centre. Smaller fragments fly outwards in different directions, each spun to a different angle, and the smallest travel furthest.', tags: ['Movement', 'Rotation', 'Radiation', 'Scale progression'] };
+    },
+    rnd => {
+      // The blast bursts in from a corner; fragments spray across the frame
+      const sq = [{ i: 0, x: rr(rnd, 4, 12), y: rr(rnd, 88, 96), r: rr(rnd, 15, 35) }];
+      [1, 2, 3].forEach((i, k) => {
+        const t = [.38, .6, .82][k] + rr(rnd, -.05, .05);
+        sq.push({ i, x: t * 100 + rr(rnd, -8, 8), y: 100 - t * 100 + rr(rnd, -8, 8), r: rr(rnd, 20, 70) });
+      });
+      return { sq: mirror(sq, rnd() < .5, rnd() < .5), note: 'The explosion starts outside the frame: the big square bursts in from a corner and the fragments spray diagonally across, getting smaller as they fly.', tags: ['Diagonal movement', 'Cropping', 'Rotation'] };
+    },
+    rnd => {
+      // A burst: the big square turned at the centre, the smaller ones overlapping its edges
+      // and poking out in three directions, each at its own angle
+      const cx = rr(rnd, 42, 58), cy = rr(rnd, 42, 58), base = rr(rnd, 0, 360) * Math.PI / 180;
+      const sq = [{ i: 0, x: cx, y: cy, r: rr(rnd, 15, 35) }];
+      [1, 2, 3].forEach((i, k) => {
+        const a = base + k * 2.09 + rr(rnd, -.25, .25), d = H(0) * .95 + H(i) * .3;
+        sq.push({ i, x: cx + Math.cos(a) * d, y: cy + Math.sin(a) * d, r: rr(rnd, 10, 80) });
+      });
+      return { sq, note: 'The big square is the core of the blast and the smaller squares burst out of its sides, each overlapping it and spun to a different angle: one jagged, sudden shape.', tags: ['Radial balance', 'Rotation', 'Overlap'] };
+    },
+    rnd => {
+      // Everything blown out to the edges, leaving an empty centre
+      const sides = [[0, rr(rnd, 20, 80)], [100, rr(rnd, 20, 80)], [rr(rnd, 20, 80), 0], [rr(rnd, 20, 80), 100]].sort(() => rnd() - .5);
+      const sq = [0, 1, 2, 3].map((i, k) => {
+        const [sx, sy] = sides[k];
+        const pull = k === 3 ? 30 : SZ[i] * .15;
+        return { i, x: sx === 0 ? pull : sx === 100 ? 100 - pull : sx, y: sy === 0 ? pull : sy === 100 ? 100 - pull : sy, r: rr(rnd, 15, 75) };
+      });
+      return { sq, note: 'The pieces have been thrown out to all four edges, some half out of the frame, leaving an empty centre where the blast happened.', tags: ['Movement', 'White space', 'Cropping'] };
+    },
+    rnd => {
+      // Triangular shards stab in from the edges towards a small square at the centre
+      const cx = rr(rnd, 40, 60), cy = rr(rnd, 40, 60);
+      const edges = [[rr(rnd, 20, 80), 0], [100, rr(rnd, 20, 80)], [rr(rnd, 20, 80), 100]].sort(() => rnd() - .5);
+      const sq = [0, 1, 2].map((i, k) => ({ i, x: edges[k][0], y: edges[k][1], r: 45 + rr(rnd, -12, 12) }));
+      sq.push({ i: 3, x: cx, y: cy, r: rr(rnd, 20, 70) });
+      return { sq: mirror(sq, rnd() < .5, rnd() < .5), note: 'Three squares are turned and half out of the frame, so their visible parts are sharp triangles pointing inwards like shards, around one small spinning fragment.', tags: ['Cropping', 'Diagonals', 'Movement'] };
+    },
+  ],
+  doubt: [
+    rnd => {
+      // The medium square overhangs and tilts on top of the big one
+      const bx = rr(rnd, 30, 50);
+      const sq = [{ i: 0, x: bx, y: 100 - H(0), r: 0 }];
+      const tilt = rr(rnd, 7, 14);
+      sq.push({ i: 1, x: bx + H(0) - H(1) * .35, y: 100 - SZ[0] - reach(1, tilt) + 1, r: tilt });
+      sq.push({ i: 2, x: rr(rnd, 78, 88), y: rr(rnd, 14, 30), r: 0 });
+      sq.push({ i: 3, x: rr(rnd, 84, 94), y: rr(rnd, 55, 70), r: rr(rnd, -8, 8) });
+      return { sq: mirror(sq, rnd() < .5, false), note: 'The middle square hangs over the edge of the big one and tilts, as if it might slide off. Nothing is resolved: the eye keeps waiting for it to fall.', tags: ['Unstable balance', 'Tension', 'Slight rotation'] };
+    },
+    rnd => {
+      // The three smaller squares almost make a neat row, with one just off; the big one waits below
+      const base = rr(rnd, 34, 42), odd = 1 + Math.floor(rnd() * 3);
+      const sq = [{ i: 0, x: rr(rnd, 30, 70), y: 100 - H(0), r: 0 }];
+      let x = rr(rnd, 12, 30);
+      [1, 2, 3].forEach(i => { sq.push({ i, x: x + H(i), y: base - H(i), r: 0 }); x += SZ[i] + rr(rnd, 4, 8); });
+      const o = sq.find(q => q.i === odd);
+      o.y -= rr(rnd, 2.5, 5); o.r = rr(rnd, 4, 8) * (rnd() < .5 ? -1 : 1);
+      return { sq: mirror(sq, rnd() < .5, false), note: 'The three smaller squares nearly make a tidy row on one line, but one is slightly raised and slightly turned. It is close enough to look like a mistake, which is exactly what makes it uneasy.', tags: ['Near-miss alignment', 'Tension', 'Rhythm broken'] };
+    },
+    rnd => {
+      // Three crowded together; the smallest hesitates alone in empty space
+      const sq = [{ i: 0, x: H(0) + 2, y: 100 - H(0) - 2, r: 0 }];
+      sq.push({ i: 1, x: SZ[0] + H(1) + 3, y: 100 - H(1) - 2, r: 0 });
+      sq.push({ i: 2, x: SZ[0] + H(2) + 3, y: 100 - SZ[1] - H(2) - 4, r: 0 });
+      sq.push({ i: 3, x: rr(rnd, 82, 92), y: rr(rnd, 8, 22), r: rr(rnd, -12, 12) });
+      return { sq: mirror(sq, rnd() < .5, false), note: 'Three squares huddle together while the smallest is left alone in a big empty space, near the edge, slightly tilted: separated, unsure which way to go.', tags: ['Isolation', 'White space', 'Contrast of spacing'] };
+    },
+    rnd => {
+      // The biggest square balanced on one corner
+      const mx = rr(rnd, 30, 55);
+      const sq = [{ i: 1, x: mx, y: 100 - H(1), r: 0 }];
+      const d = SZ[0] / Math.SQRT2;
+      sq.push({ i: 0, x: mx + rr(rnd, -H(1) * .6, H(1) * .6), y: 100 - SZ[1] - d, r: 45 });
+      sq.push({ i: 2, x: rr(rnd, 80, 90), y: 100 - H(2), r: 0 });
+      sq.push({ i: 3, x: rr(rnd, 12, 20), y: rr(rnd, 15, 30), r: 0 });
+      return { sq: mirror(sq, rnd() < .5, false), note: 'The biggest square balances on a single corner on top of a smaller one. It could tip either way, and that uncertainty is the point.', tags: ['Precarious balance', 'Rotation', 'Tension'] };
+    },
+    rnd => {
+      // Just a corner peeking in from the edge, hesitating to come in
+      const side = pick(rnd, ['left', 'right', 'top']);
+      const peek = SZ[1] / Math.SQRT2 * rr(rnd, .25, .4);
+      const pos = rr(rnd, 25, 75);
+      const q1 = side === 'left' ? { x: -SZ[1] / Math.SQRT2 + peek, y: pos } : side === 'right' ? { x: 100 + SZ[1] / Math.SQRT2 - peek, y: pos } : { x: pos, y: -SZ[1] / Math.SQRT2 + peek };
+      const sq = [{ i: 1, ...q1, r: 45 }];
+      sq.push({ i: 0, x: side === 'right' ? H(0) + 4 : 100 - H(0) - 4, y: 100 - H(0) - 4, r: rr(rnd, -4, 4) });
+      // Keep the other two in the empty upper area so they never land on the big square
+      sq.push({ i: 2, x: side === 'right' ? rr(rnd, 55, 72) : rr(rnd, 28, 45), y: rr(rnd, 12, 22), r: rr(rnd, -6, 6) });
+      sq.push({ i: 3, x: rr(rnd, 42, 58), y: rr(rnd, 32, 40), r: 0 });
+      return { sq, note: 'Only a corner of one square peeks in from the edge, as if it is not sure whether to come in. The frame crops it to a small triangle, and the rest keep their distance.', tags: ['Cropping', 'Hesitation', 'White space'] };
+    },
+  ],
+  compression: [
+    rnd => {
+      // Everything pushed into one corner, touching each other and the frame
+      const sq = [{ i: 0, x: H(0), y: 100 - H(0), r: 0 }];
+      sq.push({ i: 1, x: SZ[0] + H(1), y: 100 - H(1), r: 0 });
+      sq.push({ i: 2, x: SZ[0] + H(2), y: 100 - SZ[1] - H(2), r: 0 });
+      sq.push({ i: 3, x: SZ[0] + SZ[2] + H(3), y: 100 - SZ[1] - H(3), r: 0 });
+      return { sq: mirror(sq, rnd() < .5, rnd() < .5), note: 'All four squares are shoved into one corner, touching each other and the frame, with the rest of the space empty. There is room, but they have been forced out of it.', tags: ['Proximity', 'Tension', 'White space'] };
+    },
+    rnd => {
+      // The big square presses down, the medium pushes up, the small ones are squeezed between
+      const x0 = rr(rnd, 30, 70);
+      const gap = 100 - SZ[0] - SZ[1];
+      const squeeze = Math.min(SZ[2], Math.max(gap - 1, 2));
+      const sq = [{ i: 0, x: x0, y: H(0) - (SZ[2] - squeeze) / 2, r: 0 }, { i: 1, x: x0 + rr(rnd, -6, 6), y: 100 - H(1) + (SZ[2] - squeeze) / 2, r: 0 }];
+      const midY = (sq[0].y + H(0) + sq[1].y - H(1)) / 2;
+      sq.push({ i: 2, x: x0 - rr(rnd, 0, 6), y: midY, r: 0 });
+      sq.push({ i: 3, x: x0 + H(2) + H(3) - rr(rnd, 1, 3), y: midY + (H(2) - H(3)) * .5, r: 0 });
+      return { sq: mirror(sq, rnd() < .5, rnd() < .5), note: 'The big square presses down from the top edge while the medium pushes up from the bottom. The small squares are trapped and squeezed flat in the gap between.', tags: ['Tension', 'Contrast of scale', 'Edges'] };
+    },
+    rnd => {
+      // Overlapped into one tight lump
+      const cx = rr(rnd, 38, 62), cy = rr(rnd, 38, 62);
+      const sq = [{ i: 0, x: cx, y: cy, r: 0 }];
+      const corners = [[1, 1], [-1, 1], [1, -1], [-1, -1]].sort(() => rnd() - .5);
+      [1, 2, 3].forEach((i, k) => { const [dx, dy] = corners[k]; sq.push({ i, x: cx + dx * (H(0) - H(i) * .2), y: cy + dy * (H(0) - H(i) * .2), r: 0 }); });
+      return { sq, note: 'The small squares are jammed into the corners of the big one, overlapping it: four pieces crushed into one compact lump.', tags: ['Overlap', 'Proximity', 'Unity'] };
+    },
+    rnd => {
+      // Stacked against one wall with too little room, so they overlap
+      const total = SZ.reduce((a, b) => a + b, 0), over = Math.max(0, total - 100) / 3 + 2;
+      let y = 100;
+      const sq = [0, 1, 2, 3].map(i => { const q = { i, x: 100 - H(i), y: y - H(i), r: 0 }; y -= SZ[i] - over; return q; });
+      return { sq: mirror(sq, rnd() < .5, rnd() < .5), note: 'Stacked up one wall of the frame with not quite enough room, so each square is pushed into the one below: packed, cramped and pressed against the edge.', tags: ['Tension', 'Edges', 'Overlap'] };
+    },
+    rnd => {
+      // Two wedges press in from opposite edges; the small squares are trapped between their points
+      const cx = rr(rnd, 40, 60), gapY = rr(rnd, 44, 56);
+      const d0 = SZ[0] / Math.SQRT2, d1 = SZ[1] / Math.SQRT2;
+      const sq = [{ i: 0, x: cx, y: gapY - d0 - H(2) + 1, r: 45 }, { i: 1, x: cx + rr(rnd, -4, 4), y: gapY + d1 + H(2) - 1, r: 45 }];
+      sq.push({ i: 2, x: cx, y: gapY, r: 0 });
+      sq.push({ i: 3, x: cx + H(2) + H(3), y: gapY + H(2) - H(3), r: 0 });
+      // Push the wedges out so they are cropped by the top and bottom edges
+      sq[0].y = Math.min(sq[0].y, d0 * .4); sq[1].y = Math.max(sq[1].y, 100 - d1 * .4);
+      sq[2].y = (sq[0].y + d0 + sq[1].y - d1) / 2; sq[3].y = sq[2].y + H(2) - H(3);
+      return { sq: mirror(sq, rnd() < .5, false), note: 'Two squares turned 45° and cropped by the top and bottom edges become wedges pointing at each other, pinching the small squares in the middle like a vice.', tags: ['Cropping', 'Tension', 'Contrast of scale'] };
+    },
+  ],
+};
+
+const WORDS = [
+  { key: 'bold', name: 'Bold', lead: 'Confident and strong. Think big, heavy, stable and certain.',
+    tips: [['Go big', 'Let the largest square dominate, even run off the edge.'], ['Stay square-on', 'No rotation: straight edges feel sure of themselves.'], ['Ground it', 'Weight at the bottom; a turned square half off the base makes a pyramid.'], ['Strong contrast', 'Huge next to tiny, black against lots of white.']] },
+  { key: 'explosion', name: 'Explosion', lead: 'Sudden outward force. Think rotation, diagonals and scatter from a centre.',
+    tips: [['Rotate everything', 'Different angles feel like pieces spinning.'], ['Radiate', 'Arrange pieces outwards from one point.'], ['Crop at the edges', 'A turned square half out of the frame becomes a triangle shard.'], ['Big to small', 'Smaller fragments travel further.']] },
+  { key: 'doubt', name: 'Doubt', lead: 'Hesitation and uncertainty. Think unstable balance, near-misses and isolation.',
+    tips: [['Nearly, not quite', 'Slightly off alignment looks uneasy.'], ['Precarious', 'Balance on a corner or overhang an edge.'], ['Isolate one', 'A small square alone, or just a corner peeking in.'], ['Small tilts', 'A few degrees reads as wobble; 45° reads as action.']] },
+  { key: 'compression', name: 'Compression', lead: 'Squeezed and pressed together. Think crowding, touching, overlap and edges.',
+    tips: [['Touch everything', 'No gaps between squares.'], ['Use the walls', 'Push squares against or through the frame edges; cropped corners become wedges.'], ['Overlap', 'Squares forced into each other look crushed.'], ['Leave space empty', 'Crowding reads strongest when there was room to spare.']] },
+];
+
+const study = {};
+WORDS.forEach(w => { study[w.key] = { seed: newSeed(), ideas: [], chosen: 0 }; });
+
+function makeIdeas(key) {
+  const st = study[key], rnd = mulberry(st.seed), gens = IDEAS[key];
+  // Every approach at least once, the rest chosen at random, in a shuffled order
+  const n = gens.length, order = [...Array(n).keys()];
+  while (order.length < 8) order.push(Math.floor(rnd() * n));
+  order.sort(() => rnd() - .5);
+  st.ideas = order.map(g => gens[g](mulberry(Math.floor(rnd() * 1e9))));
+}
+
+/* ================= Word study cards ================= */
+
+const edgesOn = () => $('edges').checked;
+function buildStudies() {
+  $('studyList').innerHTML = WORDS.map(w =>
+    '<div class="study" id="study-' + w.key + '">' +
+      '<div class="study-head"><h3>' + w.name + '</h3><p>' + w.lead + '</p><button type="button" class="btn ghost" data-regen="' + w.key + '">Regenerate</button></div>' +
+      '<div class="study-body">' +
+        '<div><div class="thumbs" role="group" aria-label="Eight ideas for ' + w.name + '"></div><ul class="tips">' + w.tips.map(t => '<li><b>' + t[0] + '</b>' + t[1] + '</li>').join('') + '</ul></div>' +
+        '<div class="chosen"><div class="paper big"><svg viewBox="0 0 100 100" role="img" aria-label="Chosen idea for ' + w.name + '"></svg></div>' +
+          '<div class="why"><h4>Why it says “' + w.name.toLowerCase() + '”</h4><p class="note"></p><div class="tags"></div>' +
+          '<div class="acts"><button type="button" class="btn ghost" data-try="' + w.key + '">Try it yourself</button></div></div></div>' +
+      '</div>' +
+    '</div>').join('');
+  $('studyList').querySelectorAll('[data-regen]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.regen; study[k].seed = newSeed(); study[k].chosen = 0; makeIdeas(k); renderStudy(k); drawPrint(); }));
+  $('studyList').querySelectorAll('[data-try]').forEach(b => b.addEventListener('click', () => {
+    const st = study[b.dataset.try];
+    PG.word = b.dataset.try; PG.sq = st.ideas[st.chosen].sq.map(q => ({ ...q })); PG.sel = null;
+    syncWordButtons(); drawPG();
+    $('play').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }));
+}
+function renderStudy(key) {
+  const st = study[key], el = $('study-' + key);
+  const thumbs = el.querySelector('.thumbs');
+  thumbs.innerHTML = st.ideas.map((idea, k) => '<button type="button" aria-pressed="' + (k === st.chosen) + '" aria-label="Idea ' + (k + 1) + '"><span>' + (k + 1) + '</span><svg viewBox="0 0 100 100" aria-hidden="true">' + squaresSVG(idea.sq, edgesOn()) + '</svg></button>').join('');
+  thumbs.querySelectorAll('button').forEach((b, k) => b.addEventListener('click', () => { st.chosen = k; renderStudy(key); drawPrint(); }));
+  const idea = st.ideas[st.chosen];
+  el.querySelector('.big svg').innerHTML = squaresSVG(idea.sq, edgesOn());
+  el.querySelector('.note').textContent = 'Idea ' + (st.chosen + 1) + ': ' + idea.note;
+  el.querySelector('.tags').innerHTML = idea.tags.map(t => '<span>' + t + '</span>').join('');
+}
+function renderAll() { WORDS.forEach(w => renderStudy(w.key)); }
+
+/* ================= Sizes ================= */
+
+function saveSizes() {
+  try { localStorage.setItem('blackSquareSizes', JSON.stringify(SZ)); localStorage.setItem('blackSquareBoxCm', String(boxCm)); } catch (e) { /* ignore */ }
+}
+function drawSizes() {
+  let s = '<rect width="100" height="100" fill="#fff"/><rect x=".3" y=".3" width="99.4" height="99.4" fill="none" stroke="#141414" stroke-width=".6"/>';
+  // Side by side at the same scale as each other; shrink the row if it would not fit
+  const total = SZ.reduce((a, b) => a + b, 0) + 9, k = Math.min(1, 92 / total);
+  let x = (100 - total * k) / 2;
+  const base = 70;
+  SZ.forEach((size, i) => {
+    const w = size * k;
+    s += '<rect x="' + f1(x) + '" y="' + f1(base - w) + '" width="' + f1(w) + '" height="' + f1(w) + '" fill="' + INK + '"/>';
+    s += '<text x="' + f1(x + w / 2) + '" y="' + (base + 7) + '" text-anchor="middle" style="font:700 4px Archivo,sans-serif;fill:#333">' + (i + 1) + '</text>';
+    x += w + 3;
+  });
+  s += '<text x="50" y="92" text-anchor="middle" style="font:400 3.6px Archivo,sans-serif;fill:#555">' + SZ.map(v => v + '%').join(' · ') + '</text>' + (k < 1 ? '<text x="50" y="97" text-anchor="middle" style="font:400 3px Archivo,sans-serif;fill:#777">shown smaller to fit</text>' : '');
+  $('sizeSample').innerHTML = s;
+  $('cmList').textContent = 'At a ' + boxCm + ' cm box: ' + SZ.map((v, i) => 'square ' + (i + 1) + ' = ' + (Math.round(v * boxCm) / 100).toFixed(1) + ' cm').join(', ') + '.';
+}
+function buildSizeRows() {
+  $('sizeRows').innerHTML = SZ.map((v, i) => '<label class="row"><i style="transform:scale(' + (0.4 + 0.6 * v / 60) + ')"></i><span>Square ' + (i + 1) + (i === 0 ? ' (largest)' : i === 3 ? ' (smallest)' : '') + '<input type="range" min="4" max="70" step="1" value="' + v + '" data-sz="' + i + '"></span><output>' + v + '%</output></label>').join('');
+  $('sizeRows').querySelectorAll('[data-sz]').forEach(inp => inp.addEventListener('input', () => {
+    SZ[+inp.dataset.sz] = +inp.value;
+    inp.closest('.row').querySelector('output').textContent = inp.value + '%';
+    inp.closest('.row').querySelector('i').style.transform = 'scale(' + (0.4 + 0.6 * inp.value / 60) + ')';
+    saveSizes(); drawSizes(); WORDS.forEach(w => makeIdeas(w.key)); renderAll(); drawPG(); drawPrint();
+  }));
+}
+$('boxCm').value = boxCm;
+$('boxCm').addEventListener('input', () => { boxCm = Math.max(1, +$('boxCm').value || 12); saveSizes(); drawSizes(); drawPrint(); });
+$('sizeReset').addEventListener('click', () => { SZ = DEFAULT_SIZES.slice(); saveSizes(); buildSizeRows(); drawSizes(); WORDS.forEach(w => makeIdeas(w.key)); renderAll(); drawPG(); drawPrint(); });
+
+/* ================= Playground ================= */
+
+// Start with the squares laid out apart: the two largest on the base, the two smallest above
+const startLayout = () => [
+  { i: 0, x: 4 + H(0), y: 96 - H(0), r: 0 },
+  { i: 1, x: 8 + SZ[0] + H(1), y: 96 - H(1), r: 0 },
+  { i: 2, x: 4 + H(2), y: 6 + H(2), r: 0 },
+  { i: 3, x: 8 + SZ[2] + H(3), y: 6 + H(3), r: 0 },
+];
+const PG = { word: 'bold', sq: startLayout(), sel: null, drag: null };
+const pg = $('pgSvg');
+function drawPG() {
+  pg.innerHTML = squaresSVG(PG.sq, $('pgEdges').checked, PG.sel) +
+    '<text x="3" y="6" style="font:800 5px Archivo,sans-serif;letter-spacing:.4px;fill:#bbb" pointer-events="none">' + WORDS.find(w => w.key === PG.word).name.toUpperCase() + '</text>';
+  const q = PG.sq[PG.sel];
+  $('pgSel').textContent = q ? 'Square ' + (q.i + 1) + ' selected (' + SZ[q.i] + '% of the frame), rotated ' + Math.round(q.r) + '°.' : 'None selected: tap a square.';
+  $('rot').value = q ? Math.round(q.r) : 0;
+  $('rotOut').textContent = (q ? Math.round(q.r) : 0) + '°';
+  $('rot').disabled = !q;
+}
+function svgPt(e) {
+  const p = pg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+  const r = p.matrixTransform(pg.getScreenCTM().inverse());
+  return { x: r.x, y: r.y };
+}
+pg.addEventListener('pointerdown', e => {
+  const t = e.target.closest('rect[data-i]');
+  if (!t) { PG.sel = null; drawPG(); return; }
+  PG.sel = +t.dataset.i;
+  const m = svgPt(e), q = PG.sq[PG.sel];
+  PG.drag = { dx: m.x - q.x, dy: m.y - q.y };
+  pg.setPointerCapture(e.pointerId);
+  e.preventDefault();
+  drawPG();
+});
+pg.addEventListener('pointermove', e => {
+  if (!PG.drag || PG.sel == null) return;
+  const m = svgPt(e), q = PG.sq[PG.sel];
+  q.x = Math.max(-40, Math.min(140, m.x - PG.drag.dx));
+  q.y = Math.max(-40, Math.min(140, m.y - PG.drag.dy));
+  drawPG();
+});
+const endDrag = () => { PG.drag = null; };
+pg.addEventListener('pointerup', endDrag);
+pg.addEventListener('pointercancel', endDrag);
+pg.addEventListener('keydown', e => {
+  if (/^[1-4]$/.test(e.key)) { PG.sel = PG.sq.findIndex(q => q.i === +e.key - 1); drawPG(); e.preventDefault(); return; }
+  const q = PG.sq[PG.sel];
+  if (!q) return;
+  const st = e.shiftKey ? 5 : 1;
+  if (e.key === 'ArrowLeft') q.x -= st; else if (e.key === 'ArrowRight') q.x += st;
+  else if (e.key === 'ArrowUp') q.y -= st; else if (e.key === 'ArrowDown') q.y += st;
+  else if (e.key === '[') q.r -= st * 5; else if (e.key === ']') q.r += st * 5;
+  else return;
+  e.preventDefault(); drawPG();
+});
+const withSel = fn => () => { const q = PG.sq[PG.sel]; if (q) { fn(q); drawPG(); } };
+$('rot').addEventListener('input', withSel(q => { q.r = +$('rot').value; }));
+$('rotM').addEventListener('click', withSel(q => { q.r = Math.max(-90, q.r - 15); }));
+$('rotP').addEventListener('click', withSel(q => { q.r = Math.min(90, q.r + 15); }));
+$('rot0').addEventListener('click', withSel(q => { q.r = 0; }));
+$('front').addEventListener('click', () => { if (PG.sel == null) return; const [q] = PG.sq.splice(PG.sel, 1); PG.sq.push(q); PG.sel = PG.sq.length - 1; drawPG(); });
+$('back').addEventListener('click', () => { if (PG.sel == null) return; const [q] = PG.sq.splice(PG.sel, 1); PG.sq.unshift(q); PG.sel = 0; drawPG(); });
+$('pgReset').addEventListener('click', () => { PG.sq = startLayout(); PG.sel = null; drawPG(); });
+$('pgRandom').addEventListener('click', () => { const g = IDEAS[PG.word]; PG.sq = g[Math.floor(Math.random() * g.length)](mulberry(newSeed())).sq; PG.sel = null; drawPG(); });
+$('pgEdges').addEventListener('change', drawPG);
+
+function pickButtons(el, items, current, onPick) {
+  el.innerHTML = '';
+  items.forEach(([key, label]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tbtn'; b.textContent = label; b.dataset.k = key;
+    b.setAttribute('aria-pressed', String(key === current));
+    b.addEventListener('click', () => { el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b))); onPick(key); });
+    el.appendChild(b);
+  });
+}
+pickButtons($('pgWord'), WORDS.map(w => [w.key, w.name]), PG.word, k => { PG.word = k; drawPG(); });
+function syncWordButtons() { $('pgWord').querySelectorAll('.tbtn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.k === PG.word))); }
+
+/* ================= Printing ================= */
+// Pages are SVGs drawn in millimetres on A4 (210 × 297)
+
+let PR = 'worksheet';
+const nested = (x, y, w, sq) => '<svg x="' + x + '" y="' + y + '" width="' + w + '" height="' + w + '" viewBox="0 0 100 100">' + squaresSVG(sq, false) + '</svg>';
+function wordPage(w, withEx) {
+  const st = study[w.key];
+  let s = '<rect width="210" height="297" fill="#fff"/>';
+  s += '<text x="15" y="18" style="font:800 4.2px Archivo,sans-serif;letter-spacing:.9px;fill:#141414">BLACK SQUARE PROBLEM</text>';
+  s += '<text x="15" y="33" style="font:800 13px Archivo,sans-serif;letter-spacing:1.4px;fill:#141414">' + w.name.toUpperCase() + '</text>';
+  s += '<text x="120" y="18" style="font:700 3px Archivo,sans-serif;letter-spacing:.3px;fill:#141414">NAME</text><path d="M130 18.3H195" stroke="#141414" stroke-width=".3"/>';
+  s += '<path d="M15 38H195" stroke="#141414" stroke-width=".6"/>';
+  s += '<text x="15" y="45" style="font:700 3.2px Archivo,sans-serif;letter-spacing:.5px;fill:#141414">1. EIGHT SKETCH IDEAS</text>';
+  const bw = 40, gap = (180 - 4 * bw) / 3;
+  for (let k = 0; k < 8; k++) {
+    const x = 15 + (k % 4) * (bw + gap), y = 48 + Math.floor(k / 4) * (bw + 7);
+    if (withEx) s += nested(x, y, bw, st.ideas[k].sq);
+    s += '<rect x="' + f1(x) + '" y="' + y + '" width="' + bw + '" height="' + bw + '" fill="none" stroke="#141414" stroke-width=".4"/>';
+    s += '<text x="' + f1(x + 1.2) + '" y="' + (y + bw + 3.6) + '" style="font:700 2.6px Archivo,sans-serif;fill:#666">' + (k + 1) + (withEx && k === st.chosen ? '  ✓ chosen' : '') + '</text>';
+  }
+  s += '<text x="15" y="149" style="font:700 3.2px Archivo,sans-serif;letter-spacing:.5px;fill:#141414">2. CHOSEN DESIGN (BLACK PAPER)</text>';
+  s += '<text x="15" y="154" style="font:400 2.8px Archivo,sans-serif;fill:#555">' + (withEx ? 'Example: ' + esc(firstSentence(st.ideas[st.chosen].note)) : 'Choose your most effective sketch and re-make it here with the four black squares.') + '</text>';
+  const B = 115, bx = (210 - B) / 2, by = 160;
+  if (withEx) s += nested(bx, by, B, st.ideas[st.chosen].sq);
+  s += '<rect x="' + bx + '" y="' + by + '" width="' + B + '" height="' + B + '" fill="none" stroke="#141414" stroke-width=".6"/>';
+  s += '<text x="15" y="289" style="font:400 2.8px Archivo,sans-serif;fill:#555">Only the four black squares · think about placement, scale, rotation, overlap and spacing' + (withEx ? ' · examples are starting points, not answers' : '') + '</text>';
+  return s;
+}
+const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/“|”/g, '"');
+// Long notes would overflow one line; keep the first sentence
+function firstSentence(t) { const m = t.match(/^.*?[.!?](\s|$)/); return m ? m[0].trim() : t; }
+function cutPage() {
+  let s = '<rect width="210" height="297" fill="#fff"/>';
+  s += '<text x="15" y="18" style="font:800 4.2px Archivo,sans-serif;letter-spacing:.9px;fill:#141414">BLACK SQUARE PROBLEM · SQUARE TEMPLATES</text>';
+  s += '<text x="15" y="25" style="font:400 3px Archivo,sans-serif;fill:#333">Sized for a ' + boxCm + ' cm final box. Cut out, trace onto black construction paper, and cut the black squares carefully with a craft knife and ruler.</text>';
+  s += '<path d="M15 29H195" stroke="#141414" stroke-width=".6"/>';
+  const mm = SZ.map(v => v * boxCm / 10);
+  let x = 15, y = 36, rowH = 0;
+  for (let set = 0; set < 4; set++) {
+    mm.forEach((w, i) => {
+      if (x + w > 195) { x = 15; y += rowH + 10; rowH = 0; }
+      if (y + w > 285) return;
+      s += '<rect x="' + f1(x) + '" y="' + f1(y) + '" width="' + f1(w) + '" height="' + f1(w) + '" fill="none" stroke="#141414" stroke-width=".35" stroke-dasharray="2 1.2"/>';
+      s += '<text x="' + f1(x + w / 2) + '" y="' + f1(y + w / 2 + 1.2) + '" text-anchor="middle" style="font:700 ' + Math.min(3.4, Math.max(1.8, w / 5)) + 'px Archivo,sans-serif;fill:#555">' + (i + 1) + ' · ' + (w / 10).toFixed(1) + ' cm</text>';
+      x += w + 6; rowH = Math.max(rowH, w);
+    });
+    x = 15; y += rowH + 12; rowH = 0;
+    if (y > 270) break;
+  }
+  s += '<text x="15" y="289" style="font:400 2.8px Archivo,sans-serif;fill:#555">Several sets are included so you can re-cut after trying ideas. Measure: square 1 should be ' + (mm[0] / 10).toFixed(1) + ' cm wide.</text>';
+  return s;
+}
+function drawPrint() {
+  const pages = PR === 'cut' ? [cutPage()] : WORDS.map(w => wordPage(w, PR === 'examples'));
+  $('preview').innerHTML = pages.map((p, k) => '<div class="pg-sheet"><svg viewBox="0 0 210 297" role="img" aria-label="Page ' + (k + 1) + '">' + p + '</svg></div>').join('');
+}
+pickButtons($('prMode'), [['worksheet', 'Blank worksheet (4 pages)'], ['examples', 'With examples (4 pages)'], ['cut', 'Cut-out squares (1 page)']], PR, k => { PR = k; drawPrint(); });
+$('prBtn').addEventListener('click', () => window.print());
+
+/* ================= Start ================= */
+
+buildSizeRows();
+drawSizes();
+buildStudies();
+WORDS.forEach(w => makeIdeas(w.key));
+renderAll();
+$('edges').addEventListener('change', renderAll);
+$('regenAll').addEventListener('click', () => { WORDS.forEach(w => { study[w.key].seed = newSeed(); study[w.key].chosen = 0; makeIdeas(w.key); }); renderAll(); drawPrint(); });
+drawPG();
+drawPrint();
+
+})();
+</script>
+</body>
+</html>

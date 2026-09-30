@@ -147,6 +147,16 @@ The page has:
 - **Example ideas**: an abstract example for each box that regenerates on demand. Optional notes show how each one works (axis, see-saw fulcrum, odd one out, 1-2-3 levels), with a check question per box.
 - **Printable A4 sheets**: six labelled rectangles for either sheet, with optional prompts and centre marks. A "with examples" version prints the current ideas as a reference.
 
+## Black Square Problem
+
+`black-square.html` supports the black square problem: express **Bold**, **Explosion**, **Doubt** and **Compression** using only four black squares of different sizes.
+
+- **The brief**: the assignment, plus criteria for choosing the best of eight sketches.
+- **Your squares**: set the four sizes (% of the frame) and the final box size in cm.
+- **Example ideas**: eight ideas per word that regenerate. Each is built from five approaches per word, including squares cropped by the frame into triangles and corners. Click an idea for a large view with an explanation and the principles it uses.
+- **Try it**: drag, rotate and restack the four squares in a frame, starting from scratch or from any example.
+- **Print**: a blank worksheet (one A4 page per word: eight sketch boxes and a large final box), the same pages filled with examples, and cut-out square templates at the chosen box size.
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
