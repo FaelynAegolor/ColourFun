@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>3D Letter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="lesson.css">
+<style>
+/* ---------- Brief ---------- */
+.brief { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: start; }
+.brief ul, .brief ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 15px; }
+.brief h3 { margin: 0 0 8px; font-size: 15px; }
+
+/* ---------- Tool ---------- */
+.tool { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; }
+.page-wrap { padding: 12px; }
+.page-wrap svg { display: block; width: 100%; max-width: 640px; margin: 0 auto; height: auto; aspect-ratio: 210 / 297; background: #fff; box-shadow: 0 1px 6px rgba(0, 0, 0, .18); touch-action: none; user-select: none; -webkit-user-select: none; }
+.page-wrap text { font-family: var(--font); }
+[data-drag] { cursor: grab; }
+.letters { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.letters .tbtn { min-height: 40px; padding: 4px; font-size: 16px; font-weight: 800; }
+.readout { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+.readout.warn { color: #D2402A; font-weight: 700; }
+.steps-bar { display: flex; flex-wrap: wrap; gap: 6px; }
+.steps-bar .tbtn { min-width: 44px; padding: 4px 10px; }
+.step-text { margin: 10px 0 0; font-size: 15px; line-height: 1.45; min-height: 4.4em; }
+.tool .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.tool .row .btn { flex: 1 1 auto; min-height: 40px; padding: 6px 10px; font-size: 13px; }
+.colour-row { display: flex; align-items: center; gap: 10px; font-size: 14px; margin-top: 4px; }
+.colour-row input[type="color"] { width: 44px; height: 36px; border: 1px solid var(--border); border-radius: 8px; background: none; padding: 2px; }
+
+/* ---------- Shading key + tips ---------- */
+.key { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.key div { display: grid; grid-template-columns: 46px 1fr; gap: 10px; align-items: center; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; font-size: 13px; }
+.key i { width: 46px; height: 34px; border: 1.5px solid #141414; display: block; border-radius: 3px; }
+.key b { display: block; font-size: 14px; }
+.tips { margin: 16px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+.tips li { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+.tips b { display: block; margin-bottom: 2px; }
+
+@media (max-width: 960px) {
+  .tool { grid-template-columns: 1fr; }
+}
+
+@page { size: A4 portrait; margin: 0; }
+@media print {
+  html, body { background: #fff; }
+  main > *:not(#tool), #tool > *:not(.tool), .tool > .panel { display: none !important; }
+  .wrap, #tool { padding: 0; margin: 0; max-width: none; }
+  .tool { display: block; }
+  .page-wrap { padding: 0; border: 0; box-shadow: none; background: #fff; }
+  .page-wrap svg { width: 210mm; height: 296mm; max-width: none; box-shadow: none; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Colour</button>
+        <ul>
+          <li><a href="colour-schemes.html">Colour schemes</a></li>
+          <li><a href="colour-interaction.html">Colour interaction</a></li>
+          <li><a href="paint-mixing.html">Paint mixing</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Form &amp; space</button>
+        <ul>
+          <li><a href="shape-shading.html">3D shape shading</a></li>
+          <li><a href="ellipses.html">Ellipses</a></li>
+          <li><a href="perspective.html">Perspective</a></li>
+          <li><a href="letter-3d.html" aria-current="page">3D letter</a></li>
+          <li><a href="atmospheric-perspective.html">Atmospheric perspective</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Reference tools</button>
+        <ul>
+          <li><a href="value-notan.html">Value &amp; notan</a></li>
+          <li><a href="grid-proportion.html">Grid &amp; proportion</a></li>
+          <li><a href="composition.html">Composition</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Practice</button>
+        <ul>
+          <li><a href="design-principles.html">Design principles</a></li>
+          <li><a href="black-square.html">Black square problem</a></li>
+          <li><a href="gesture-timer.html">Gesture timer</a></li>
+          <li><a href="mark-making.html">Mark-making &amp; media</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
+
+<!-- Pencil hatching, scaled for a drawing measured in centimetres -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="h1" width=".26" height=".26" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width=".26" height=".26" fill="#f4f2ec"/><line x1=".03" y1="0" x2=".03" y2=".26" stroke="#2a2a2e" stroke-opacity=".28" stroke-width=".025"/></pattern>
+    <pattern id="h2" width=".16" height=".16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width=".16" height=".16" fill="#d9d6cf"/><line x1=".03" y1="0" x2=".03" y2=".16" stroke="#2a2a2e" stroke-opacity=".45" stroke-width=".03"/></pattern>
+    <pattern id="h3" width=".15" height=".15" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width=".15" height=".15" fill="#aaa7a0"/><line x1=".03" y1="0" x2=".03" y2=".15" stroke="#2a2a2e" stroke-opacity=".55" stroke-width=".03"/><line x1="0" y1=".03" x2=".15" y2=".03" stroke="#2a2a2e" stroke-opacity=".45" stroke-width=".03"/></pattern>
+    <pattern id="h4" width=".12" height=".12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width=".12" height=".12" fill="#6f6d69"/><line x1=".03" y1="0" x2=".03" y2=".12" stroke="#1d1d1f" stroke-opacity=".6" stroke-width=".03"/><line x1="0" y1=".03" x2=".12" y2=".03" stroke="#1d1d1f" stroke-opacity=".5" stroke-width=".03"/></pattern>
+  </defs>
+</svg>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>3D letter in one-point perspective</h1>
+    <p>Turn a flat block letter into a solid 3D letter using one vanishing point, at least 2 cm thick, shaded with the light coming from the right. Pick a letter, move the vanishing point, follow the six steps, then print it at true size.</p>
+    <ul class="jump">
+      <li><a href="#brief">The brief</a></li>
+      <li><a href="#tool">Letter builder</a></li>
+      <li><a href="#shading">Shading</a></li>
+      <li><a href="#tips">Tips</a></li>
+    </ul>
+  </div>
+
+  <!-- ---------- Brief ---------- -->
+  <section id="brief" aria-labelledby="briefTitle">
+    <h2 class="sec-title" id="briefTitle">The brief</h2>
+    <div class="brief">
+      <div class="panel">
+        <h3>Submit</h3>
+        <ul>
+          <li>Your letter in <b>3D, one-point perspective</b>.</li>
+          <li>A <b>minimum thickness of 2 cm</b> (the depth you see on the top).</li>
+          <li><b>Shading</b>, with the <b>light source coming from the right</b>.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>The method (as in the class video)</h3>
+        <ol>
+          <li>Draw the letter flat with a ruler.</li>
+          <li>Place one vanishing point.</li>
+          <li>Join every corner to the vanishing point.</li>
+          <li>Cut off the thickness and draw the back edges parallel to the front.</li>
+          <li>Rub out the guide lines and hidden edges.</li>
+          <li>Shade each face for the light from the right.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Tool ---------- -->
+  <section id="tool" aria-labelledby="toolTitle">
+    <h2 class="sec-title" id="toolTitle">Letter builder</h2>
+    <p class="sec-lead">The drawing is an A4 page at true size. Drag the blue vanishing point or the letter itself to move them. Step through the method with the numbered buttons, then print exactly what you see.</p>
+    <div class="tool">
+      <div class="paper page-wrap">
+        <svg id="page" viewBox="0 0 21 29.7" tabindex="0" role="img" aria-label="A4 page with the 3D letter. Arrow keys move the vanishing point; Shift and arrow keys move the letter."></svg>
+      </div>
+      <div class="panel">
+        <h3 class="label" id="letLbl">Letter</h3>
+        <div class="letters" role="group" aria-labelledby="letLbl" id="letters"></div>
+
+        <h3 class="label" id="stepLbl">Step</h3>
+        <div class="steps-bar" role="group" aria-labelledby="stepLbl" id="steps"></div>
+        <p class="step-text" id="stepText" aria-live="polite"></p>
+        <div class="row">
+          <button type="button" class="btn ghost" id="prev">Back</button>
+          <button type="button" class="btn primary" id="next">Next</button>
+          <button type="button" class="btn ghost" id="play">Play all</button>
+        </div>
+
+        <h3 class="label">Size</h3>
+        <label class="range"><span>Letter height <output id="hOut"></output></span><input type="range" id="hIn" min="6" max="18" step="0.5"></label>
+        <label class="range"><span>Thickness (shortest edge) <output id="dOut"></output></span><input type="range" id="dIn" min="2" max="6" step="0.1"></label>
+        <p class="readout" id="depthNote" aria-live="polite"></p>
+
+        <h3 class="label" id="styleLbl">Shading style</h3>
+        <div class="bgrid" role="group" aria-labelledby="styleLbl" id="style"></div>
+        <div class="colour-row"><label for="front">Front face</label><input type="color" id="front" value="#ffffff"><button type="button" class="tbtn" id="frontWhite" style="min-height:36px">White</button></div>
+
+        <h3 class="label">Show</h3>
+        <label class="check"><input type="checkbox" id="oGuides"> Guide lines to the VP</label>
+        <label class="check"><input type="checkbox" id="oHidden"> Hidden back edges (dashed)</label>
+        <label class="check"><input type="checkbox" id="oLabels" checked> Labels (VP, light, thickness)</label>
+
+        <div class="row">
+          <button type="button" class="btn ghost" id="reset">Reset position</button>
+          <button type="button" class="btn primary" id="print">Print A4</button>
+        </div>
+        <p class="hint">Keyboard: click the page, then arrow keys move the vanishing point; Shift + arrows move the letter.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Shading ---------- -->
+  <section id="shading" aria-labelledby="shTitle">
+    <h2 class="sec-title" id="shTitle">Shading with the light from the right</h2>
+    <p class="sec-lead">Every face gets one tone, set by which way it faces. The light comes from the right (and a little from above), so the tones run from light on the right-facing faces to darkest on the left-facing ones. Keep each face an even tone and make neighbouring faces clearly different.</p>
+    <div class="key">
+      <div><i style="background:#f2f0ea"></i><span><b>Faces turned right</b>Lightest: they face the light.</span></div>
+      <div><i style="background:#c9c6bf"></i><span><b>Top faces</b>Light grey.</span></div>
+      <div><i style="background:#8f8c86"></i><span><b>Bottom faces</b>Mid to dark grey.</span></div>
+      <div><i style="background:#55534f"></i><span><b>Faces turned left</b>Darkest: they face away from the light.</span></div>
+      <div><i style="background:#fff"></i><span><b>Front face</b>Leave it white, or use one flat colour.</span></div>
+    </div>
+  </section>
+
+  <!-- ---------- Tips ---------- -->
+  <section id="tips" aria-labelledby="tipsTitle">
+    <h2 class="sec-title" id="tipsTitle">Tips</h2>
+    <ul class="tips">
+      <li><b>Everything goes to one point</b>Every edge that goes back into the page must line up with the vanishing point. Use a ruler every time.</li>
+      <li><b>Back edges are parallel</b>The back edges are parallel to the front edges: horizontals stay horizontal, verticals stay vertical, diagonals keep the same angle.</li>
+      <li><b>Where to put the VP</b>Above the letter shows the top faces (the thickness the brief asks for). Off to one side shows that side as well.</li>
+      <li><b>Check the 2 cm</b>Measure the shortest edge going back to the VP. Lines further from the VP are longer, so if the shortest is 2 cm, they all are.</li>
+      <li><b>Clean before you shade</b>Rub out the guide lines and the hidden back edges first, then go over the visible edges firmly.</li>
+      <li><b>Even tones</b>Shade each face with the side of the pencil in one direction, building up layers rather than pressing hard.</li>
+    </ul>
+  </section>
+</main>
+
+<script src="site.js"></script>
+<script>
+(function () {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const f2 = n => Math.round(n * 1000) / 1000;
+const INK = '#1d1d1f';
+const PAGE_W = 21, PAGE_H = 29.7;
+
+/* ================= Block letters ================= */
+// Each letter is drawn on a grid 10 units tall with straight edges, ready for a ruler.
+// The first ring is the outline; any further rings are holes.
+
+const G = {
+  A: [[[0,10],[0,2],[2,0],[6,0],[8,2],[8,10],[5.6,10],[5.6,6.6],[2.4,6.6],[2.4,10]], [[2.4,3],[3,2.4],[5,2.4],[5.6,3],[5.6,4.4],[2.4,4.4]]],
+  B: [[[0,0],[6.4,0],[8,1.6],[8,3.6],[7,5],[8,6.4],[8,8.4],[6.4,10],[0,10]], [[2.4,2.2],[5.2,2.2],[5.6,2.6],[5.6,3.6],[5.2,4],[2.4,4]], [[2.4,6],[5.2,6],[5.6,6.4],[5.6,7.4],[5.2,7.8],[2.4,7.8]]],
+  C: [[[2,0],[8,0],[8,2.4],[2.8,2.4],[2.4,2.8],[2.4,7.2],[2.8,7.6],[8,7.6],[8,10],[2,10],[0,8],[0,2]]],
+  D: [[[0,0],[5.6,0],[8,2.4],[8,7.6],[5.6,10],[0,10]], [[2.4,2.4],[4.8,2.4],[5.6,3.2],[5.6,6.8],[4.8,7.6],[2.4,7.6]]],
+  E: [[[0,0],[8,0],[8,2.4],[2.4,2.4],[2.4,3.8],[6.4,3.8],[6.4,6.2],[2.4,6.2],[2.4,7.6],[8,7.6],[8,10],[0,10]]],
+  F: [[[0,0],[8,0],[8,2.4],[2.4,2.4],[2.4,3.8],[6.4,3.8],[6.4,6.2],[2.4,6.2],[2.4,10],[0,10]]],
+  G: [[[2,0],[8,0],[8,2.4],[2.8,2.4],[2.4,2.8],[2.4,7.2],[2.8,7.6],[5.6,7.6],[5.6,6.4],[4.4,6.4],[4.4,4.2],[8,4.2],[8,8],[6,10],[2,10],[0,8],[0,2]]],
+  H: [[[0,0],[2.4,0],[2.4,3.8],[5.6,3.8],[5.6,0],[8,0],[8,10],[5.6,10],[5.6,6.2],[2.4,6.2],[2.4,10],[0,10]]],
+  I: [[[0,0],[6,0],[6,2.2],[4.2,2.2],[4.2,7.8],[6,7.8],[6,10],[0,10],[0,7.8],[1.8,7.8],[1.8,2.2],[0,2.2]]],
+  J: [[[3.6,0],[8,0],[8,8],[6,10],[2,10],[0,8],[0,6],[2.4,6],[2.4,7.2],[2.8,7.6],[5.2,7.6],[5.6,7.2],[5.6,2.4],[3.6,2.4]]],
+  K: [[[0,0],[2.4,0],[2.4,3.8],[5.4,0],[8.4,0],[4.4,5],[8.4,10],[5.4,10],[2.4,6.2],[2.4,10],[0,10]]],
+  L: [[[0,0],[2.4,0],[2.4,7.6],[8,7.6],[8,10],[0,10]]],
+  M: [[[0,10],[0,0],[2.6,0],[4.75,3.2],[6.9,0],[9.5,0],[9.5,10],[7.1,10],[7.1,4.4],[4.75,7.6],[2.4,4.4],[2.4,10]]],
+  N: [[[0,10],[0,0],[2.4,0],[5.6,5.4],[5.6,0],[8,0],[8,10],[5.6,10],[2.4,4.6],[2.4,10]]],
+  O: [[[2,0],[6,0],[8,2],[8,8],[6,10],[2,10],[0,8],[0,2]], [[2.8,2.4],[5.2,2.4],[5.6,2.8],[5.6,7.2],[5.2,7.6],[2.8,7.6],[2.4,7.2],[2.4,2.8]]],
+  P: [[[0,0],[6,0],[8,2],[8,4.6],[6,6.6],[2.4,6.6],[2.4,10],[0,10]], [[2.4,2.2],[5.2,2.2],[5.6,2.6],[5.6,4],[5.2,4.4],[2.4,4.4]]],
+  Q: [[[2,0],[6,0],[8,2],[8,7.6],[7.2,8.4],[8.6,9.8],[7.4,11],[6,9.6],[5.6,10],[2,10],[0,8],[0,2]], [[2.8,2.4],[5.2,2.4],[5.6,2.8],[5.6,7.2],[5.2,7.6],[2.8,7.6],[2.4,7.2],[2.4,2.8]]],
+  R: [[[0,0],[6,0],[8,2],[8,4.6],[6.6,6],[8.4,10],[5.8,10],[4.3,6.6],[2.4,6.6],[2.4,10],[0,10]], [[2.4,2.2],[5.2,2.2],[5.6,2.6],[5.6,4],[5.2,4.4],[2.4,4.4]]],
+  S: [[[2,0],[8,0],[8,2.4],[2.8,2.4],[2.4,2.8],[2.4,3.4],[2.8,3.8],[6,3.8],[8,5.8],[8,8],[6,10],[0,10],[0,7.6],[5.2,7.6],[5.6,7.2],[5.6,6.6],[5.2,6.2],[2,6.2],[0,4.2],[0,2]]],
+  T: [[[0,0],[8,0],[8,2.4],[5.2,2.4],[5.2,10],[2.8,10],[2.8,2.4],[0,2.4]]],
+  U: [[[0,0],[2.4,0],[2.4,7.2],[2.8,7.6],[5.2,7.6],[5.6,7.2],[5.6,0],[8,0],[8,8],[6,10],[2,10],[0,8]]],
+  V: [[[0,0],[2.5,0],[4,6.4],[5.5,0],[8,0],[5.3,10],[2.7,10]]],
+  W: [[[0,0],[2.4,0],[3,5.8],[4.1,3],[5.9,3],[7,5.8],[7.6,0],[10,0],[8.6,10],[6.4,10],[5,6.4],[3.6,10],[1.4,10]]],
+  X: [[[0,0],[2.7,0],[4,2.6],[5.3,0],[8,0],[5.4,5],[8,10],[5.3,10],[4,7.4],[2.7,10],[0,10],[2.6,5]]],
+  Y: [[[0,0],[2.7,0],[4,3],[5.3,0],[8,0],[5.2,5.6],[5.2,10],[2.8,10],[2.8,5.6]]],
+  Z: [[[0,0],[8,0],[8,2.4],[3.2,7.6],[8,7.6],[8,10],[0,10],[0,7.6],[4.8,2.4],[0,2.4]]],
+};
+
+const area = ring => ring.reduce((s, p, i) => { const q = ring[(i + 1) % ring.length]; return s + p[0] * q[1] - q[0] * p[1]; }, 0) / 2;
+// Outline rings run one way and holes the other, so (dy, -dx) is always the outward normal of the solid
+function orient(rings) {
+  return rings.map((r, k) => { const a = area(r); return (k === 0 ? a < 0 : a > 0) ? r.slice().reverse() : r; });
+}
+const glyphWidth = rings => Math.max(...rings[0].map(p => p[0]));
+
+/* ================= State ================= */
+
+const S = { letter: 'Z', h: 10, depth: 2.5, x: null, y: 10, vp: { x: 16.5, y: 4.2 }, stage: 6, style: 'grey', front: '#ffffff', guides: false, hidden: false, labels: true };
+try { const saved = JSON.parse(localStorage.getItem('letter3d') || '{}'); if (G[saved.letter]) S.letter = saved.letter; } catch (e) { /* storage unavailable */ }
+function centreLetter() {
+  const w = glyphWidth(G[S.letter]) * S.h / 10;
+  S.x = (PAGE_W - w) / 2;
+  // Well below the VP, so the depth stays fairly even from top to bottom
+  S.y = Math.max(S.vp.y + 9, 12);
+}
+centreLetter();
+
+/* ================= Geometry ================= */
+
+function build() {
+  const sc = S.h / 10;
+  const rings = orient(G[S.letter]).map(r => r.map(([u, v]) => ({ x: S.x + u * sc, y: S.y + v * sc })));
+  const V = S.vp;
+  // Side faces: one per edge; visible when the vanishing point is on the outward side of that edge
+  const faces = [];
+  rings.forEach((ring, ri) => ring.forEach((a, i) => {
+    const b = ring[(i + 1) % ring.length];
+    const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1;
+    const n = { x: dy / len, y: -dx / len };
+    const vis = (V.x - a.x) * n.x + (V.y - a.y) * n.y > 1e-6;
+    faces.push({ a, b, n, vis, ri, i });
+  }));
+  // Thickness: scale so the shortest visible receding edge is exactly the chosen depth
+  const recede = new Set();
+  faces.forEach(f => { if (f.vis) { recede.add(f.a); recede.add(f.b); } });
+  const pts = recede.size ? [...recede] : rings.flat();
+  const dists = pts.map(p => Math.hypot(V.x - p.x, V.y - p.y));
+  const k = Math.min(.95, S.depth / Math.max(.01, Math.min(...dists)));
+  const back = p => ({ x: p.x + (V.x - p.x) * k, y: p.y + (V.y - p.y) * k });
+  faces.forEach(f => { f.A = back(f.a); f.B = back(f.b); f.d = Math.hypot(V.x - (f.a.x + f.b.x) / 2, V.y - (f.a.y + f.b.y) / 2); });
+  const lens = pts.map(p => Math.hypot(V.x - p.x, V.y - p.y) * k);
+  let shortest = pts[0], sl = Infinity;
+  pts.forEach((p, j) => { if (lens[j] < sl) { sl = lens[j]; shortest = p; } });
+  return { rings, faces, k, back, minLen: Math.min(...lens), maxLen: Math.max(...lens), shortest };
+}
+
+// Light from the right and slightly above (screen y points down)
+const LIGHT = (() => { const x = 1, y = -.35, l = Math.hypot(x, y); return { x: x / l, y: y / l }; })();
+const TONES = { grey: ['#f2f0ea', '#c9c6bf', '#8f8c86', '#55534f'], pencil: ['url(#h1)', 'url(#h2)', 'url(#h3)', 'url(#h4)'] };
+function toneOf(n) {
+  const v = n.x * LIGHT.x + n.y * LIGHT.y;
+  return v > .6 ? 0 : v > 0 ? 1 : v > -.6 ? 2 : 3;
+}
+
+/* ================= Drawing ================= */
+
+const pt = p => f2(p.x) + ' ' + f2(p.y);
+const STEP_TEXT = [
+  'Draw the letter flat with a ruler. This is the front face: block capitals with straight edges are easiest to make 3D.',
+  'Draw a horizon line and put one vanishing point (VP) on it. Above the letter shows its top faces, which is the thickness the brief asks for.',
+  'Lightly join every corner of the letter to the vanishing point with a ruler. These are guide lines only.',
+  'Choose the thickness: measure at least 2 cm along the shortest guide line, then draw the back edges parallel to the front edges, stopping on the guide lines.',
+  'Rub out the guide lines and any back edges hidden behind the letter. Go over the visible edges firmly.',
+  'Shade with the light from the right: faces turned right stay lightest, top faces light grey, bottom faces darker, faces turned left darkest. Keep the front face white or one flat colour.',
+];
+
+function draw() {
+  const g = build(), st = S.stage;
+  let s = '<rect width="' + PAGE_W + '" height="' + PAGE_H + '" fill="#fff"/>';
+  // Page title for printing
+  s += '<text x="1.5" y="1.9" style="font:800 .42px Archivo,sans-serif;letter-spacing:.05px;fill:#141414">3D LETTER · ONE-POINT PERSPECTIVE</text>';
+  s += '<text x="12.9" y="1.9" style="font:700 .38px Archivo,sans-serif;fill:#141414">NAME</text><path d="M14.1 1.95H19.5" stroke="#141414" stroke-width=".03"/>';
+
+  if (st >= 2) {
+    s += '<path d="M0 ' + f2(S.vp.y) + 'H' + PAGE_W + '" stroke="#9a978f" stroke-width=".035"/>';
+    if (S.labels) s += '<text x="1.5" y="' + f2(S.vp.y - .25) + '" style="font:700 .34px Archivo,sans-serif;fill:#77746d;letter-spacing:.03px">HORIZON LINE</text>';
+  }
+  // Guide lines: every corner to the VP
+  if (st === 3 || st === 4 || (st >= 5 && S.guides)) {
+    let d = '';
+    g.rings.flat().forEach(p => { d += 'M' + pt(p) + 'L' + pt(S.vp); });
+    s += '<path d="' + d + '" stroke="#1F5FBF" stroke-opacity=".5" stroke-width=".03" fill="none"/>';
+  }
+  // Side faces, furthest from the VP first
+  if (st >= 4) {
+    const vis = g.faces.filter(f => f.vis).sort((a, b) => b.d - a.d);
+    vis.forEach(f => {
+      const fill = st >= 6 && S.style !== 'outline' ? TONES[S.style][toneOf(f.n)] : '#fff';
+      s += '<path d="M' + pt(f.a) + 'L' + pt(f.b) + 'L' + pt(f.B) + 'L' + pt(f.A) + 'Z" fill="' + fill + '" stroke="' + INK + '" stroke-width=".045" stroke-linejoin="round"/>';
+    });
+    if (st === 4 || (st >= 5 && S.hidden)) {
+      // Back outline, dashed where it is hidden behind the letter
+      let d = '';
+      g.faces.forEach(f => { d += 'M' + pt(f.A) + 'L' + pt(f.B); });
+      s += '<path d="' + d + '" stroke="#8b8882" stroke-width=".03" stroke-dasharray=".18 .12" fill="none"/>';
+    }
+  }
+  // Front face
+  const frontD = g.rings.map(r => 'M' + r.map(pt).join('L') + 'Z').join('');
+  s += '<path data-drag="letter" d="' + frontD + '" fill-rule="evenodd" fill="' + (st >= 6 ? S.front : '#fff') + '" stroke="' + INK + '" stroke-width=".06" stroke-linejoin="round"/>';
+  // Labels
+  if (S.labels && st >= 4) {
+    const p = g.shortest, b = g.back(p);
+    const mx = (p.x + b.x) / 2, my = (p.y + b.y) / 2;
+    s += '<path d="M' + pt(p) + 'L' + pt(b) + '" stroke="#D2402A" stroke-width=".07" stroke-linecap="round"/>';
+    s += '<text x="' + f2(mx + .35) + '" y="' + f2(my - .2) + '" style="font:700 .42px Archivo,sans-serif;fill:#D2402A">' + g.minLen.toFixed(1) + ' cm</text>';
+  }
+  if (S.labels && st >= 6) {
+    // Light comes from the right
+    const lx = PAGE_W - 1.2, ly = S.y + S.h * .35;
+    s += '<g stroke="#141414" stroke-width=".05" stroke-linecap="round"><circle cx="' + lx + '" cy="' + f2(ly) + '" r=".45" fill="#f2b632"/>';
+    for (let a = 0; a < 8; a++) { const t = a * Math.PI / 4; s += '<path d="M' + f2(lx + Math.cos(t) * .65) + ' ' + f2(ly + Math.sin(t) * .65) + 'L' + f2(lx + Math.cos(t) * .9) + ' ' + f2(ly + Math.sin(t) * .9) + '"/>'; }
+    s += '<path d="M' + f2(lx - 1.2) + ' ' + f2(ly) + 'H' + f2(lx - 2.6) + 'M' + f2(lx - 2.6) + ' ' + f2(ly) + 'l.3 -.22M' + f2(lx - 2.6) + ' ' + f2(ly) + 'l.3 .22" fill="none"/></g>';
+    s += '<text x="' + lx + '" y="' + f2(ly + 1.5) + '" text-anchor="middle" style="font:700 .36px Archivo,sans-serif;fill:#141414">LIGHT</text>';
+  }
+  // Vanishing point (drawn last so it can always be grabbed)
+  if (st >= 2) {
+    s += '<g data-drag="vp"><circle cx="' + f2(S.vp.x) + '" cy="' + f2(S.vp.y) + '" r=".7" fill="transparent"/><circle cx="' + f2(S.vp.x) + '" cy="' + f2(S.vp.y) + '" r=".2" fill="#1F5FBF" stroke="#fff" stroke-width=".06"/>' +
+      (S.labels ? '<text x="' + f2(S.vp.x + .35) + '" y="' + f2(S.vp.y - .3) + '" style="font:800 .42px Archivo,sans-serif;fill:#1F5FBF">VP</text>' : '') + '</g>';
+  }
+  $('page').innerHTML = s;
+
+  // Readouts
+  $('hOut').textContent = S.h + ' cm';
+  $('dOut').textContent = S.depth.toFixed(1) + ' cm';
+  const note = $('depthNote');
+  note.textContent = 'Edges going back to the VP run from ' + g.minLen.toFixed(1) + ' cm (shortest, marked in red) to ' + g.maxLen.toFixed(1) + ' cm.';
+  note.classList.toggle('warn', g.minLen < 1.995);
+  $('stepText').textContent = 'Step ' + st + ' of 6: ' + STEP_TEXT[st - 1];
+  $('steps').querySelectorAll('.tbtn').forEach((b, i) => b.setAttribute('aria-pressed', String(i + 1 === st)));
+  $('prev').disabled = st === 1; $('next').disabled = st === 6;
+  try { localStorage.setItem('letter3d', JSON.stringify({ letter: S.letter })); } catch (e) { /* ignore */ }
+}
+
+/* ================= Controls ================= */
+
+function pickButtons(el, items, current, onPick) {
+  el.innerHTML = '';
+  items.forEach(([key, label]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tbtn'; b.textContent = label; b.dataset.k = key;
+    b.setAttribute('aria-pressed', String(key === current));
+    b.addEventListener('click', () => { el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b))); onPick(key); });
+    el.appendChild(b);
+  });
+}
+pickButtons($('letters'), Object.keys(G).map(k => [k, k]), S.letter, k => { S.letter = k; centreLetter(); draw(); });
+pickButtons($('steps'), [1, 2, 3, 4, 5, 6].map(n => [n, String(n)]), S.stage, k => { stopPlay(); S.stage = k; draw(); });
+pickButtons($('style'), [['grey', 'Grey tones'], ['pencil', 'Pencil'], ['outline', 'Outline']], S.style, k => { S.style = k; draw(); });
+
+$('hIn').value = S.h; $('dIn').value = S.depth;
+$('hIn').addEventListener('input', () => { const cx = S.x + glyphWidth(G[S.letter]) * S.h / 20; S.h = +$('hIn').value; S.x = cx - glyphWidth(G[S.letter]) * S.h / 20; draw(); });
+$('dIn').addEventListener('input', () => { S.depth = +$('dIn').value; draw(); });
+$('front').addEventListener('input', () => { S.front = $('front').value; draw(); });
+$('frontWhite').addEventListener('click', () => { S.front = '#ffffff'; $('front').value = '#ffffff'; draw(); });
+[['oGuides', 'guides'], ['oHidden', 'hidden'], ['oLabels', 'labels']].forEach(([id, key]) => {
+  $(id).checked = S[key];
+  $(id).addEventListener('change', () => { S[key] = $(id).checked; draw(); });
+});
+$('reset').addEventListener('click', () => { S.vp = { x: 16.5, y: 4.2 }; centreLetter(); draw(); });
+$('print').addEventListener('click', () => window.print());
+
+let timer = 0;
+function stopPlay() { clearTimeout(timer); timer = 0; $('play').textContent = 'Play all'; }
+$('prev').addEventListener('click', () => { stopPlay(); if (S.stage > 1) { S.stage--; draw(); } });
+$('next').addEventListener('click', () => { stopPlay(); if (S.stage < 6) { S.stage++; draw(); } });
+$('play').addEventListener('click', () => {
+  if (timer) { stopPlay(); return; }
+  S.stage = 1; draw(); $('play').textContent = 'Pause';
+  const step = () => { if (S.stage >= 6) { stopPlay(); return; } S.stage++; draw(); timer = setTimeout(step, 2600); };
+  timer = setTimeout(step, 2600);
+});
+
+// Dragging the vanishing point or the letter
+const page = $('page');
+let drag = null;
+function svgPt(e) {
+  const p = page.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+  const r = p.matrixTransform(page.getScreenCTM().inverse());
+  return { x: r.x, y: r.y };
+}
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+page.addEventListener('pointerdown', e => {
+  const t = e.target.closest('[data-drag]');
+  if (!t) return;
+  drag = { kind: t.dataset.drag, last: svgPt(e) };
+  page.setPointerCapture(e.pointerId);
+  e.preventDefault();
+});
+page.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const m = svgPt(e), dx = m.x - drag.last.x, dy = m.y - drag.last.y;
+  if (drag.kind === 'vp') { S.vp.x = clamp(S.vp.x + dx, .3, PAGE_W - .3); S.vp.y = clamp(S.vp.y + dy, .3, PAGE_H - .3); }
+  else { S.x = clamp(S.x + dx, -5, PAGE_W); S.y = clamp(S.y + dy, -5, PAGE_H); }
+  drag.last = m;
+  draw();
+});
+const endDrag = () => { drag = null; };
+page.addEventListener('pointerup', endDrag);
+page.addEventListener('pointercancel', endDrag);
+page.addEventListener('keydown', e => {
+  const d = { ArrowLeft: [-.25, 0], ArrowRight: [.25, 0], ArrowUp: [0, -.25], ArrowDown: [0, .25] }[e.key];
+  if (!d) return;
+  e.preventDefault();
+  if (e.shiftKey) { S.x += d[0]; S.y += d[1]; } else { S.vp.x = clamp(S.vp.x + d[0], .3, PAGE_W - .3); S.vp.y = clamp(S.vp.y + d[1], .3, PAGE_H - .3); }
+  draw();
+});
+
+draw();
+
+})();
+</script>
+</body>
+</html>

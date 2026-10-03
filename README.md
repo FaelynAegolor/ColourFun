@@ -157,6 +157,15 @@ The page has:
 - **Try it**: drag, rotate and restack the four squares in a frame, starting from scratch or from any example.
 - **Print**: a blank worksheet (one A4 page per word: eight sketch boxes and a large final box), the same pages filled with examples, and cut-out square templates at the chosen box size.
 
+## 3D Letter
+
+`letter-3d.html` turns a block letter (A–Z, Z by default) into a solid 3D letter in one-point perspective, as in the class video's method.
+
+- **Drawing**: an A4 page at true size. Drag the vanishing point or the letter, and set the letter height and the thickness. Thickness is the shortest receding edge, minimum 2 cm, marked in red.
+- **Six steps**: flat letter, vanishing point, guide lines, thickness and back edges, clean up, shading.
+- **Shading**: light from the right, as grey tones, pencil hatching or outline. Right-facing faces are lightest, top light grey, bottom darker, left-facing darkest. The front face can be white or a colour.
+- **Options**: guide lines, dashed hidden back edges and labels can be toggled. Printing gives the page exactly as shown.
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
