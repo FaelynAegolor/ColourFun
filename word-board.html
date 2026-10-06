@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Word Image Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="lesson.css">
+<style>
+/* ---------- Brief ---------- */
+.brief { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: start; }
+.brief ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 15px; }
+.brief h3 { margin: 0 0 8px; font-size: 15px; }
+.word-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.word-row input { font: inherit; font-size: 22px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; min-height: 48px; width: 220px; padding: 4px 12px; border: 2px solid var(--border); border-radius: 10px; background: var(--panel); color: var(--ink); }
+
+/* ---------- Vocabulary ---------- */
+.vocab { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.vocab dl { margin: 0; display: grid; gap: 8px; }
+.vocab dt { font-weight: 800; font-size: 14px; }
+.vocab dd { margin: 0 0 4px; font-size: 13px; color: var(--muted); }
+
+/* ---------- Board ---------- */
+.board-tools { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 14px; }
+.board { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.slot { display: flex; flex-direction: column; gap: 6px; }
+.slot-box {
+  position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 4px;
+  background: #fbfaf6; border: 2px dashed #bdb9b0; cursor: pointer; padding: 0; font: inherit; color: #555;
+}
+.slot-box:hover, .slot-box.over { border-color: var(--accent); }
+.slot-box.filled { border: 1px solid #141414; border-style: solid; }
+.slot-box img { position: absolute; max-width: none; pointer-events: none; user-select: none; }
+.slot-box .num { position: absolute; left: 4px; top: 3px; z-index: 2; font-size: 11px; font-weight: 800; background: rgba(255, 255, 255, .85); color: #141414; border-radius: 4px; padding: 0 5px; }
+.slot-box .empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px; text-align: center; font-size: 12px; }
+.slot-box .empty b { font-size: 22px; line-height: 1; color: #8b8882; }
+.slot-box .plan { font-size: 11px; color: #1F5FBF; font-weight: 700; }
+.slot-tags { font-size: 12px; font-weight: 700; min-height: 1.3em; }
+.slot-tags.missing { color: #D2402A; font-weight: 600; }
+
+.checks { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 16px; margin-top: 20px; align-items: start; }
+.checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+.checklist li { display: flex; gap: 8px; align-items: flex-start; }
+.checklist li::before { content: "✗"; color: #D2402A; font-weight: 800; width: 16px; flex: none; }
+.checklist li.ok::before { content: "✓"; color: #2E8B57; }
+.counts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.counts h4 { margin: 0 0 6px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.bar { display: grid; grid-template-columns: 110px 1fr 22px; gap: 6px; align-items: center; font-size: 13px; margin-bottom: 3px; }
+.bar i { display: block; height: 10px; background: var(--bg); border-radius: 99px; overflow: hidden; }
+.bar i span { display: block; height: 100%; background: var(--accent); }
+.bar.zero { color: var(--muted); }
+
+/* ---------- Ideas ---------- */
+.idea-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.ideas { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+.idea { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.idea b { font-size: 15px; }
+.idea .tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--bg); border: 1px solid var(--border); margin-right: 4px; }
+.idea .kind { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.idea p { margin: 0; color: var(--muted); font-size: 13px; }
+.idea .acts { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+.idea .acts a, .idea .acts button { min-height: 36px; padding: 0 12px; display: inline-flex; align-items: center; border-radius: 8px; border: 1.5px solid var(--border); background: var(--panel); color: var(--ink); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; }
+.idea .acts a:hover, .idea .acts button:hover { border-color: var(--ink); }
+
+/* ---------- Finder ---------- */
+.finder-bar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 10px; }
+.finder-bar input[type="search"] { flex: 1 1 260px; min-height: 44px; font: inherit; font-size: 16px; padding: 6px 12px; border: 2px solid var(--border); border-radius: 10px; background: var(--panel); color: var(--ink); }
+.finder-bar select { min-height: 44px; font: inherit; font-size: 14px; padding: 6px 10px; border: 2px solid var(--border); border-radius: 10px; background: var(--panel); color: var(--ink); }
+.finder-bar .bgrid { display: flex; gap: 6px; }
+.results { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-top: 10px; }
+.res { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
+.res .thumb { aspect-ratio: 1; background: #eee; overflow: hidden; }
+.res .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.res .meta { padding: 6px 8px; font-size: 11px; color: var(--muted); line-height: 1.3; flex: 1; overflow: hidden; }
+.res .meta b { display: block; color: var(--ink); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.res .acts { display: flex; gap: 4px; padding: 0 8px 8px; }
+.res .acts button, .res .acts a { flex: 1; min-height: 34px; display: inline-flex; align-items: center; justify-content: center; border-radius: 7px; border: 1.5px solid var(--border); background: var(--panel); color: var(--ink); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; }
+.res .acts button { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.res .acts button:disabled { opacity: .6; }
+.finder-status { font-size: 14px; color: var(--muted); margin: 6px 0 0; min-height: 1.4em; }
+.frow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+/* ---------- Editor dialog ---------- */
+dialog.editor { border: 0; border-radius: 16px; padding: 0; width: min(880px, calc(100vw - 24px)); max-height: calc(100vh - 24px); background: var(--panel); color: var(--ink); box-shadow: 0 20px 60px rgba(0, 0, 0, .35); }
+dialog.editor::backdrop { background: rgba(0, 0, 0, .5); }
+.ed { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; padding: 18px; }
+.ed h3 { margin: 0 0 10px; font-size: 18px; }
+.crop { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; background: #fbfaf6; border: 1px solid #141414; cursor: grab; touch-action: none; }
+.crop:active { cursor: grabbing; }
+.crop img { position: absolute; max-width: none; pointer-events: none; user-select: none; }
+.crop .drop { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; text-align: center; padding: 20px; color: #555; font-size: 14px; }
+.ed .fields { display: grid; gap: 10px; align-content: start; }
+.ed label.f { display: grid; gap: 4px; font-size: 13px; font-weight: 700; }
+.ed select, .ed input[type="text"], .ed input[type="url"], .ed textarea { font: inherit; font-size: 14px; font-weight: 400; min-height: 40px; padding: 6px 10px; border: 2px solid var(--border); border-radius: 8px; background: var(--panel); color: var(--ink); width: 100%; }
+.ed textarea { min-height: 64px; resize: vertical; }
+.ed .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ed .row { display: flex; gap: 8px; flex-wrap: wrap; }
+.ed .row .btn { min-height: 40px; padding: 6px 12px; font-size: 13px; }
+.ed .hintline { font-size: 12px; color: var(--muted); margin: 0; }
+.ed .foot { display: flex; gap: 8px; justify-content: flex-end; padding: 0 18px 18px; flex-wrap: wrap; }
+
+/* ---------- Print ---------- */
+.print-ctl { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 14px; }
+.print-ctl .bgrid { display: flex; gap: 6px; flex-wrap: wrap; }
+.print-ctl .spacer { margin-left: auto; }
+#printArea { display: none; }
+
+@media (max-width: 960px) {
+  .board { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .checks, .vocab { grid-template-columns: 1fr; }
+  .ed { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .counts { grid-template-columns: 1fr; }
+}
+
+/* Printed pages: true-size 6 cm squares */
+@page { size: A4 portrait; margin: 0; }
+@media print {
+  html, body { background: #fff; }
+  body > *:not(#printArea) { display: none !important; }
+  #printArea { display: block; }
+  .pp { position: relative; width: 210mm; height: 296mm; overflow: hidden; break-after: page; page-break-after: always; font-family: Archivo, Helvetica, Arial, sans-serif; color: #141414; }
+  .pp:last-child { break-after: auto; page-break-after: auto; }
+  .pp h2 { position: absolute; left: 15mm; top: 8mm; margin: 0; font-size: 11pt; letter-spacing: .12em; }
+  .pp .sub { position: absolute; left: 15mm; top: 14mm; margin: 0; font-size: 8pt; color: #444; }
+  .sq { position: absolute; width: 60mm; height: 60mm; overflow: hidden; outline: .25mm solid #555; }
+  .sq img { position: absolute; max-width: none; }
+  .sq.blank { background: #f4f2ec; }
+  .cap { position: absolute; width: 60mm; font-size: 7.5pt; line-height: 1.25; }
+  .cap b { font-size: 8pt; }
+  .pp table { position: absolute; left: 12mm; top: 22mm; width: 186mm; border-collapse: collapse; font-size: 8pt; }
+  .pp th, .pp td { border: .2mm solid #999; padding: 1.4mm 1.6mm; text-align: left; vertical-align: top; }
+  .pp th { background: #eee; font-size: 7.5pt; letter-spacing: .04em; text-transform: uppercase; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Colour</button>
+        <ul>
+          <li><a href="colour-schemes.html">Colour schemes</a></li>
+          <li><a href="colour-interaction.html">Colour interaction</a></li>
+          <li><a href="paint-mixing.html">Paint mixing</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Form &amp; space</button>
+        <ul>
+          <li><a href="shape-shading.html">3D shape shading</a></li>
+          <li><a href="ellipses.html">Ellipses</a></li>
+          <li><a href="perspective.html">Perspective</a></li>
+          <li><a href="letter-3d.html">3D letter</a></li>
+          <li><a href="atmospheric-perspective.html">Atmospheric perspective</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Reference tools</button>
+        <ul>
+          <li><a href="value-notan.html">Value &amp; notan</a></li>
+          <li><a href="grid-proportion.html">Grid &amp; proportion</a></li>
+          <li><a href="composition.html">Composition</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Practice</button>
+        <ul>
+          <li><a href="design-principles.html">Design principles</a></li>
+          <li><a href="black-square.html">Black square problem</a></li>
+          <li><a href="word-board.html" aria-current="page">Word image board</a></li>
+          <li><a href="gesture-timer.html">Gesture timer</a></li>
+          <li><a href="mark-making.html">Mark-making &amp; media</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>Word image board</h1>
+    <p>Collect 18 pictures that show your word literally or conceptually, crop each to a 6 cm square, and label each one with one design element and one design principle. Your board is saved in this browser, so you can come back to it.</p>
+    <ul class="jump">
+      <li><a href="#brief">The brief</a></li>
+      <li><a href="#board">Your 18 squares</a></li>
+      <li><a href="#finder">Find pictures</a></li>
+      <li><a href="#ideas">Picture ideas</a></li>
+      <li><a href="#vocab">Elements &amp; principles</a></li>
+      <li><a href="#printSec">Print</a></li>
+    </ul>
+  </div>
+
+  <!-- ---------- Brief ---------- -->
+  <section id="brief" aria-labelledby="briefTitle">
+    <h2 class="sec-title" id="briefTitle">The brief</h2>
+    <div class="brief">
+      <div class="panel">
+        <h3>Your word</h3>
+        <div class="word-row"><label class="sr-only" for="word">Your word</label><input id="word" type="text" value="Chaos" maxlength="24" autocomplete="off"></div>
+        <p class="hint">Type your own word if it isn't chaos. Picture ideas are written for chaos; other words get general search ideas.</p>
+      </div>
+      <div class="panel">
+        <h3>Task</h3>
+        <ul>
+          <li>Find <b>18 pictures</b> that represent the word <b>literally or conceptually</b>.</li>
+          <li>Cut each into a <b>6 cm × 6 cm square</b> and glue them on the sheet provided.</li>
+          <li>Each picture shows <b>1 design element</b> and <b>1 design principle</b>, for example <b>Colour / Emphasis</b>.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Literal or conceptual?</h3>
+        <ul>
+          <li><b>Literal</b>: the picture shows the thing itself (a storm, a crowd, a messy room).</li>
+          <li><b>Conceptual</b>: the picture shows the idea or feeling, or something that behaves like it (TV static, a fractal, a toppled domino run).</li>
+          <li>A mix of both makes a stronger board.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Board ---------- -->
+  <section id="board" aria-labelledby="boardTitle">
+    <h2 class="sec-title" id="boardTitle">Your 18 squares</h2>
+    <p class="sec-lead">Click a square to add a picture (choose a file, paste one, or drag one in from another browser tab), crop it, and pick its element and principle. You can also drop a picture straight onto a square.</p>
+    <div class="board-tools">
+      <button type="button" class="btn ghost" id="planBtn">Suggest a pair for every empty square</button>
+      <button type="button" class="btn ghost" id="clearPlan">Clear suggestions</button>
+      <button type="button" class="btn ghost" id="clearAll">Clear the whole board</button>
+    </div>
+    <div class="board" id="boardGrid"></div>
+    <div class="checks">
+      <div class="panel">
+        <h3 class="label">Checklist</h3>
+        <ul class="checklist" id="checklist"></ul>
+      </div>
+      <div class="panel">
+        <div class="counts">
+          <div><h4>Elements used</h4><div id="elCounts"></div></div>
+          <div><h4>Principles used</h4><div id="prCounts"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Finder ---------- -->
+  <section id="finder" aria-labelledby="finderTitle">
+    <h2 class="sec-title" id="finderTitle">Find pictures</h2>
+    <p class="sec-lead">Search two free image libraries: Openverse (Creative Commons photos from many sites) and Wikimedia Commons. Press <em>Use</em> to put a picture straight into a square; the title, photographer and licence are filled in for you. Then click the square to crop it and label it.</p>
+    <form class="finder-bar" id="finderForm" role="search">
+      <label class="sr-only" for="q">Search for pictures</label>
+      <input type="search" id="q" placeholder="e.g. tangled wires" autocomplete="off">
+      <div class="bgrid" role="group" aria-label="Library" id="libBtns"></div>
+      <label class="sr-only" for="target">Put pictures in</label>
+      <select id="target"></select>
+      <button type="submit" class="btn primary">Search</button>
+    </form>
+    <p class="finder-status" id="finderStatus" aria-live="polite">Pick an idea below and press “Find pictures”, or type your own search.</p>
+    <div class="results" id="results"></div>
+    <div class="frow"><button type="button" class="btn ghost" id="more" hidden>More results</button>
+      <a class="btn ghost" id="googleLink" target="_blank" rel="noopener" href="#" style="display:inline-flex;align-items:center;text-decoration:none">Search Google Images instead ↗</a></div>
+  </section>
+
+  <!-- ---------- Ideas ---------- -->
+  <section id="ideas" aria-labelledby="ideasTitle">
+    <h2 class="sec-title" id="ideasTitle">Picture ideas</h2>
+    <p class="sec-lead" id="ideasLead"></p>
+    <div class="idea-tools">
+      <div class="bgrid" role="group" aria-label="Filter ideas" id="ideaFilter"></div>
+    </div>
+    <div class="ideas" id="ideaList"></div>
+  </section>
+
+  <!-- ---------- Vocabulary ---------- -->
+  <section id="vocab" aria-labelledby="vocabTitle">
+    <h2 class="sec-title" id="vocabTitle">Elements and principles</h2>
+    <p class="sec-lead">Elements are the ingredients you see in a picture. Principles are how they are arranged. Pick the one element and one principle that are strongest in each photo, and be ready to point to them.</p>
+    <div class="vocab">
+      <div class="panel"><h3 class="label">Design elements</h3><dl id="elList"></dl></div>
+      <div class="panel"><h3 class="label">Design principles</h3><dl id="prList"></dl></div>
+    </div>
+  </section>
+
+  <!-- ---------- Print ---------- -->
+  <section id="printSec" aria-labelledby="printTitle">
+    <h2 class="sec-title" id="printTitle">Print</h2>
+    <p class="sec-lead">The squares print at exactly 6 × 6 cm with a thin cutting outline, 12 to an A4 page, each with its number and labels underneath (outside the cut). In the print dialogue choose <b>actual size / 100%</b>, not "fit to page". Check one square with a ruler before cutting them all.</p>
+    <div class="print-ctl">
+      <div class="bgrid" role="group" aria-label="What to print" id="prMode"></div>
+      <label class="check"><input type="checkbox" id="prLabels" checked> Labels under each square</label>
+      <button type="button" class="btn primary spacer" id="printBtn">Print</button>
+    </div>
+    <p class="hint" id="printInfo"></p>
+  </section>
+</main>
+
+<!-- ---------- Square editor ---------- -->
+<dialog class="editor" id="editor" aria-labelledby="edTitle">
+  <div class="ed">
+    <div>
+      <h3 id="edTitle">Square 1</h3>
+      <div class="crop" id="crop" tabindex="0" aria-label="Crop area: drag to move the picture, use the zoom slider or arrow keys">
+        <div class="drop" id="cropDrop"><b>Add a picture</b>Choose a file, paste (Ctrl+V), drop one here, or paste an image address below.</div>
+      </div>
+      <label class="range" style="margin-top:10px"><span>Zoom <output id="zoomOut">100%</output></span><input type="range" id="zoom" min="1" max="4" step="0.01" value="1"></label>
+      <div class="row">
+        <button type="button" class="btn primary" id="findForSq">Find pictures</button>
+        <label class="btn ghost" style="display:inline-flex;align-items:center;cursor:pointer">Choose file<input type="file" id="file" accept="image/*" hidden></label>
+        <button type="button" class="btn ghost" id="centre">Re-centre</button>
+        <button type="button" class="btn ghost" id="removeImg">Remove picture</button>
+      </div>
+      <label class="f" style="margin-top:10px;display:grid;gap:4px;font-size:13px;font-weight:700">Or paste an image address<input type="url" id="imgUrl" placeholder="https://…/picture.jpg"></label>
+      <p class="hintline">Right-click a picture on a website and choose “Copy image address”. Some sites block this; if so, save the picture and choose the file instead.</p>
+    </div>
+    <div class="fields">
+      <div class="two">
+        <label class="f">Design element<select id="fEl"></select></label>
+        <label class="f">Design principle<select id="fPr"></select></label>
+      </div>
+      <p class="hintline" id="pairHint"></p>
+      <label class="f">Literal or conceptual?<select id="fKind"><option value="">Choose…</option><option value="literal">Literal</option><option value="conceptual">Conceptual</option></select></label>
+      <label class="f">What it shows, and why it says your word<textarea id="fNote" placeholder="e.g. Tangled cables: the lines go everywhere with no order."></textarea></label>
+      <label class="f">Where it's from (website)<input type="text" id="fSrc" placeholder="e.g. unsplash.com"></label>
+      <p class="hintline" id="planHint"></p>
+    </div>
+  </div>
+  <div class="foot">
+    <button type="button" class="btn ghost" id="prevSq">← Previous</button>
+    <button type="button" class="btn ghost" id="nextSq">Next →</button>
+    <button type="button" class="btn primary" id="done">Done</button>
+  </div>
+</dialog>
+
+<div id="printArea"></div>
+
+<script src="site.js"></script>
+<script>
+(function () {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const N = 18;
+
+/* ================= Vocabulary ================= */
+
+const ELEMENTS = [
+  ['Line', 'Marks, edges, cables, cracks, paths. Look for direction: straight, curved, tangled, jagged.'],
+  ['Shape', 'Flat, 2D areas with an edge: shards, silhouettes, signs, blobs.'],
+  ['Form', '3D objects with volume and light and shadow: a crumpled car, a tornado, waves.'],
+  ['Space', 'The room around and between things: crowded, empty, deep or flat.'],
+  ['Colour', 'Hue, brightness and saturation: clashing colours, a burst of red, neon.'],
+  ['Value', 'Light and dark: lightning in a black sky, smoke, high-contrast black and white.'],
+  ['Texture', 'How a surface would feel: rough, cracked, crumpled, splattered.'],
+];
+const PRINCIPLES = [
+  ['Balance', 'How visual weight is spread: symmetrical, asymmetrical, or deliberately off-balance.'],
+  ['Contrast', 'Strong differences: light vs dark, big vs small, calm vs busy.'],
+  ['Emphasis', 'One focal point that grabs attention first.'],
+  ['Movement', 'The path the eye follows, or a sense of motion.'],
+  ['Pattern', 'A repeated motif across a surface.'],
+  ['Rhythm', 'Repetition with a beat or flow, regular or irregular.'],
+  ['Unity', 'Everything feels like it belongs together.'],
+  ['Variety', 'Lots of different elements that keep it interesting.'],
+  ['Proportion & scale', 'Size relationships, normal or exaggerated.'],
+  ['Hierarchy', 'A clear order of importance: first, second, third.'],
+  ['Repetition', 'The same element used again and again.'],
+  ['White space', 'Empty space used on purpose.'],
+  ['Alignment', 'Things lined up along edges or a grid (or pointedly not).'],
+];
+const EL = ELEMENTS.map(e => e[0]), PR = PRINCIPLES.map(p => p[0]);
+const esc = t => String(t || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+
+$('elList').innerHTML = ELEMENTS.map(([n, d]) => '<dt>' + n + '</dt><dd>' + d + '</dd>').join('');
+$('prList').innerHTML = PRINCIPLES.map(([n, d]) => '<dt>' + n + '</dt><dd>' + d + '</dd>').join('');
+$('fEl').innerHTML = '<option value="">Choose…</option>' + EL.map(e => '<option>' + e + '</option>').join('');
+$('fPr').innerHTML = '<option value="">Choose…</option>' + PR.map(p => '<option>' + p + '</option>').join('');
+
+/* ================= Ideas ================= */
+// [search term, kind, element, principle, why]
+const CHAOS = [
+  ['Tangled cables or wires', 'literal', 'Line', 'Movement', 'Lines loop and cross in every direction, so the eye can never settle.'],
+  ['Shattered glass', 'literal', 'Line', 'Variety', 'Cracks split the surface into countless different pieces.'],
+  ['Paint splatter (Jackson Pollock)', 'conceptual', 'Colour', 'Rhythm', 'Drips and flicks repeat with an irregular, frantic beat.'],
+  ['Fireworks exploding', 'literal', 'Colour', 'Emphasis', 'A bright burst against a dark sky grabs attention instantly.'],
+  ['Lightning storm', 'literal', 'Value', 'Contrast', 'Blinding white against black: violent light and dark.'],
+  ['Rush-hour crowd from above', 'literal', 'Space', 'Pattern', 'People pack the space in a busy, uneven pattern.'],
+  ['Traffic jam at night', 'literal', 'Colour', 'Repetition', 'Rows of red tail lights repeat into the distance.'],
+  ['Very messy bedroom or desk', 'literal', 'Space', 'Variety', 'Every bit of space is filled with different objects.'],
+  ['Tornado or hurricane', 'literal', 'Form', 'Movement', 'A huge spinning form: you can feel the motion.'],
+  ['Starling murmuration', 'conceptual', 'Shape', 'Movement', 'Thousands of birds form one shifting, unpredictable shape.'],
+  ['Crumpled paper', 'conceptual', 'Texture', 'Variety', 'Creases go every way: order screwed up.'],
+  ['Crashing ocean waves', 'literal', 'Form', 'Movement', 'Water twists and breaks with uncontrolled force.'],
+  ['Broken mirror reflection', 'conceptual', 'Shape', 'Contrast', 'One face split into mismatched fragments.'],
+  ['TV static or glitch art', 'conceptual', 'Texture', 'Unity', 'Pure visual noise: random dots that still read as one surface.'],
+  ['Fractal (Mandelbrot set)', 'conceptual', 'Shape', 'Pattern', 'Chaos theory: endless complexity from a simple rule.'],
+  ['Phone full of notifications', 'conceptual', 'Shape', 'Hierarchy', 'Too many alerts: no clear order of importance.'],
+  ['Graffiti-covered wall', 'literal', 'Colour', 'Variety', 'Layers of tags and colours fight for attention.'],
+  ['Tangled tree roots or vines', 'literal', 'Line', 'Rhythm', 'Twisting lines repeat in an organic, unruly rhythm.'],
+  ['Swirling smoke', 'conceptual', 'Value', 'Movement', 'Soft greys drift and curl with no fixed shape.'],
+  ['Collapsing Jenga tower or falling dominoes', 'conceptual', 'Form', 'Balance', 'The moment balance is lost.'],
+  ['Spilled drink or cereal on the floor', 'literal', 'Space', 'Emphasis', 'A mess spreading across clean empty space.'],
+  ['Wildfire or burning building', 'literal', 'Colour', 'Contrast', 'Hot orange against black smoke: danger and disorder.'],
+  ['Junkyard or scrap heap', 'literal', 'Form', 'Proportion & scale', 'Huge and tiny objects piled with no sense of order.'],
+  ['Abstract expressionist painting (de Kooning)', 'conceptual', 'Texture', 'Movement', 'Thick, slashing brushstrokes full of energy.'],
+  ['One still person in a rushing crowd', 'conceptual', 'Space', 'Emphasis', 'Calm in the middle of chaos makes the chaos stronger.'],
+  ['Neat row with one item knocked over', 'conceptual', 'Shape', 'Alignment', 'Order broken in one place shows how chaos starts.'],
+  ['Cracked dry earth', 'literal', 'Texture', 'Pattern', 'An irregular pattern of cracks covering the ground.'],
+  ['Heart-rate or sound wave going wild', 'conceptual', 'Line', 'Rhythm', 'A line whose rhythm has lost control.'],
+  ['Marbled ink in water', 'conceptual', 'Colour', 'Movement', 'Colours swirl and mix with no plan.'],
+  ['Stock market trading floor', 'literal', 'Space', 'Variety', 'Screens, papers and people crammed together.'],
+  ['Huge pile of laundry', 'literal', 'Texture', 'Unity', 'Mixed fabrics heaped into one tangled mass.'],
+  ['Long-exposure city traffic lights', 'conceptual', 'Line', 'Movement', 'Streaks of light race in every direction.'],
+];
+const GENERIC = w => [
+  [w + ' (close-up / macro)', 'literal', 'Texture', 'Pattern', 'Close-ups often show texture and pattern clearly.'],
+  [w + ' from above (aerial)', 'literal', 'Space', 'Pattern', 'Aerial views turn scenes into patterns and shapes.'],
+  [w + ' silhouette', 'literal', 'Shape', 'Contrast', 'Silhouettes make shape and contrast obvious.'],
+  [w + ' black and white photography', 'literal', 'Value', 'Contrast', 'Removing colour makes value the main element.'],
+  [w + ' abstract art', 'conceptual', 'Colour', 'Movement', 'Artists often express a word through colour and movement.'],
+  [w + ' texture', 'conceptual', 'Texture', 'Variety', 'A surface that feels like the word.'],
+  [w + ' minimalist photography', 'conceptual', 'Space', 'White space', 'Empty space can make a word stronger.'],
+  [w + ' crowd or group', 'literal', 'Form', 'Repetition', 'Many similar things repeated.'],
+  [w + ' symbol or sign', 'conceptual', 'Shape', 'Emphasis', 'A single clear symbol as the focal point.'],
+  [w + ' long exposure', 'conceptual', 'Line', 'Movement', 'Motion turns into lines.'],
+  [w + ' in nature', 'literal', 'Form', 'Unity', 'Natural scenes often feel unified.'],
+  [w + ' street photography', 'literal', 'Space', 'Variety', 'Everyday scenes full of different elements.'],
+];
+let filter = 'all';
+const word = () => ($('word').value.trim() || 'Chaos');
+function currentIdeas() { return word().toLowerCase() === 'chaos' ? CHAOS : GENERIC(word().toLowerCase()); }
+function drawIdeas() {
+  const isChaos = word().toLowerCase() === 'chaos';
+  $('ideasLead').textContent = isChaos
+    ? 'Things to search for, each with an element and principle it shows well. "Find pictures" searches the free libraries above; "Google" opens a normal image search; "Use as a plan" puts the idea on your next empty square.'
+    : 'General ways to search for "' + word() + '": combine your word with a photography style. "Find pictures" searches the free libraries above; "Use as a plan" adds the idea to your next empty square as a plan. Then think of your own: what does ' + word().toLowerCase() + ' look like, sound like, feel like?';
+  const list = currentIdeas().filter(i => filter === 'all' || i[1] === filter);
+  $('ideaList').innerHTML = list.map(([t, k, e, p, why]) =>
+    '<div class="idea"><span class="kind">' + k + '</span><b>' + esc(t) + '</b>' +
+    '<div><span class="tag">' + e + '</span><span class="tag">' + p + '</span></div><p>' + esc(why) + '</p>' +
+    '<div class="acts"><button type="button" data-find="' + esc(t) + '">Find pictures</button><a href="https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(t) + '" target="_blank" rel="noopener">Google ↗</a>' +
+    '<button type="button" data-use="' + esc(t) + '">Use as a plan</button></div></div>').join('');
+  $('ideaList').querySelectorAll('[data-find]').forEach(b => b.addEventListener('click', () => {
+    const idea = currentIdeas().find(i => i[0] === b.dataset.find);
+    findPictures(idea[0], 'next', idea);
+  }));
+  $('ideaList').querySelectorAll('[data-use]').forEach(b => b.addEventListener('click', () => {
+    const idea = currentIdeas().find(i => i[0] === b.dataset.use);
+    const i = slots.findIndex(s => !s.img && !s.url && !s.plan);
+    if (i < 0) { b.textContent = 'No empty squares'; return; }
+    slots[i].plan = { term: idea[0], kind: idea[1], el: idea[2], pr: idea[3] };
+    save(i); drawBoard();
+    b.textContent = 'Added to square ' + (i + 1);
+  }));
+}
+function pickButtons(el, items, current, onPick) {
+  el.innerHTML = '';
+  items.forEach(([key, label]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tbtn'; b.textContent = label;
+    b.setAttribute('aria-pressed', String(key === current));
+    b.addEventListener('click', () => { el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b))); onPick(key); });
+    el.appendChild(b);
+  });
+}
+pickButtons($('ideaFilter'), [['all', 'All'], ['literal', 'Literal'], ['conceptual', 'Conceptual']], filter, k => { filter = k; drawIdeas(); });
+
+/* ================= Storage (IndexedDB, so pictures survive a reload) ================= */
+// Each square: { img: Blob|null, url: string, nw, nh, cx, cy, z, el, pr, kind, note, src, plan }
+
+const blank = () => ({ img: null, url: '', nw: 0, nh: 0, cx: .5, cy: .5, z: 1, el: '', pr: '', kind: '', note: '', src: '', plan: null });
+let slots = Array.from({ length: N }, blank);
+let db = null;
+function openDB() {
+  return new Promise(res => {
+    try {
+      const r = indexedDB.open('wordBoard', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('slots');
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => res(null);
+    } catch (e) { res(null); }
+  });
+}
+function save(i) {
+  if (!db) return;
+  try { db.transaction('slots', 'readwrite').objectStore('slots').put(slots[i], i); } catch (e) { /* storage unavailable */ }
+}
+function loadAll() {
+  return new Promise(res => {
+    if (!db) return res();
+    try {
+      const st = db.transaction('slots').objectStore('slots');
+      const req = st.getAll(), keys = st.getAllKeys();
+      let vals;
+      req.onsuccess = () => { vals = req.result; };
+      keys.onsuccess = () => { keys.result.forEach((k, j) => { if (k < N) slots[k] = Object.assign(blank(), vals[j]); }); res(); };
+      keys.onerror = req.onerror = () => res();
+    } catch (e) { res(); }
+  });
+}
+try { const w = localStorage.getItem('wordBoardWord'); if (w) $('word').value = w; } catch (e) { /* ignore */ }
+
+/* ================= Image display ================= */
+
+const urls = new Map();
+function srcOf(s, i) {
+  if (s.img) {
+    const cached = urls.get(i);
+    if (cached && cached.blob === s.img) return cached.url;
+    if (cached) URL.revokeObjectURL(cached.url);
+    const url = URL.createObjectURL(s.img);
+    urls.set(i, { blob: s.img, url });
+    return url;
+  }
+  return s.url;
+}
+// Cover the square, then zoom; cx, cy are the picture point shown at the centre (0–1)
+function placement(s) {
+  const m = Math.min(s.nw, s.nh) || 1;
+  const w = s.nw / m * s.z * 100, h = s.nh / m * s.z * 100;
+  const cx = clampC(s.cx, w), cy = clampC(s.cy, h);
+  return { w, h, left: 50 - cx * w, top: 50 - cy * h };
+}
+const clampC = (c, size) => { const lo = 50 / size; return Math.max(lo, Math.min(1 - lo, c)); };
+function imgTag(s, i) {
+  const p = placement(s);
+  return '<img alt="" src="' + esc(srcOf(s, i)) + '" style="width:' + p.w.toFixed(3) + '%;height:' + p.h.toFixed(3) + '%;left:' + p.left.toFixed(3) + '%;top:' + p.top.toFixed(3) + '%">';
+}
+const hasImg = s => !!(s.img || s.url);
+
+/* ================= Board ================= */
+
+function drawBoard() {
+  $('boardGrid').innerHTML = slots.map((s, i) => {
+    const tags = s.el && s.pr ? s.el + ' / ' + s.pr : '';
+    const planTxt = !hasImg(s) && s.plan ? '<span class="plan">Plan: ' + esc(s.plan.term || (s.plan.el + ' / ' + s.plan.pr)) + '</span>' : '';
+    return '<div class="slot"><button type="button" class="slot-box' + (hasImg(s) ? ' filled' : '') + '" data-i="' + i + '" aria-label="Square ' + (i + 1) + (tags ? ', ' + tags : '') + '">' +
+      '<span class="num">' + (i + 1) + '</span>' +
+      (hasImg(s) ? imgTag(s, i) : '<span class="empty"><b>+</b>Add picture' + planTxt + '</span>') +
+      '</button><div class="slot-tags' + (hasImg(s) && !tags ? ' missing' : '') + '">' + (tags || (hasImg(s) ? 'Needs element / principle' : (s.plan ? s.plan.el + ' / ' + s.plan.pr : ''))) + '</div></div>';
+  }).join('');
+  $('boardGrid').querySelectorAll('.slot-box').forEach(b => {
+    const i = +b.dataset.i;
+    b.addEventListener('click', () => openEditor(i));
+    b.addEventListener('dragover', e => { e.preventDefault(); b.classList.add('over'); });
+    b.addEventListener('dragleave', () => b.classList.remove('over'));
+    b.addEventListener('drop', e => { e.preventDefault(); b.classList.remove('over'); takeDrop(e.dataTransfer, i); });
+  });
+  drawChecks();
+  drawPrintInfo();
+}
+
+function drawChecks() {
+  const filled = slots.filter(hasImg).length;
+  const labelled = slots.filter(s => hasImg(s) && s.el && s.pr).length;
+  const pairs = slots.filter(s => s.el && s.pr).map(s => s.el + '/' + s.pr);
+  const dupes = pairs.filter((p, k) => pairs.indexOf(p) !== k);
+  const elC = Object.fromEntries(EL.map(e => [e, 0])), prC = Object.fromEntries(PR.map(p => [p, 0]));
+  slots.forEach(s => { if (s.el) elC[s.el]++; if (s.pr) prC[s.pr]++; });
+  const kinds = slots.filter(s => s.kind);
+  const lit = kinds.filter(s => s.kind === 'literal').length, con = kinds.length - lit;
+  const items = [
+    [filled === N, filled + ' of ' + N + ' squares have a picture.'],
+    [labelled === filled && filled > 0, labelled + ' of ' + filled + ' pictures have both an element and a principle.'],
+    [dupes.length === 0, dupes.length ? 'Repeated pairs: ' + [...new Set(dupes)].join(', ').replace(/\//g, ' / ') + '. Try a different combination so every square says something new.' : 'No element / principle pair is repeated.'],
+    [EL.every(e => elC[e] >= 1), EL.every(e => elC[e] >= 1) ? 'All seven elements are used at least once.' : 'Not used yet: ' + EL.filter(e => !elC[e]).join(', ') + '. Using all seven shows you know them.'],
+    [Object.values(prC).filter(Boolean).length >= 8, Object.values(prC).filter(Boolean).length + ' different principles used (aim for 8 or more).'],
+    [lit > 0 && con > 0, 'Literal: ' + lit + ', conceptual: ' + con + '. A mix of both is strongest.'],
+  ];
+  $('checklist').innerHTML = items.map(([ok, t]) => '<li' + (ok ? ' class="ok"' : '') + '>' + esc(t) + '</li>').join('');
+  const bars = (counts, max) => Object.entries(counts).map(([k, v]) => '<div class="bar' + (v ? '' : ' zero') + '"><span>' + k + '</span><i><span style="width:' + Math.min(100, v / max * 100) + '%"></span></i><span>' + v + '</span></div>').join('');
+  $('elCounts').innerHTML = bars(elC, 5);
+  $('prCounts').innerHTML = bars(prC, 4);
+}
+
+// Spread suggestions so every element gets used two or three times and principles vary
+$('planBtn').addEventListener('click', () => {
+  const used = slots.filter(s => s.el && s.pr).map(s => s.el + '/' + s.pr);
+  const elC = Object.fromEntries(EL.map(e => [e, 0])), prC = Object.fromEntries(PR.map(p => [p, 0]));
+  slots.forEach(s => { const t = s.el ? s : s.plan; if (t && t.el) { elC[t.el]++; prC[t.pr]++; } });
+  const pool = currentIdeas();
+  slots.forEach((s, i) => {
+    if (hasImg(s) || s.plan) return;
+    // Prefer an idea whose element and principle are least used so far
+    const ranked = pool.filter(([, , e, p]) => !used.includes(e + '/' + p))
+      .map(idea => ({ idea, score: elC[idea[2]] * 3 + prC[idea[3]] + Math.random() }))
+      .sort((a, b) => a.score - b.score);
+    const pickI = ranked[0] && ranked[0].idea;
+    if (!pickI) return;
+    s.plan = { term: pickI[0], kind: pickI[1], el: pickI[2], pr: pickI[3] };
+    used.push(pickI[2] + '/' + pickI[3]); elC[pickI[2]]++; prC[pickI[3]]++;
+    save(i);
+  });
+  drawBoard();
+});
+$('clearPlan').addEventListener('click', () => { slots.forEach((s, i) => { if (s.plan) { s.plan = null; save(i); } }); drawBoard(); });
+$('clearAll').addEventListener('click', () => {
+  if (!confirm('Remove all 18 pictures and labels from this board? This cannot be undone.')) return;
+  slots = Array.from({ length: N }, blank);
+  slots.forEach((_, i) => save(i));
+  drawBoard();
+});
+$('word').addEventListener('input', () => { try { localStorage.setItem('wordBoardWord', $('word').value); } catch (e) { /* ignore */ } drawIdeas(); drawPrintInfo(); });
+
+/* ================= Adding pictures ================= */
+
+// extra: { fallback: second address to try, credit: source text, done: callback(ok) }
+function setImage(i, blob, url, extra) {
+  const s = slots[i], x = extra || {};
+  const probe = new Image();
+  probe.onload = () => {
+    Object.assign(s, { img: blob || null, url: blob ? '' : probe.src, nw: probe.naturalWidth, nh: probe.naturalHeight, cx: .5, cy: .5, z: 1 });
+    if (x.credit) s.src = x.credit;
+    if (s.plan && !s.el) { s.el = s.plan.el; s.pr = s.plan.pr; s.kind = s.plan.kind; }
+    save(i); drawBoard();
+    if (edIndex === i && dlg.open) fillEditor();
+    if (x.done) x.done(true);
+  };
+  probe.onerror = () => {
+    if (x.fallback) { const f = x.fallback; x.fallback = null; probe.src = f; return; }
+    if (x.done) x.done(false); else alert('That picture could not be loaded. Try saving it to your computer and choosing the file instead.');
+  };
+  probe.src = blob ? URL.createObjectURL(blob) : url;
+}
+function takeDrop(dt, i) {
+  if (!dt) return;
+  const file = [...(dt.files || [])].find(f => f.type.startsWith('image/'));
+  if (file) { setImage(i, file); return; }
+  const html = dt.getData('text/html');
+  const m = html && html.match(/<img[^>]+src="([^"]+)"/i);
+  const url = (m && m[1]) || dt.getData('text/uri-list') || dt.getData('text/plain');
+  if (url && /^(https?:|data:image)/.test(url.trim())) setImage(i, null, url.trim());
+}
+
+/* ================= Editor ================= */
+
+const dlg = $('editor');
+let edIndex = 0;
+function openEditor(i) {
+  edIndex = i;
+  fillEditor();
+  if (!dlg.open) dlg.showModal();
+}
+function fillEditor() {
+  const s = slots[edIndex];
+  $('edTitle').textContent = 'Square ' + (edIndex + 1) + ' of ' + N;
+  const crop = $('crop');
+  crop.querySelectorAll('img').forEach(n => n.remove());
+  $('cropDrop').style.display = hasImg(s) ? 'none' : '';
+  if (hasImg(s)) crop.insertAdjacentHTML('beforeend', imgTag(s, edIndex));
+  $('zoom').value = s.z; $('zoomOut').textContent = Math.round(s.z * 100) + '%';
+  $('fEl').value = s.el; $('fPr').value = s.pr; $('fKind').value = s.kind; $('fNote').value = s.note; $('fSrc').value = s.src;
+  $('imgUrl').value = s.url && !s.url.startsWith('data:') ? s.url : '';
+  $('planHint').textContent = s.plan ? 'Plan for this square: search "' + s.plan.term + '" (' + s.plan.el + ' / ' + s.plan.pr + ').' : '';
+  pairHint();
+  $('prevSq').disabled = edIndex === 0; $('nextSq').disabled = edIndex === N - 1;
+}
+function pairHint() {
+  const e = ELEMENTS.find(x => x[0] === $('fEl').value), p = PRINCIPLES.find(x => x[0] === $('fPr').value);
+  $('pairHint').textContent = e && p ? 'Say it like this: the ' + e[0].toLowerCase() + ' creates ' + p[0].toLowerCase() + ' because…' : e ? e[1] : p ? p[1] : '';
+}
+function updateCrop() {
+  const s = slots[edIndex], img = $('crop').querySelector('img');
+  if (!img) return;
+  const p = placement(s);
+  Object.assign(img.style, { width: p.w + '%', height: p.h + '%', left: p.left + '%', top: p.top + '%' });
+}
+$('zoom').addEventListener('input', () => { const s = slots[edIndex]; s.z = +$('zoom').value; $('zoomOut').textContent = Math.round(s.z * 100) + '%'; updateCrop(); });
+$('zoom').addEventListener('change', () => { save(edIndex); drawBoard(); });
+$('centre').addEventListener('click', () => { const s = slots[edIndex]; s.cx = s.cy = .5; s.z = 1; $('zoom').value = 1; $('zoomOut').textContent = '100%'; updateCrop(); save(edIndex); drawBoard(); });
+$('removeImg').addEventListener('click', () => { const s = slots[edIndex]; Object.assign(s, { img: null, url: '', nw: 0, nh: 0 }); save(edIndex); drawBoard(); fillEditor(); });
+$('file').addEventListener('change', e => { const f = e.target.files[0]; if (f) setImage(edIndex, f); e.target.value = ''; });
+$('imgUrl').addEventListener('change', () => { const u = $('imgUrl').value.trim(); if (u) setImage(edIndex, null, u); });
+['fEl', 'fPr', 'fKind', 'fNote', 'fSrc'].forEach(id => $(id).addEventListener('input', () => {
+  const s = slots[edIndex];
+  s.el = $('fEl').value; s.pr = $('fPr').value; s.kind = $('fKind').value; s.note = $('fNote').value; s.src = $('fSrc').value;
+  pairHint(); save(edIndex); drawBoard();
+}));
+$('prevSq').addEventListener('click', () => { if (edIndex > 0) { edIndex--; fillEditor(); } });
+$('nextSq').addEventListener('click', () => { if (edIndex < N - 1) { edIndex++; fillEditor(); } });
+$('done').addEventListener('click', () => dlg.close());
+
+// Drag to pan the picture inside the square
+const crop = $('crop');
+let pan = null;
+crop.addEventListener('pointerdown', e => {
+  const s = slots[edIndex];
+  if (!hasImg(s)) { $('file').click(); return; }
+  pan = { x: e.clientX, y: e.clientY };
+  crop.setPointerCapture(e.pointerId);
+});
+crop.addEventListener('pointermove', e => {
+  if (!pan) return;
+  const s = slots[edIndex], box = crop.getBoundingClientRect(), p = placement(s);
+  const wPx = p.w / 100 * box.width, hPx = p.h / 100 * box.height;
+  s.cx = clampC(s.cx - (e.clientX - pan.x) / wPx, p.w);
+  s.cy = clampC(s.cy - (e.clientY - pan.y) / hPx, p.h);
+  pan = { x: e.clientX, y: e.clientY };
+  updateCrop();
+});
+const endPan = () => { if (pan) { pan = null; save(edIndex); drawBoard(); } };
+crop.addEventListener('pointerup', endPan);
+crop.addEventListener('pointercancel', endPan);
+crop.addEventListener('keydown', e => {
+  const s = slots[edIndex];
+  const d = { ArrowLeft: [-.02, 0], ArrowRight: [.02, 0], ArrowUp: [0, -.02], ArrowDown: [0, .02] }[e.key];
+  if (!d || !hasImg(s)) return;
+  e.preventDefault();
+  const p = placement(s);
+  s.cx = clampC(s.cx + d[0], p.w); s.cy = clampC(s.cy + d[1], p.h);
+  updateCrop(); save(edIndex);
+});
+crop.addEventListener('wheel', e => {
+  const s = slots[edIndex];
+  if (!hasImg(s)) return;
+  e.preventDefault();
+  s.z = Math.max(1, Math.min(4, s.z * (e.deltaY < 0 ? 1.06 : 1 / 1.06)));
+  $('zoom').value = s.z; $('zoomOut').textContent = Math.round(s.z * 100) + '%';
+  updateCrop();
+}, { passive: false });
+crop.addEventListener('dragover', e => e.preventDefault());
+crop.addEventListener('drop', e => { e.preventDefault(); takeDrop(e.dataTransfer, edIndex); });
+// Paste a copied picture into the open square
+document.addEventListener('paste', e => {
+  if (!dlg.open) return;
+  const item = [...(e.clipboardData ? e.clipboardData.items : [])].find(it => it.type.startsWith('image/'));
+  if (item) { e.preventDefault(); setImage(edIndex, item.getAsFile()); return; }
+  const t = e.clipboardData && e.clipboardData.getData('text');
+  if (t && /^https?:\/\/\S+$/.test(t.trim()) && document.activeElement !== $('imgUrl')) setImage(edIndex, null, t.trim());
+});
+dlg.addEventListener('close', () => drawBoard());
+
+/* ================= Finding pictures ================= */
+// Openverse and Wikimedia Commons both allow searches from a web page without a key.
+
+const F = { lib: 'openverse', q: '', page: 1, idea: null };
+pickButtons($('libBtns'), [['openverse', 'Openverse'], ['commons', 'Wikimedia']], F.lib, k => { F.lib = k; if (F.q) runSearch(true); });
+function fillTargets(sel) {
+  const t = $('target');
+  t.innerHTML = '<option value="next">Next empty square</option>' + slots.map((s, i) => '<option value="' + i + '">Square ' + (i + 1) + (hasImg(s) ? ' (replace)' : '') + '</option>').join('');
+  t.value = String(sel == null ? 'next' : sel);
+}
+const stripTags = h => { const d = document.createElement('div'); d.innerHTML = h || ''; return (d.textContent || '').trim(); };
+async function searchOpenverse(q, page) {
+  const r = await fetch('https://api.openverse.org/v1/images/?q=' + encodeURIComponent(q) + '&page_size=20&page=' + page + '&mature=false');
+  if (!r.ok) throw new Error('Openverse ' + r.status);
+  const j = await r.json();
+  return (j.results || []).map(x => ({
+    thumb: x.thumbnail || x.url, full: x.url, alt: x.thumbnail,
+    title: x.title || 'Untitled', by: x.creator || 'unknown', lic: ((x.license || '') + ' ' + (x.license_version || '')).trim().toUpperCase(),
+    page: x.foreign_landing_url || x.url,
+  }));
+}
+async function searchCommons(q, page) {
+  const off = (page - 1) * 20;
+  const u = 'https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=20&gsroffset=' + off +
+    '&gsrsearch=' + encodeURIComponent(q + ' filetype:bitmap') + '&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=1000';
+  const r = await fetch(u);
+  if (!r.ok) throw new Error('Commons ' + r.status);
+  const j = await r.json();
+  const pages = Object.values((j.query && j.query.pages) || {}).sort((a, b) => (a.index || 0) - (b.index || 0));
+  return pages.map(p => {
+    const ii = (p.imageinfo || [])[0] || {}, md = ii.extmetadata || {};
+    return {
+      thumb: ii.thumburl || ii.url, full: ii.thumburl || ii.url, alt: ii.url,
+      title: (p.title || '').replace(/^File:/, '').replace(/\.[a-z0-9]+$/i, ''),
+      by: stripTags(md.Artist && md.Artist.value) || 'unknown', lic: (md.LicenseShortName && md.LicenseShortName.value) || '',
+      page: ii.descriptionurl || '',
+    };
+  }).filter(x => x.thumb);
+}
+let results = [];
+async function runSearch(fresh) {
+  if (fresh) { F.page = 1; results = []; $('results').innerHTML = ''; }
+  const q = F.q;
+  $('googleLink').href = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(q || word());
+  if (!q) return;
+  $('finderStatus').textContent = 'Searching ' + (F.lib === 'openverse' ? 'Openverse' : 'Wikimedia Commons') + ' for “' + q + '”…';
+  $('more').hidden = true;
+  try {
+    const found = F.lib === 'openverse' ? await searchOpenverse(q, F.page) : await searchCommons(q, F.page);
+    results = results.concat(found);
+    drawResults();
+    $('finderStatus').textContent = results.length
+      ? results.length + ' pictures for “' + q + '”' + (F.idea ? ' (suggested pair: ' + F.idea[2] + ' / ' + F.idea[3] + ')' : '') + '. Press Use to add one to a square.'
+      : 'Nothing found for “' + q + '”. Try fewer or simpler words, the other library, or Google.';
+    $('more').hidden = found.length < 20;
+  } catch (e) {
+    $('finderStatus').textContent = 'The picture library could not be reached (' + e.message + '). Check the internet connection, try the other library, or use Google and save pictures to your computer.';
+  }
+}
+function drawResults() {
+  $('results').innerHTML = results.map((r, k) =>
+    '<div class="res"><div class="thumb"><img loading="lazy" alt="' + esc(r.title) + '" src="' + esc(r.thumb) + '"></div>' +
+    '<div class="meta"><b title="' + esc(r.title) + '">' + esc(r.title) + '</b>' + esc(r.by) + (r.lic ? ' · ' + esc(r.lic) : '') + '</div>' +
+    '<div class="acts"><button type="button" data-k="' + k + '">Use</button>' + (r.page ? '<a href="' + esc(r.page) + '" target="_blank" rel="noopener">Source ↗</a>' : '') + '</div></div>').join('');
+  $('results').querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => {
+    const r = results[+b.dataset.k];
+    const t = $('target').value;
+    const i = t === 'next' ? slots.findIndex(s => !hasImg(s)) : +t;
+    if (i < 0) { $('finderStatus').textContent = 'All 18 squares are full. Choose a square to replace in the list next to Search.'; return; }
+    b.disabled = true; b.textContent = 'Adding…';
+    const credit = '“' + r.title + '” by ' + r.by + (r.lic ? ' (' + r.lic + ')' : '') + (r.page ? ' — ' + r.page : '');
+    if (F.idea && !slots[i].plan && !slots[i].el) slots[i].plan = { term: F.idea[0], kind: F.idea[1], el: F.idea[2], pr: F.idea[3] };
+    setImage(i, null, r.full, { fallback: r.alt && r.alt !== r.full ? r.alt : r.thumb, credit, done: ok => {
+      b.disabled = false;
+      b.textContent = ok ? 'Added to ' + (i + 1) : 'Could not load';
+      if (ok) { $('finderStatus').textContent = 'Added to square ' + (i + 1) + '. Click the square on your board to crop it and choose its element and principle.'; fillTargets(t); }
+    } });
+  }));
+}
+function findPictures(q, target, idea) {
+  F.q = q; F.idea = idea || null;
+  $('q').value = q;
+  fillTargets(target);
+  $('finder').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  runSearch(true);
+}
+$('finderForm').addEventListener('submit', e => { e.preventDefault(); F.q = $('q').value.trim(); F.idea = null; runSearch(true); });
+$('more').addEventListener('click', () => { F.page++; runSearch(false); });
+$('findForSq').addEventListener('click', () => {
+  const s = slots[edIndex];
+  const q = s.plan ? s.plan.term : word();
+  const idea = s.plan ? [s.plan.term, s.plan.kind, s.plan.el, s.plan.pr] : null;
+  dlg.close();
+  findPictures(q, edIndex, idea);
+});
+fillTargets('next');
+$('googleLink').href = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(word());
+
+/* ================= Printing ================= */
+
+let PRM = 'squares';
+pickButtons($('prMode'), [['squares', 'Squares to cut (2 pages)'], ['list', 'Label list (1 page)'], ['both', 'Both']], PRM, k => { PRM = k; drawPrintInfo(); });
+function drawPrintInfo() {
+  const filled = slots.filter(hasImg).length;
+  $('printInfo').textContent = filled + ' of ' + N + ' squares have pictures' + (filled < N ? '; empty squares print as grey 6 cm boxes.' : '.') + ' Pictures from image addresses print only if that website allows it; pictures from files always print.';
+}
+// 3 across × 4 down, 6 cm squares with room for labels underneath
+function squaresPage(from, to, labels) {
+  let h = '<div class="pp"><h2>' + esc(word().toUpperCase()) + ' · ' + (from + 1) + '–' + to + '</h2><p class="sub">Cut along the thin outline of each square (6 × 6 cm). Check one with a ruler first.</p>';
+  for (let i = from; i < to; i++) {
+    const k = i - from, col = k % 3, row = Math.floor(k / 3);
+    const x = 15 + col * 63, y = 24 + row * 68;
+    const s = slots[i];
+    h += '<div class="sq' + (hasImg(s) ? '' : ' blank') + '" style="left:' + x + 'mm;top:' + y + 'mm">' + (hasImg(s) ? imgTag(s, i) : '') + '</div>';
+    if (labels) h += '<div class="cap" style="left:' + x + 'mm;top:' + (y + 61) + 'mm"><b>' + (i + 1) + '. ' + esc(s.el || '—') + ' / ' + esc(s.pr || '—') + '</b>' + (s.kind ? ' · ' + s.kind : '') + '</div>';
+  }
+  return h + '</div>';
+}
+function listPage() {
+  let h = '<div class="pp"><h2>' + esc(word().toUpperCase()) + ' · 18 PICTURES</h2><p class="sub">Element and principle for each square, with what it shows and where it came from.</p><table><thead><tr><th>#</th><th>Element</th><th>Principle</th><th>Literal / conceptual</th><th>What it shows and why</th><th>Source</th></tr></thead><tbody>';
+  slots.forEach((s, i) => { h += '<tr><td>' + (i + 1) + '</td><td>' + esc(s.el) + '</td><td>' + esc(s.pr) + '</td><td>' + esc(s.kind) + '</td><td>' + esc(s.note) + '</td><td>' + esc(s.src) + '</td></tr>'; });
+  return h + '</tbody></table></div>';
+}
+$('printBtn').addEventListener('click', () => {
+  const labels = $('prLabels').checked;
+  let h = '';
+  if (PRM !== 'list') h += squaresPage(0, 12, labels) + squaresPage(12, 18, labels);
+  if (PRM !== 'squares') h += listPage();
+  $('printArea').innerHTML = h;
+  // Give the pictures a moment to load before the print dialogue opens
+  const imgs = [...$('printArea').querySelectorAll('img')];
+  Promise.all(imgs.map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; }))).then(() => window.print());
+});
+
+/* ================= Start ================= */
+
+openDB().then(d => { db = d; return loadAll(); }).then(() => { drawBoard(); drawIdeas(); });
+drawBoard();
+drawIdeas();
+
+})();
+</script>
+</body>
+</html>

@@ -166,6 +166,16 @@ The page has:
 - **Shading**: light from the right, as grey tones, pencil hatching or outline. Right-facing faces are lightest, top light grey, bottom darker, left-facing darkest. The front face can be white or a colour.
 - **Options**: guide lines, dashed hidden back edges and labels can be toggled. Printing gives the page exactly as shown.
 
+## Word Image Board
+
+`word-board.html` supports collecting 18 pictures that represent a word (chaos by default), literally or conceptually, each labelled with one design element and one design principle.
+
+- **Board**: 18 squares. Add a picture by file, paste, drag-and-drop or image address, crop it square by dragging and zooming, and choose element, principle, literal/conceptual, a note and the source. Everything is saved in the browser (IndexedDB).
+- **Find pictures**: search Openverse (Creative Commons) or Wikimedia Commons from the page. "Use" puts a result in a square and fills in the title, creator and licence. A Google Images link is included too.
+- **Picture ideas**: about 30 chaos ideas, each with a suggested element/principle pair, plus general search ideas for other words. "Use as a plan" and "Suggest a pair for every empty square" spread the elements and principles.
+- **Checklist**: all 18 filled and labelled, no repeated pairs, all seven elements used, at least 8 principles, and a literal/conceptual mix.
+- **Print**: pictures at exactly 6 × 6 cm (12 per A4 page) with labels, and a label list. Print at 100%.
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
