@@ -176,6 +176,26 @@ The page has:
 - **Checklist**: all 18 filled and labelled, no repeated pairs, all seven elements used, at least 8 principles, and a literal/conceptual mix.
 - **Print**: pictures at exactly 6 × 6 cm (12 per A4 page) with labels, and a label list. Print at 100%.
 
+## Perfume Bottle Compositions
+
+`perfume-bottles.html` supports drawing 15 compositions of the same two cuboid perfume bottles, each arranged differently, shaded to look 3D, with no table or shadows.
+
+- **Your two bottles**: body height, width, depth, cap height and width for each bottle, saved in the browser. Every composition uses them.
+- **15 compositions**: real 3D perspective renders, one arrangement each:
+  - side by side (square-on, or both turned)
+  - overlaps (tall behind and short behind)
+  - far apart, or corners touching
+  - one or both lying down, or one lying in front of the other
+  - directly behind, or turned opposite ways
+  - near and far
+  - bird's-eye view or low eye level
+  - a cropped close-up
+
+  Each can be regenerated or locked. Drag the large view to turn the camera.
+- **Shading**: one light direction (left or right) with a tone per face, in grey tones, pencil hatching, outline or colour. Optional labels, glass highlight and table line.
+- **Drawing and shading tips**: a four-step demo plus tips.
+- **Print**: a 15-composition examples sheet, a blank 15-frame sheet, or the selected composition full page.
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.

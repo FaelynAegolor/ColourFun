@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Perfume Bottle Compositions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="lesson.css">
+<style>
+/* ---------- Brief ---------- */
+.brief { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: start; }
+.brief ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 15px; }
+.brief h3 { margin: 0 0 8px; font-size: 15px; }
+
+/* ---------- Bottles ---------- */
+.bottles { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.1fr); gap: 16px; align-items: start; }
+.bottles h3 { margin: 0 0 8px; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+.bottles h3 i { width: 14px; height: 14px; border-radius: 3px; display: inline-block; border: 1px solid #141414; }
+.bottles .range { margin-bottom: 4px; }
+.pair svg { display: block; width: 100%; height: auto; }
+
+/* ---------- Compositions ---------- */
+.comp-tools { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-bottom: 14px; }
+.comp-tools .bgrid { display: flex; gap: 6px; flex-wrap: wrap; }
+.comps { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 20px; align-items: start; }
+.thumbs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.thumbs button { position: relative; padding: 0; border: 2px solid #cfcbc2; background: #fff; border-radius: 6px; overflow: hidden; cursor: pointer; }
+.thumbs button:hover { border-color: #141414; }
+.thumbs button[aria-pressed="true"] { border-color: #1F5FBF; box-shadow: 0 0 0 2px #1F5FBF; }
+.thumbs button .n { position: absolute; left: 4px; top: 2px; font-size: 11px; font-weight: 800; color: #555; }
+.thumbs button .lock { position: absolute; right: 4px; top: 2px; font-size: 11px; }
+.thumbs svg, .big svg { display: block; width: 100%; height: auto; aspect-ratio: 5 / 4; }
+.big { padding: 10px; }
+.big svg { cursor: grab; touch-action: none; }
+.big svg:active { cursor: grabbing; }
+.about { margin-top: 12px; display: grid; gap: 8px; font-size: 14px; }
+.about h3 { margin: 0; font-size: 18px; }
+.about p { margin: 0; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tags span { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--bg); border: 1px solid var(--border); }
+.about .row { display: flex; flex-wrap: wrap; gap: 8px; }
+.about .row .btn { min-height: 40px; padding: 6px 12px; font-size: 13px; }
+
+/* ---------- Tips ---------- */
+.tips { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.tips li { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+.tips b { display: block; margin-bottom: 2px; }
+.steps-demo { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+.steps-demo figure { margin: 0; }
+.steps-demo svg { display: block; width: 100%; height: auto; aspect-ratio: 1; }
+.steps-demo figcaption { font-size: 13px; padding: 8px 10px 10px; color: #333; }
+
+/* ---------- Print ---------- */
+.print-ctl { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.print-ctl .bgrid { display: flex; gap: 6px; flex-wrap: wrap; }
+.print-ctl .spacer { margin-left: auto; }
+#printArea { display: none; }
+
+@media (max-width: 960px) {
+  .comps, .bottles { grid-template-columns: 1fr; }
+  .steps-demo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@page { size: A4 portrait; margin: 0; }
+@media print {
+  html, body { background: #fff; }
+  body > *:not(#printArea) { display: none !important; }
+  #printArea { display: block; }
+  #printArea svg { display: block; width: 210mm; height: 296mm; break-after: page; page-break-after: always; }
+  #printArea svg:last-child { break-after: auto; page-break-after: auto; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Colour</button>
+        <ul>
+          <li><a href="colour-schemes.html">Colour schemes</a></li>
+          <li><a href="colour-interaction.html">Colour interaction</a></li>
+          <li><a href="paint-mixing.html">Paint mixing</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Form &amp; space</button>
+        <ul>
+          <li><a href="shape-shading.html">3D shape shading</a></li>
+          <li><a href="ellipses.html">Ellipses</a></li>
+          <li><a href="perspective.html">Perspective</a></li>
+          <li><a href="letter-3d.html">3D letter</a></li>
+          <li><a href="atmospheric-perspective.html">Atmospheric perspective</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Reference tools</button>
+        <ul>
+          <li><a href="value-notan.html">Value &amp; notan</a></li>
+          <li><a href="grid-proportion.html">Grid &amp; proportion</a></li>
+          <li><a href="composition.html">Composition</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Practice</button>
+        <ul>
+          <li><a href="design-principles.html">Design principles</a></li>
+          <li><a href="black-square.html">Black square problem</a></li>
+          <li><a href="word-board.html">Word image board</a></li>
+          <li><a href="perfume-bottles.html" aria-current="page">Perfume bottle compositions</a></li>
+          <li><a href="gesture-timer.html">Gesture timer</a></li>
+          <li><a href="mark-making.html">Mark-making &amp; media</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
+
+<!-- Pencil hatching for the shaded faces (units of the 500 × 400 drawing) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="q1" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#f4f2ec"/><line x1="1" y1="0" x2="1" y2="7" stroke="#2a2a2e" stroke-opacity=".25" stroke-width="1"/></pattern>
+    <pattern id="q2" width="4.5" height="4.5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4.5" height="4.5" fill="#d6d3cc"/><line x1="1" y1="0" x2="1" y2="4.5" stroke="#2a2a2e" stroke-opacity=".45" stroke-width="1"/></pattern>
+    <pattern id="q3" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="4" fill="#a9a6a0"/><line x1="1" y1="0" x2="1" y2="4" stroke="#2a2a2e" stroke-opacity=".55" stroke-width="1"/><line x1="0" y1="1" x2="4" y2="1" stroke="#2a2a2e" stroke-opacity=".45" stroke-width="1"/></pattern>
+    <pattern id="q4" width="3.4" height="3.4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3.4" height="3.4" fill="#73716c"/><line x1="1" y1="0" x2="1" y2="3.4" stroke="#1d1d1f" stroke-opacity=".6" stroke-width="1"/><line x1="0" y1="1" x2="3.4" y2="1" stroke="#1d1d1f" stroke-opacity=".5" stroke-width="1"/></pattern>
+  </defs>
+</svg>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>Perfume bottle compositions</h1>
+    <p>Fifteen different arrangements of the same two cuboid perfume bottles, each drawn in perspective and shaded to show it is 3D. Set up your two bottles, browse and regenerate the ideas, turn the view, then draw your own.</p>
+    <ul class="jump">
+      <li><a href="#brief">The brief</a></li>
+      <li><a href="#bottles">Your two bottles</a></li>
+      <li><a href="#comps">15 compositions</a></li>
+      <li><a href="#tips">Drawing &amp; shading</a></li>
+      <li><a href="#printSec">Print</a></li>
+    </ul>
+  </div>
+
+  <!-- ---------- Brief ---------- -->
+  <section id="brief" aria-labelledby="briefTitle">
+    <h2 class="sec-title" id="briefTitle">The brief</h2>
+    <div class="brief">
+      <div class="panel">
+        <h3>Task</h3>
+        <ul>
+          <li>Draw <b>15 compositions</b>, each featuring <b>2 cuboid perfume bottles</b>.</li>
+          <li>The two bottles can differ a little in size, but <b>the same two bottles appear in all 15</b>.</li>
+          <li>Arrange the bottles <b>differently in every composition</b>.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Remember</h3>
+        <ul>
+          <li>The bottles stand (or lie) on a table, but you <b>don't need to draw the table or the shadows</b>.</li>
+          <li><b>Shade the bottles</b> so they look 3D: each face of a cuboid gets its own tone.</li>
+          <li>Keep the light coming from the <b>same direction</b> in every drawing.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Ways to make each one different</h3>
+        <ul>
+          <li><b>Position</b>: side by side, one behind the other, far apart, touching.</li>
+          <li><b>Angle</b>: square-on, turned, turned opposite ways.</li>
+          <li><b>Pose</b>: standing, lying down.</li>
+          <li><b>Viewpoint</b>: from above, at eye level, close up and cropped.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Bottles ---------- -->
+  <section id="bottles" aria-labelledby="botTitle">
+    <h2 class="sec-title" id="botTitle">Your two bottles</h2>
+    <p class="sec-lead">Match these to the two bottles you are drawing. Sizes are in centimetres. Every composition uses these exact bottles.</p>
+    <div class="bottles">
+      <div class="panel" id="ctlA"><h3><i style="background:#e9b8c8"></i>Bottle A</h3></div>
+      <div class="panel" id="ctlB"><h3><i style="background:#b8cde9"></i>Bottle B</h3></div>
+      <div class="paper pair"><svg id="pairSvg" viewBox="0 0 500 400" role="img" aria-label="The two bottles side by side"></svg></div>
+    </div>
+  </section>
+
+  <!-- ---------- Compositions ---------- -->
+  <section id="comps" aria-labelledby="compTitle">
+    <h2 class="sec-title" id="compTitle">15 compositions</h2>
+    <p class="sec-lead">Each idea uses a different arrangement. Click one to see it large, drag the large view to turn the camera, and press <em>Regenerate</em> for a new version of the same idea. Lock the ones you like before regenerating the rest.</p>
+    <div class="comp-tools">
+      <div class="bgrid" role="group" aria-label="Shading style" id="style"></div>
+      <div class="bgrid" role="group" aria-label="Light direction" id="light"></div>
+      <label class="check"><input type="checkbox" id="oLabel" checked> Labels on bottles</label>
+      <label class="check"><input type="checkbox" id="oShine" checked> Glass highlight</label>
+      <label class="check"><input type="checkbox" id="oTable"> Table line</label>
+      <button type="button" class="btn primary" id="regenAll">Regenerate all (except locked)</button>
+    </div>
+    <div class="comps">
+      <div class="thumbs" id="thumbs" role="group" aria-label="Fifteen compositions"></div>
+      <div>
+        <div class="paper big"><svg id="bigSvg" viewBox="0 0 500 400" role="img" aria-label="Selected composition. Drag to turn the view."></svg></div>
+        <div class="about">
+          <h3 id="aboutTitle"></h3>
+          <p id="aboutText"></p>
+          <div class="tags" id="aboutTags"></div>
+          <div class="row">
+            <button type="button" class="btn ghost" id="regenOne">Regenerate this one</button>
+            <button type="button" class="btn ghost" id="lockOne">Lock</button>
+            <button type="button" class="btn ghost" id="resetView">Reset view</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Tips ---------- -->
+  <section id="tips" aria-labelledby="tipsTitle">
+    <h2 class="sec-title" id="tipsTitle">Drawing and shading a cuboid bottle</h2>
+    <div class="steps-demo" id="stepsDemo"></div>
+    <ul class="tips">
+      <li><b>Same bottles every time</b>Measure your real bottles (or decide on proportions, e.g. A is 2½ times as tall as it is wide) and keep them the same in all 15.</li>
+      <li><b>Verticals stay vertical</b>For a standing bottle, all upright edges are vertical. Only the edges going back into the picture slope towards the vanishing points.</li>
+      <li><b>Three faces, three tones</b>You usually see three faces of a cuboid. Give each one its own tone: lightest facing the light, middle, darkest facing away.</li>
+      <li><b>One light direction</b>Pick where the light comes from and keep it for all 15, so the same faces are light and dark in every drawing.</li>
+      <li><b>Overlap shows depth</b>The bottle in front hides part of the one behind. Draw the front bottle first, then only the visible part of the back one.</li>
+      <li><b>Make the glass shine</b>Leave a thin white strip down the lit face as a highlight. It instantly reads as glass.</li>
+      <li><b>Caps line up</b>The cap sits in the centre of the top face. Draw the top face first, find its centre with the diagonals, then build the cap from there.</li>
+      <li><b>Lying down</b>When a bottle lies on its side, its length goes back into the picture: the end faces get smaller with distance.</li>
+    </ul>
+  </section>
+
+  <!-- ---------- Print ---------- -->
+  <section id="printSec" aria-labelledby="printTitle">
+    <h2 class="sec-title" id="printTitle">Print</h2>
+    <p class="sec-lead">A4 portrait. The examples sheet shows all 15 current compositions as a reference; the blank sheet has 15 numbered frames to plan or draw in; the large page prints the selected composition with its notes.</p>
+    <div class="print-ctl">
+      <div class="bgrid" role="group" aria-label="What to print" id="prMode"></div>
+      <button type="button" class="btn primary spacer" id="printBtn">Print</button>
+    </div>
+  </section>
+</main>
+
+<div id="printArea"></div>
+
+<script src="site.js"></script>
+<script>
+(function () {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const f1 = n => Math.round(n * 100) / 100;
+const INK = '#1d1d1f';
+const VW = 500, VH = 400;
+
+/* ================= Bottles ================= */
+// Sizes in cm. Body is a cuboid; the cap is a smaller cuboid centred on top.
+
+const DEFAULT_BOTTLES = {
+  A: { w: 3.2, d: 2.2, h: 8.5, cw: 1.6, ch: 2.2, tint: '#e9b8c8' },
+  B: { w: 4.6, d: 3.2, h: 5.5, cw: 2.2, ch: 1.4, tint: '#b8cde9' },
+};
+let BOT = JSON.parse(JSON.stringify(DEFAULT_BOTTLES));
+try { const s = JSON.parse(localStorage.getItem('perfumeBottles') || 'null'); if (s && s.A && s.B) BOT = s; } catch (e) { /* storage unavailable */ }
+const saveBottles = () => { try { localStorage.setItem('perfumeBottles', JSON.stringify(BOT)); } catch (e) { /* ignore */ } };
+
+/* ================= 3D ================= */
+
+const v3 = (x, y, z) => ({ x, y, z });
+const sub = (a, b) => v3(a.x - b.x, a.y - b.y, a.z - b.z);
+const dot = (a, b) => a.x * b.x + a.y * b.y + a.z * b.z;
+const cross = (a, b) => v3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+const norm = a => { const l = Math.hypot(a.x, a.y, a.z) || 1; return v3(a.x / l, a.y / l, a.z / l); };
+
+// Corner index bits: x = bit 0, y = bit 1, z = bit 2
+const FACES = [
+  { c: [0, 4, 6, 2], n: v3(-1, 0, 0) }, { c: [1, 3, 7, 5], n: v3(1, 0, 0) },
+  { c: [0, 1, 5, 4], n: v3(0, -1, 0) }, { c: [2, 6, 7, 3], n: v3(0, 1, 0) },
+  { c: [0, 2, 3, 1], n: v3(0, 0, -1) }, { c: [4, 5, 7, 6], n: v3(0, 0, 1) },
+];
+const corners = (x0, x1, y0, y1, z0, z1) => [0, 1, 2, 3, 4, 5, 6, 7].map(i => v3(i & 1 ? x1 : x0, i & 2 ? y1 : y0, i & 4 ? z1 : z0));
+
+// Local bottle space: x across, y along the height (0 at the base), z front/back.
+// A placement turns that into the world: standing or lying on a side, turned (yaw), moved on the table.
+function placer(b, pl) {
+  const L = b.h + b.ch, cy = Math.cos(pl.yaw * Math.PI / 180), sy = Math.sin(pl.yaw * Math.PI / 180);
+  const pose = p => pl.lying ? v3(p.y - L / 2, p.x + b.w / 2, p.z) : p;
+  const poseN = n => pl.lying ? v3(n.y, n.x, n.z) : n;
+  const yaw = q => v3(q.x * cy - q.z * sy, q.y, q.x * sy + q.z * cy);
+  return { pt: p => { const q = yaw(pose(p)); return v3(q.x + pl.x, q.y, q.z + pl.z); }, nrm: n => yaw(poseN(n)) };
+}
+// Footprint on the table (for keeping the bottles apart)
+function footprint(b, pl) {
+  const P = placer(b, pl), L = b.h + b.ch;
+  const pts = pl.lying ? [v3(0, 0, -b.d / 2), v3(0, L, -b.d / 2), v3(0, L, b.d / 2), v3(0, 0, b.d / 2)] : [v3(-b.w / 2, 0, -b.d / 2), v3(b.w / 2, 0, -b.d / 2), v3(b.w / 2, 0, b.d / 2), v3(-b.w / 2, 0, b.d / 2)];
+  if (pl.lying) pts.forEach(p => { p.x = -b.w / 2; });
+  return pts.map(p => { const q = P.pt(p); return { x: q.x, y: q.z }; });
+}
+function overlap2(a, b) {
+  const axes = [a, b].flatMap(poly => poly.map((p, i) => { const q = poly[(i + 1) % poly.length]; return { x: q.y - p.y, y: p.x - q.x }; }));
+  return axes.every(ax => {
+    const pa = a.map(p => p.x * ax.x + p.y * ax.y), pb = b.map(p => p.x * ax.x + p.y * ax.y);
+    return Math.max(...pa) > Math.min(...pb) && Math.max(...pb) > Math.min(...pa);
+  });
+}
+// Slide bottle B away from A until they no longer intersect, then leave a small gap
+function separate(c, gap) {
+  const dx = c.B.x - c.A.x, dz = c.B.z - c.A.z, l = Math.hypot(dx, dz) || 1, ux = l > .01 ? dx / l : 1, uz = l > .01 ? dz / l : 0;
+  for (let k = 0; k < 400 && overlap2(footprint(BOT.A, c.A), footprint(BOT.B, c.B)); k++) { c.B.x += ux * .1; c.B.z += uz * .1; }
+  c.B.x += ux * gap; c.B.z += uz * gap;
+}
+
+/* ================= Rendering ================= */
+
+const LIGHTS = { left: norm(v3(-.65, 1, .55)), right: norm(v3(.65, 1, .55)) };
+const S = { style: 'grey', light: 'left', label: true, shine: true, table: false };
+const TONES = { grey: ['#f3f1eb', '#cfccc5', '#9b9892', '#66645f'], pencil: ['url(#q1)', 'url(#q2)', 'url(#q3)', 'url(#q4)'] };
+function mix(hex, t) {
+  // t: 0 = darkest, 1 = lightest version of the tint
+  const n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  const k = .45 + .7 * t, ch = v => Math.max(0, Math.min(255, Math.round(t > .8 ? v + (255 - v) * (t - .8) * 2.5 : v * k)));
+  return 'rgb(' + ch(r) + ',' + ch(g) + ',' + ch(b) + ')';
+}
+
+function camera(cam) {
+  const az = cam.az * Math.PI / 180, el = cam.el * Math.PI / 180, D = cam.D || 34;
+  const target = v3(cam.tx || 0, cam.ty || 3, cam.tz || 0);
+  const pos = v3(target.x + D * Math.sin(az) * Math.cos(el), target.y + D * Math.sin(el), target.z + D * Math.cos(az) * Math.cos(el));
+  const f = norm(sub(target, pos)), r = norm(cross(f, v3(0, 1, 0))), u = cross(r, f);
+  return { pos, proj: p => { const d = sub(p, pos), z = dot(d, f); return { x: dot(d, r) / z, y: -dot(d, u) / z, z }; } };
+}
+
+// Build every visible face of both bottles (body and cap) in camera space
+function scene(c) {
+  const cam = camera(c.cam), L = LIGHTS[S.light];
+  const boxes = [];
+  ['A', 'B'].forEach(k => {
+    const b = BOT[k], P = placer(b, c[k]);
+    boxes.push({ k, part: 'body', P, b, local: corners(-b.w / 2, b.w / 2, 0, b.h, -b.d / 2, b.d / 2) });
+    boxes.push({ k, part: 'cap', P, b, local: corners(-b.cw / 2, b.cw / 2, b.h, b.h + b.ch, -b.cw / 2, b.cw / 2) });
+  });
+  boxes.forEach(bx => {
+    bx.world = bx.local.map(bx.P.pt);
+    const cen = bx.world.reduce((s, p) => v3(s.x + p.x / 8, s.y + p.y / 8, s.z + p.z / 8), v3(0, 0, 0));
+    bx.dist = Math.hypot(cen.x - cam.pos.x, cen.y - cam.pos.y, cen.z - cam.pos.z);
+    bx.faces = FACES.map((F, fi) => {
+      const n = bx.P.nrm(F.n), pts = F.c.map(i => bx.world[i]);
+      const fc = pts.reduce((s, p) => v3(s.x + p.x / 4, s.y + p.y / 4, s.z + p.z / 4), v3(0, 0, 0));
+      return { fi, n, pts, vis: dot(n, sub(cam.pos, fc)) > 1e-6, light: dot(n, L) };
+    });
+  });
+  return { cam, boxes: boxes.sort((a, b) => b.dist - a.dist) };
+}
+const toneIndex = v => v > .72 ? 0 : v > .3 ? 1 : v > -.15 ? 2 : 3;
+
+// Draw a composition into a W × H frame. Returns SVG markup.
+function draw(c, W, H, opt) {
+  const sc = scene(c), o = opt || {};
+  // Fit all corners into the frame
+  const all = sc.boxes.flatMap(bx => bx.world.map(sc.cam.proj));
+  const xs = all.map(p => p.x), ys = all.map(p => p.y);
+  const bw = Math.max(...xs) - Math.min(...xs), bh = Math.max(...ys) - Math.min(...ys);
+  const zoom = (c.crop || 1) * Math.min(W * .84 / bw, H * .84 / bh);
+  const mx = (Math.max(...xs) + Math.min(...xs)) / 2 + (c.cropDx || 0) * bw, my = (Math.max(...ys) + Math.min(...ys)) / 2 + (c.cropDy || 0) * bh;
+  const scr = p => { const q = sc.cam.proj(p); return { x: W / 2 + (q.x - mx) * zoom, y: H / 2 + (q.y - my) * zoom }; };
+  const path = pts => 'M' + pts.map(p => { const q = scr(p); return f1(q.x) + ' ' + f1(q.y); }).join('L') + 'Z';
+  const sw = Math.max(1, W / 260);
+  let s = '<rect width="' + W + '" height="' + H + '" fill="#fff"/>';
+  if (S.table) {
+    // A faint line where the table top meets the back of the picture: the horizon of the table plane
+    const y0 = scr(v3(0, 0, -12)).y;
+    s += '<path d="M0 ' + f1(y0) + 'H' + W + '" stroke="#cfcbc2" stroke-width="' + sw + '"/>';
+  }
+  sc.boxes.forEach(bx => {
+    const b = bx.b;
+    bx.faces.forEach(F => {
+      if (!F.vis) return;
+      const t = toneIndex(F.light);
+      const fill = S.style === 'outline' ? '#fff' : S.style === 'colour' ? mix(b.tint, [1, .78, .55, .32][t] * (bx.part === 'cap' ? .8 : 1)) : TONES[S.style][t];
+      s += '<path d="' + path(F.pts) + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="' + sw + '" stroke-linejoin="round"/>';
+      if (bx.part !== 'body') return;
+      // Label on the front face (local +z)
+      if (S.label && F.fi === 5) {
+        const z = b.d / 2 + .001, lb = [v3(-b.w * .3, b.h * .32, z), v3(b.w * .3, b.h * .32, z), v3(b.w * .3, b.h * .58, z), v3(-b.w * .3, b.h * .58, z)].map(bx.P.pt);
+        s += '<path d="' + path(lb) + '" fill="' + (S.style === 'outline' ? '#fff' : 'rgba(255,255,255,.75)') + '" stroke="' + INK + '" stroke-width="' + sw * .7 + '"/>';
+      }
+      // Glass highlight: a thin strip near one edge of the brightest side face
+      if (S.shine && F.fi !== 2 && F.fi !== 3 && t <= 1 && S.style !== 'outline') {
+        const best = bx.faces.filter(G => G.vis && G.fi !== 2 && G.fi !== 3).sort((a, c2) => c2.light - a.light)[0];
+        if (best === F) {
+          const along = F.fi < 2 ? 'z' : 'x', half = along === 'z' ? b.d / 2 : b.w / 2, side = F.fi < 2 ? (F.fi === 0 ? -b.w / 2 - .001 : b.w / 2 + .001) : (F.fi === 4 ? -b.d / 2 - .001 : b.d / 2 + .001);
+          const a0 = -half + half * .28, a1 = -half + half * .44, y0 = b.h * .08, y1 = b.h * .92;
+          const mk = (a, y) => along === 'z' ? v3(side, y, a) : v3(a, y, side);
+          s += '<path d="' + path([mk(a0, y0), mk(a1, y0), mk(a1, y1), mk(a0, y1)].map(bx.P.pt)) + '" fill="#fff" fill-opacity=".85" stroke="none"/>';
+        }
+      }
+    });
+  });
+  if (o.frame !== false) s += '<rect x=".5" y=".5" width="' + (W - 1) + '" height="' + (H - 1) + '" fill="none" stroke="#141414" stroke-width="' + sw * .8 + '"/>';
+  return s;
+}
+
+/* ================= Composition ideas ================= */
+
+function mulberry(seed) {
+  let t = seed >>> 0;
+  return () => { t += 0x6D2B79F5; let r = Math.imul(t ^ t >>> 15, 1 | t); r ^= r + Math.imul(r ^ r >>> 7, 61 | r); return ((r ^ r >>> 14) >>> 0) / 4294967296; };
+}
+const newSeed = () => Math.floor(Math.random() * 1e9);
+const rr = (rnd, a, b) => a + rnd() * (b - a);
+
+// Each idea sets where the bottles go, how they are turned, and where we look from.
+// 'swap' exchanges the roles of the two bottles for variety.
+const IDEAS = [
+  { name: 'Side by side, square-on', tags: ['Balance', 'Repetition', 'Simple viewpoint'],
+    text: 'Both bottles stand side by side, facing straight forward. A calm, stable starting point: compare their heights and widths directly.',
+    gen: rnd => ({ A: { x: -2.6, z: 0, yaw: 0 }, B: { x: 2.8, z: 0, yaw: 0 }, cam: { az: rr(rnd, -6, 6), el: rr(rnd, 14, 22) }, gap: rr(rnd, .4, 1.2) }) },
+  { name: 'Side by side, both turned', tags: ['Two-point perspective', 'Rhythm'],
+    text: 'Both bottles are turned to the same angle, so you see two side faces of each. Their receding edges point to the same vanishing points.',
+    gen: rnd => { const y = rr(rnd, 28, 52) * (rnd() < .5 ? -1 : 1); return { A: { x: -2.6, z: 0, yaw: y }, B: { x: 2.8, z: 0, yaw: y }, cam: { az: rr(rnd, -10, 10), el: rr(rnd, 16, 26) }, gap: rr(rnd, .6, 1.5) }; } },
+  { name: 'Tall behind, short in front', tags: ['Overlap', 'Depth', 'Contrast of size'],
+    text: 'The shorter bottle stands in front and hides part of the taller one. Overlap is the clearest way to show which object is nearer.',
+    gen: rnd => ({ A: { x: rr(rnd, -1.5, 1.5), z: -2.5, yaw: rr(rnd, -40, 40) }, B: { x: rr(rnd, -1.5, 1.5), z: 2.2, yaw: rr(rnd, -40, 40) }, cam: { az: rr(rnd, -15, 15), el: rr(rnd, 12, 22) }, gap: .3 }) },
+  { name: 'Short behind, tall in front', tags: ['Overlap', 'Hierarchy'],
+    text: 'Now the tall bottle is in front and the short one peeks out from behind it. Only part of the back bottle is visible: draw the front one first.',
+    gen: rnd => ({ A: { x: rr(rnd, -1.5, 1.5), z: 2.2, yaw: rr(rnd, -40, 40) }, B: { x: rr(rnd, -2.5, 2.5), z: -2.5, yaw: rr(rnd, -40, 40) }, cam: { az: rr(rnd, -20, 20), el: rr(rnd, 12, 22) }, gap: .3 }) },
+  { name: 'Far apart, different angles', tags: ['White space', 'Asymmetrical balance'],
+    text: 'Plenty of space between the bottles, each turned to a different angle. The empty space between them becomes part of the composition.',
+    gen: rnd => ({ A: { x: -rr(rnd, 5, 7), z: rr(rnd, -2, 2), yaw: rr(rnd, -60, 60) }, B: { x: rr(rnd, 5, 7), z: rr(rnd, -2, 2), yaw: rr(rnd, -60, 60) }, cam: { az: rr(rnd, -10, 10), el: rr(rnd, 14, 24) }, gap: 0 }) },
+  { name: 'One lying down', tags: ['Contrast of direction', 'Horizontal vs vertical'],
+    text: 'One bottle lies on its side while the other stands. A vertical and a horizontal form make a strong contrast.',
+    gen: rnd => ({ A: { x: -2, z: rr(rnd, -1, 1), yaw: rr(rnd, -30, 30) }, B: { x: 3, z: rr(rnd, 0, 2), yaw: rr(rnd, -60, 60), lying: true }, cam: { az: rr(rnd, -20, 20), el: rr(rnd, 18, 28) }, gap: rr(rnd, .3, 1), swap: rnd() < .5 }) },
+  { name: 'Both lying down', tags: ['Movement', 'Diagonals'],
+    text: 'Both bottles lie on their sides at different angles. The long diagonals give the drawing movement.',
+    gen: rnd => ({ A: { x: -2, z: -1, yaw: rr(rnd, -60, -15), lying: true }, B: { x: 2.5, z: 2, yaw: rr(rnd, 15, 70), lying: true }, cam: { az: rr(rnd, -15, 15), el: rr(rnd, 22, 34) }, gap: rr(rnd, .3, 1) }) },
+  { name: 'Corners touching', tags: ['Unity', 'Symmetry'],
+    text: 'The bottles turn towards each other until their corners almost touch, making a V shape that holds them together as a pair.',
+    gen: rnd => { const y = rr(rnd, 25, 45); return { A: { x: -2, z: 0, yaw: y }, B: { x: 2, z: 0, yaw: -y }, cam: { az: rr(rnd, -8, 8), el: rr(rnd, 15, 25) }, gap: .05 }; } },
+  { name: 'One directly behind the other', tags: ['Strong overlap', 'Depth'],
+    text: 'Lined up one behind the other so the back bottle is mostly hidden. Only its top and one edge show: a test of drawing what you actually see.',
+    gen: rnd => ({ A: { x: 0, z: -3, yaw: rr(rnd, -20, 20) }, B: { x: rr(rnd, -.8, .8), z: 2, yaw: rr(rnd, -20, 20) }, cam: { az: rr(rnd, -12, 12), el: rr(rnd, 10, 18) }, gap: .3, swap: rnd() < .5 }) },
+  { name: "Bird's-eye view", tags: ['High viewpoint', 'Top faces'],
+    text: 'Looking down from high above. The top faces and caps become the main shapes, and the bottles taper towards the bottom of the picture.',
+    gen: rnd => ({ A: { x: -2.4, z: rr(rnd, -1, 1), yaw: rr(rnd, -45, 45) }, B: { x: 2.6, z: rr(rnd, -1, 1), yaw: rr(rnd, -45, 45) }, cam: { az: rr(rnd, -20, 20), el: rr(rnd, 52, 68), D: 30 }, gap: rr(rnd, .4, 1.5) }) },
+  { name: 'Low eye level', tags: ['Low viewpoint', 'Monumental'],
+    text: 'Your eye is just above the table. You barely see the tops, and the bottles look tall and monumental.',
+    gen: rnd => ({ A: { x: -2.4, z: rr(rnd, -1.5, 1.5), yaw: rr(rnd, -45, 45) }, B: { x: 2.6, z: rr(rnd, -1.5, 1.5), yaw: rr(rnd, -45, 45) }, cam: { az: rr(rnd, -15, 15), el: rr(rnd, 3, 7), ty: 3.5 }, gap: rr(rnd, .3, 1.2) }) },
+  { name: 'Turned opposite ways', tags: ['Contrast of angle', 'Variety'],
+    text: 'One bottle faces left and the other right, so you see different faces of each. Their receding edges head to opposite vanishing points.',
+    gen: rnd => ({ A: { x: -2.6, z: rr(rnd, -1, 1), yaw: rr(rnd, 20, 45) }, B: { x: 2.8, z: rr(rnd, -1, 1), yaw: rr(rnd, 95, 135) }, cam: { az: rr(rnd, -10, 10), el: rr(rnd, 15, 25) }, gap: rr(rnd, .4, 1.2) }) },
+  { name: 'Diagonal: near and far', tags: ['Scale and distance', 'Depth'],
+    text: 'One bottle close on one side, the other further back on the other side. The far bottle looks smaller even though it is the same size: perspective at work.',
+    gen: rnd => ({ A: { x: -3.5, z: 4, yaw: rr(rnd, -40, 40) }, B: { x: 4.5, z: -8, yaw: rr(rnd, -40, 40) }, cam: { az: rr(rnd, -8, 8), el: rr(rnd, 14, 22), tz: -1 }, gap: 0, swap: rnd() < .5 }) },
+  { name: 'Lying in front of standing', tags: ['Overlap', 'Contrast of direction'],
+    text: 'One bottle lies across the front of the other, overlapping its base. Horizontal in front, vertical behind.',
+    gen: rnd => ({ A: { x: rr(rnd, -1, 1), z: -1.8, yaw: rr(rnd, -30, 30) }, B: { x: 0, z: 2.6, yaw: rr(rnd, -25, 25), lying: true }, cam: { az: rr(rnd, -15, 15), el: rr(rnd, 16, 26) }, gap: .2, swap: rnd() < .4 }) },
+  { name: 'Close-up, cropped', tags: ['Cropping', 'Emphasis', 'Scale'],
+    text: 'Move in close so the bottles fill the frame and run off the edges. Cropping makes an ordinary arrangement feel bold and modern.',
+    gen: rnd => ({ A: { x: -1.6, z: 0, yaw: rr(rnd, -40, 40) }, B: { x: 1.8, z: 1.2, yaw: rr(rnd, -40, 40) }, cam: { az: rr(rnd, -20, 20), el: rr(rnd, 14, 28), D: 26 }, gap: .2, crop: rr(rnd, 1.5, 1.9), cropDx: rr(rnd, -.18, .18), cropDy: rr(rnd, -.2, .05) }) },
+];
+
+const comps = IDEAS.map(() => ({ seed: newSeed(), locked: false, c: null }));
+function build(i) {
+  const st = comps[i], rnd = mulberry(st.seed), raw = IDEAS[i].gen(rnd);
+  let c = { A: { ...raw.A }, B: { ...raw.B }, cam: { ...raw.cam }, crop: raw.crop, cropDx: raw.cropDx, cropDy: raw.cropDy };
+  if (raw.swap) { const t = c.A; c.A = c.B; c.B = t; }
+  separate(c, raw.gap || 0);
+  st.c = c; st.base = JSON.parse(JSON.stringify(c.cam));
+}
+let sel = 0;
+
+/* ================= Page ================= */
+
+function drawThumbs() {
+  $('thumbs').innerHTML = comps.map((st, i) => '<button type="button" aria-pressed="' + (i === sel) + '" aria-label="Composition ' + (i + 1) + ': ' + IDEAS[i].name + '"><span class="n">' + (i + 1) + '</span>' + (st.locked ? '<span class="lock" aria-hidden="true">🔒</span>' : '') + '<svg viewBox="0 0 250 200" aria-hidden="true">' + draw(st.c, 250, 200) + '</svg></button>').join('');
+  $('thumbs').querySelectorAll('button').forEach((b, i) => b.addEventListener('click', () => { sel = i; drawThumbs(); drawBig(); }));
+}
+function drawBig() {
+  const st = comps[sel], idea = IDEAS[sel];
+  $('bigSvg').innerHTML = draw(st.c, VW, VH);
+  $('aboutTitle').textContent = (sel + 1) + '. ' + idea.name;
+  $('aboutText').textContent = idea.text;
+  $('aboutTags').innerHTML = idea.tags.map(t => '<span>' + t + '</span>').join('');
+  $('lockOne').textContent = st.locked ? 'Unlock' : 'Lock';
+}
+function drawAll() { drawThumbs(); drawBig(); drawPair(); drawDemo(); }
+
+function drawPair() {
+  const c = { A: { x: -2.8, z: 0, yaw: -25 }, B: { x: 2.8, z: 0, yaw: -25 }, cam: { az: 0, el: 16 } };
+  separate(c, 1);
+  $('pairSvg').innerHTML = '<g transform="translate(25 0) scale(.9)">' + draw(c, VW, VH, { frame: false }).replace('<rect width="500" height="400" fill="#fff"/>', '') + '</g>' +
+    '<text x="12" y="372" style="font:700 15px Archivo,sans-serif;fill:#555">A: ' + BOT.A.w + ' × ' + BOT.A.d + ' × ' + (BOT.A.h + BOT.A.ch).toFixed(1) + ' cm</text>' +
+    '<text x="12" y="392" style="font:700 15px Archivo,sans-serif;fill:#555">B: ' + BOT.B.w + ' × ' + BOT.B.d + ' × ' + (BOT.B.h + BOT.B.ch).toFixed(1) + ' cm</text>';
+}
+
+// Four steps for drawing one bottle, shown with bottle A
+function drawDemo() {
+  const steps = [
+    ['Draw the box lightly with a ruler: verticals straight up, the other edges towards the vanishing points.', { style: 'outline', label: false, shine: false, cap: false }],
+    ['Find the centre of the top with its diagonals and build the cap on it.', { style: 'outline', label: false, shine: false, cap: true }],
+    ['Shade: the face towards the light lightest, the top light, the far side darkest.', { style: 'grey', label: false, shine: false, cap: true }],
+    ['Add the label and leave a white strip of highlight on the lit face for glass.', { style: 'grey', label: true, shine: true, cap: true }],
+  ];
+  const keep = { ...S }, chKeep = BOT.A.ch;
+  $('stepsDemo').innerHTML = steps.map(([txt, o], k) => {
+    Object.assign(S, { style: o.style, label: o.label, shine: o.shine, table: false });
+    if (!o.cap) BOT.A.ch = .0001;
+    const c = { A: { x: 0, z: 0, yaw: 32 }, B: { x: 60, z: 60, yaw: 0 }, cam: { az: 0, el: 18 } };
+    // Only bottle A: hide B far outside the view by drawing A alone
+    const svgBody = drawSingle(c);
+    BOT.A.ch = chKeep;
+    return '<figure class="paper"><svg viewBox="0 0 300 300" aria-hidden="true">' + svgBody + '</svg><figcaption><b>' + (k + 1) + '.</b> ' + txt + '</figcaption></figure>';
+  }).join('');
+  Object.assign(S, keep);
+}
+function drawSingle(c) {
+  // Render bottle A on its own by temporarily giving B zero size
+  const keepB = BOT.B;
+  BOT.B = { w: .0001, d: .0001, h: .0001, cw: .0001, ch: .0001, tint: '#fff' };
+  c.B = { x: 0, z: 0, yaw: 0 };
+  const s = draw(c, 300, 300, { frame: false });
+  BOT.B = keepB;
+  return s;
+}
+
+/* ================= Controls ================= */
+
+function sliders(key) {
+  const b = BOT[key], el = $('ctl' + key);
+  const fields = [['h', 'Body height', 3, 14], ['w', 'Width', 1.5, 7], ['d', 'Depth', 1, 6], ['ch', 'Cap height', .5, 4], ['cw', 'Cap width', .6, 4]];
+  el.insertAdjacentHTML('beforeend', fields.map(([f, label, mn, mx]) => '<label class="range"><span>' + label + ' <output data-o="' + key + f + '">' + b[f] + ' cm</output></span><input type="range" min="' + mn + '" max="' + mx + '" step=".1" value="' + b[f] + '" data-k="' + key + '" data-f="' + f + '"></label>').join(''));
+  el.querySelectorAll('input[type="range"]').forEach(inp => inp.addEventListener('input', () => {
+    BOT[key][inp.dataset.f] = +inp.value;
+    if (inp.dataset.f === 'cw') BOT[key].cw = Math.min(BOT[key].cw, BOT[key].w, BOT[key].d);
+    el.querySelector('[data-o="' + key + inp.dataset.f + '"]').textContent = (+inp.value).toFixed(1) + ' cm';
+    saveBottles();
+    comps.forEach((_, i) => build(i));
+    drawAll();
+  }));
+}
+sliders('A'); sliders('B');
+$('ctlB').insertAdjacentHTML('beforeend', '<button type="button" class="btn ghost" id="resetBottles" style="margin-top:6px">Reset both bottles</button>');
+$('resetBottles').addEventListener('click', () => { BOT = JSON.parse(JSON.stringify(DEFAULT_BOTTLES)); saveBottles(); location.reload(); });
+
+function pickButtons(el, items, current, onPick) {
+  el.innerHTML = '';
+  items.forEach(([key, label]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tbtn'; b.textContent = label;
+    b.setAttribute('aria-pressed', String(key === current));
+    b.addEventListener('click', () => { el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b))); onPick(key); });
+    el.appendChild(b);
+  });
+}
+pickButtons($('style'), [['grey', 'Grey tones'], ['pencil', 'Pencil'], ['outline', 'Outline'], ['colour', 'Colour']], S.style, k => { S.style = k; drawAll(); });
+pickButtons($('light'), [['left', 'Light from left'], ['right', 'Light from right']], S.light, k => { S.light = k; drawAll(); });
+[['oLabel', 'label'], ['oShine', 'shine'], ['oTable', 'table']].forEach(([id, k]) => { $(id).checked = S[k]; $(id).addEventListener('change', () => { S[k] = $(id).checked; drawAll(); }); });
+$('regenAll').addEventListener('click', () => { comps.forEach((st, i) => { if (!st.locked) { st.seed = newSeed(); build(i); } }); drawThumbs(); drawBig(); });
+$('regenOne').addEventListener('click', () => { comps[sel].seed = newSeed(); build(sel); drawThumbs(); drawBig(); });
+$('lockOne').addEventListener('click', () => { comps[sel].locked = !comps[sel].locked; drawThumbs(); drawBig(); });
+$('resetView').addEventListener('click', () => { comps[sel].c.cam = JSON.parse(JSON.stringify(comps[sel].base)); drawThumbs(); drawBig(); });
+
+// Drag the large view to orbit the camera
+const big = $('bigSvg');
+let orbit = null;
+big.addEventListener('pointerdown', e => { orbit = { x: e.clientX, y: e.clientY }; big.setPointerCapture(e.pointerId); });
+big.addEventListener('pointermove', e => {
+  if (!orbit) return;
+  const cam = comps[sel].c.cam;
+  cam.az -= (e.clientX - orbit.x) * .4;
+  cam.el = Math.max(2, Math.min(80, cam.el + (e.clientY - orbit.y) * .3));
+  orbit = { x: e.clientX, y: e.clientY };
+  drawBig();
+});
+const endOrbit = () => { if (orbit) { orbit = null; drawThumbs(); } };
+big.addEventListener('pointerup', endOrbit);
+big.addEventListener('pointercancel', endOrbit);
+
+/* ================= Printing ================= */
+
+let PRM = 'examples';
+pickButtons($('prMode'), [['examples', 'Examples sheet (15)'], ['blank', 'Blank sheet (15 frames)'], ['large', 'Selected, full page']], PRM, k => { PRM = k; });
+const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+function sheet(withEx) {
+  // 3 across × 5 down frames, 5:4, in millimetres
+  let s = '<svg viewBox="0 0 210 297" xmlns="http://www.w3.org/2000/svg"><rect width="210" height="297" fill="#fff"/>';
+  s += '<text x="12" y="16" style="font:800 4.2px Archivo,sans-serif;letter-spacing:.6px;fill:#141414">PERFUME BOTTLES · 15 COMPOSITIONS</text>';
+  s += '<text x="12" y="22" style="font:400 3px Archivo,sans-serif;fill:#444">The same two cuboid bottles, arranged differently each time. Shade each face; no table or shadows needed.</text>';
+  s += '<text x="140" y="16" style="font:700 3px Archivo,sans-serif;fill:#141414">NAME</text><path d="M149 16.3H198" stroke="#141414" stroke-width=".3"/>';
+  const fw = 58, fh = 46.4, gx = (186 - 3 * fw) / 2;
+  for (let i = 0; i < 15; i++) {
+    const x = 12 + (i % 3) * (fw + gx), y = 28 + Math.floor(i / 3) * (fh + 7.5);
+    if (withEx) s += '<svg x="' + f1(x) + '" y="' + f1(y) + '" width="' + fw + '" height="' + fh + '" viewBox="0 0 250 200">' + draw(comps[i].c, 250, 200, { frame: false }) + '</svg>';
+    s += '<rect x="' + f1(x) + '" y="' + f1(y) + '" width="' + fw + '" height="' + fh + '" fill="none" stroke="#141414" stroke-width=".35"/>';
+    s += '<text x="' + f1(x) + '" y="' + f1(y + fh + 3.6) + '" style="font:700 2.7px Archivo,sans-serif;fill:#333">' + (i + 1) + '. ' + esc(IDEAS[i].name) + '</text>';
+  }
+  return s + '</svg>';
+}
+function largePage() {
+  const idea = IDEAS[sel];
+  let s = '<svg viewBox="0 0 210 297" xmlns="http://www.w3.org/2000/svg"><rect width="210" height="297" fill="#fff"/>';
+  s += '<text x="12" y="16" style="font:800 4.2px Archivo,sans-serif;letter-spacing:.6px;fill:#141414">PERFUME BOTTLES · ' + (sel + 1) + '. ' + esc(idea.name.toUpperCase()) + '</text>';
+  s += '<svg x="12" y="24" width="186" height="148.8" viewBox="0 0 500 400">' + draw(comps[sel].c, 500, 400) + '</svg>';
+  s += '<foreignObject x="12" y="180" width="186" height="60"><div xmlns="http://www.w3.org/1999/xhtml" style="font:4px Archivo,sans-serif;color:#222;line-height:1.4">' + esc(idea.text) + '<br/><b>' + idea.tags.map(esc).join(' · ') + '</b></div></foreignObject>';
+  return s + '</svg>';
+}
+$('printBtn').addEventListener('click', () => {
+  $('printArea').innerHTML = PRM === 'large' ? largePage() : sheet(PRM === 'examples');
+  window.print();
+});
+
+/* ================= Start ================= */
+
+comps.forEach((_, i) => build(i));
+drawAll();
+
+})();
+</script>
+</body>
+</html>
