@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>Word Image Board</title>
+<title>Chaos Picture List</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
@@ -15,111 +15,51 @@
 .brief { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: start; }
 .brief ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 15px; }
 .brief h3 { margin: 0 0 8px; font-size: 15px; }
-.word-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.word-row input { font: inherit; font-size: 22px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; min-height: 48px; width: 220px; padding: 4px 12px; border: 2px solid var(--border); border-radius: 10px; background: var(--panel); color: var(--ink); }
 
-/* ---------- Vocabulary ---------- */
-.vocab { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
-.vocab dl { margin: 0; display: grid; gap: 8px; }
-.vocab dt { font-weight: 800; font-size: 14px; }
-.vocab dd { margin: 0 0 4px; font-size: 13px; color: var(--muted); }
+/* ---------- Matrix ---------- */
+.matrix-wrap { overflow-x: auto; }
+.matrix { border-collapse: collapse; font-size: 13px; min-width: 560px; }
+.matrix th { font-weight: 700; padding: 6px 8px; text-align: center; }
+.matrix th.row { text-align: right; white-space: nowrap; }
+.matrix td { border: 1px solid var(--border); padding: 0; width: 76px; height: 40px; text-align: center; background: var(--panel); }
+.matrix td button { width: 100%; height: 100%; min-height: 40px; border: 0; background: none; color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
+.matrix td button:hover { background: var(--bg); }
+.matrix td.has button { font-weight: 700; color: var(--accent); }
+.matrix td.chosen { background: color-mix(in srgb, #2E8B57 22%, var(--panel)); }
+.matrix td.chosen button { color: var(--ink); }
+.matrix td.active { outline: 3px solid var(--accent); outline-offset: -3px; }
+.matrix td.none button { color: var(--muted); cursor: default; }
+.legend { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
 
-/* ---------- Board ---------- */
-.board-tools { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 14px; }
-.board { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
-.slot { display: flex; flex-direction: column; gap: 6px; }
-.slot-box {
-  position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 4px;
-  background: #fbfaf6; border: 2px dashed #bdb9b0; cursor: pointer; padding: 0; font: inherit; color: #555;
-}
-.slot-box:hover, .slot-box.over { border-color: var(--accent); }
-.slot-box.filled { border: 1px solid #141414; border-style: solid; }
-.slot-box img { position: absolute; max-width: none; pointer-events: none; user-select: none; }
-.slot-box .num { position: absolute; left: 4px; top: 3px; z-index: 2; font-size: 11px; font-weight: 800; background: rgba(255, 255, 255, .85); color: #141414; border-radius: 4px; padding: 0 5px; }
-.slot-box .empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px; text-align: center; font-size: 12px; }
-.slot-box .empty b { font-size: 22px; line-height: 1; color: #8b8882; }
-.slot-box .plan { font-size: 11px; color: #1F5FBF; font-weight: 700; }
-.slot-tags { font-size: 12px; font-weight: 700; min-height: 1.3em; }
-.slot-tags.missing { color: #D2402A; font-weight: 600; }
+/* ---------- List ---------- */
+.tools { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 14px; }
+.tools .bgrid { display: flex; flex-wrap: wrap; gap: 6px; }
+.tools select { min-height: 44px; font: inherit; font-size: 14px; padding: 6px 10px; border: 2px solid var(--border); border-radius: 10px; background: var(--panel); color: var(--ink); }
+.count { font-size: 14px; color: var(--muted); }
+.list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.pic { display: flex; flex-direction: column; background: var(--panel); border: 2px solid var(--border); border-radius: 14px; overflow: hidden; }
+.pic.on { border-color: #2E8B57; box-shadow: 0 0 0 2px #2E8B57; }
+.pic .img { position: relative; aspect-ratio: 1; background: #ddd; overflow: hidden; }
+.pic .img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pic .badge { position: absolute; left: 8px; top: 8px; background: #2E8B57; color: #fff; font-weight: 800; font-size: 13px; border-radius: 999px; padding: 3px 10px; }
+.pic .body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.pic .pair { font-size: 17px; font-weight: 800; }
+.pic .pair span { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-left: 6px; }
+.pic p { margin: 0; font-size: 14px; line-height: 1.45; }
+.pic .src { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.pic .src a { color: inherit; }
+.pic .choose { margin-top: auto; min-height: 44px; border-radius: 10px; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; border: 2px solid var(--accent); background: var(--accent); color: var(--accent-ink); }
+.pic.on .choose { background: transparent; color: var(--ink); border-color: #2E8B57; }
 
-.checks { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 16px; margin-top: 20px; align-items: start; }
-.checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
-.checklist li { display: flex; gap: 8px; align-items: flex-start; }
-.checklist li::before { content: "✗"; color: #D2402A; font-weight: 800; width: 16px; flex: none; }
-.checklist li.ok::before { content: "✓"; color: #2E8B57; }
-.counts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
-.counts h4 { margin: 0 0 6px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-.bar { display: grid; grid-template-columns: 110px 1fr 22px; gap: 6px; align-items: center; font-size: 13px; margin-bottom: 3px; }
-.bar i { display: block; height: 10px; background: var(--bg); border-radius: 99px; overflow: hidden; }
-.bar i span { display: block; height: 100%; background: var(--accent); }
-.bar.zero { color: var(--muted); }
+/* ---------- Selection bar ---------- */
+.selbar { position: sticky; bottom: 0; z-index: 5; margin-top: 18px; background: var(--panel); border: 1px solid var(--border); border-radius: 14px 14px 0 0; box-shadow: 0 -6px 18px rgba(0, 0, 0, .12); padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.selbar b { font-size: 18px; }
+.selbar .warn { color: #D2402A; font-size: 13px; font-weight: 600; }
+.selbar .ok { color: #2E8B57; font-size: 13px; font-weight: 700; }
+.selbar .spacer { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+.selbar .btn { min-height: 40px; padding: 6px 14px; font-size: 13px; }
 
-/* ---------- Ideas ---------- */
-.idea-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.ideas { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
-.idea { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
-.idea b { font-size: 15px; }
-.idea .tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--bg); border: 1px solid var(--border); margin-right: 4px; }
-.idea .kind { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.idea p { margin: 0; color: var(--muted); font-size: 13px; }
-.idea .acts { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
-.idea .acts a, .idea .acts button { min-height: 36px; padding: 0 12px; display: inline-flex; align-items: center; border-radius: 8px; border: 1.5px solid var(--border); background: var(--panel); color: var(--ink); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; }
-.idea .acts a:hover, .idea .acts button:hover { border-color: var(--ink); }
-
-/* ---------- Finder ---------- */
-.finder-bar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 10px; }
-.finder-bar input[type="search"] { flex: 1 1 260px; min-height: 44px; font: inherit; font-size: 16px; padding: 6px 12px; border: 2px solid var(--border); border-radius: 10px; background: var(--panel); color: var(--ink); }
-.finder-bar select { min-height: 44px; font: inherit; font-size: 14px; padding: 6px 10px; border: 2px solid var(--border); border-radius: 10px; background: var(--panel); color: var(--ink); }
-.finder-bar .bgrid { display: flex; gap: 6px; }
-.results { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-top: 10px; }
-.res { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
-.res .thumb { aspect-ratio: 1; background: #eee; overflow: hidden; }
-.res .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.res .meta { padding: 6px 8px; font-size: 11px; color: var(--muted); line-height: 1.3; flex: 1; overflow: hidden; }
-.res .meta b { display: block; color: var(--ink); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.res .acts { display: flex; gap: 4px; padding: 0 8px 8px; }
-.res .acts button, .res .acts a { flex: 1; min-height: 34px; display: inline-flex; align-items: center; justify-content: center; border-radius: 7px; border: 1.5px solid var(--border); background: var(--panel); color: var(--ink); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; }
-.res .acts button { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.res .acts button:disabled { opacity: .6; }
-.finder-status { font-size: 14px; color: var(--muted); margin: 6px 0 0; min-height: 1.4em; }
-.frow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-
-/* ---------- Editor dialog ---------- */
-dialog.editor { border: 0; border-radius: 16px; padding: 0; width: min(880px, calc(100vw - 24px)); max-height: calc(100vh - 24px); background: var(--panel); color: var(--ink); box-shadow: 0 20px 60px rgba(0, 0, 0, .35); }
-dialog.editor::backdrop { background: rgba(0, 0, 0, .5); }
-.ed { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; padding: 18px; }
-.ed h3 { margin: 0 0 10px; font-size: 18px; }
-.crop { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; background: #fbfaf6; border: 1px solid #141414; cursor: grab; touch-action: none; }
-.crop:active { cursor: grabbing; }
-.crop img { position: absolute; max-width: none; pointer-events: none; user-select: none; }
-.crop .drop { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; text-align: center; padding: 20px; color: #555; font-size: 14px; }
-.ed .fields { display: grid; gap: 10px; align-content: start; }
-.ed label.f { display: grid; gap: 4px; font-size: 13px; font-weight: 700; }
-.ed select, .ed input[type="text"], .ed input[type="url"], .ed textarea { font: inherit; font-size: 14px; font-weight: 400; min-height: 40px; padding: 6px 10px; border: 2px solid var(--border); border-radius: 8px; background: var(--panel); color: var(--ink); width: 100%; }
-.ed textarea { min-height: 64px; resize: vertical; }
-.ed .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.ed .row { display: flex; gap: 8px; flex-wrap: wrap; }
-.ed .row .btn { min-height: 40px; padding: 6px 12px; font-size: 13px; }
-.ed .hintline { font-size: 12px; color: var(--muted); margin: 0; }
-.ed .foot { display: flex; gap: 8px; justify-content: flex-end; padding: 0 18px 18px; flex-wrap: wrap; }
-
-/* ---------- Print ---------- */
-.print-ctl { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 14px; }
-.print-ctl .bgrid { display: flex; gap: 6px; flex-wrap: wrap; }
-.print-ctl .spacer { margin-left: auto; }
 #printArea { display: none; }
-
-@media (max-width: 960px) {
-  .board { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .checks, .vocab { grid-template-columns: 1fr; }
-  .ed { grid-template-columns: 1fr; }
-}
-@media (max-width: 480px) {
-  .board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .counts { grid-template-columns: 1fr; }
-}
-
-/* Printed pages: true-size 6 cm squares */
 @page { size: A4 portrait; margin: 0; }
 @media print {
   html, body { background: #fff; }
@@ -127,18 +67,23 @@ dialog.editor::backdrop { background: rgba(0, 0, 0, .5); }
   #printArea { display: block; }
   .pp { position: relative; width: 210mm; height: 296mm; overflow: hidden; break-after: page; page-break-after: always; font-family: Archivo, Helvetica, Arial, sans-serif; color: #141414; }
   .pp:last-child { break-after: auto; page-break-after: auto; }
-  .pp h2 { position: absolute; left: 15mm; top: 8mm; margin: 0; font-size: 11pt; letter-spacing: .12em; }
-  .pp .sub { position: absolute; left: 15mm; top: 14mm; margin: 0; font-size: 8pt; color: #444; }
+  .pp .h1 { position: absolute; left: 15mm; top: 10mm; font-size: 9pt; font-weight: 700; }
+  .pp .h2 { position: absolute; left: 15mm; top: 15mm; font-size: 13pt; font-weight: 800; letter-spacing: .08em; }
+  .pp .nm { position: absolute; right: 15mm; top: 16mm; font-size: 8pt; font-weight: 700; }
   .sq { position: absolute; width: 60mm; height: 60mm; overflow: hidden; outline: .25mm solid #555; }
-  .sq img { position: absolute; max-width: none; }
-  .sq.blank { background: #f4f2ec; }
-  .cap { position: absolute; width: 60mm; font-size: 7.5pt; line-height: 1.25; }
-  .cap b { font-size: 8pt; }
-  .pp table { position: absolute; left: 12mm; top: 22mm; width: 186mm; border-collapse: collapse; font-size: 8pt; }
-  .pp th, .pp td { border: .2mm solid #999; padding: 1.4mm 1.6mm; text-align: left; vertical-align: top; }
-  .pp th { background: #eee; font-size: 7.5pt; letter-spacing: .04em; text-transform: uppercase; }
+  .sq img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cap { position: absolute; width: 60mm; font-size: 8.5pt; font-weight: 700; }
+  .cap span { font-weight: 400; color: #555; }
+  .pp table { position: absolute; left: 12mm; top: 26mm; width: 186mm; border-collapse: collapse; font-size: 7.5pt; }
+  .pp th, .pp td { border: .2mm solid #999; padding: 1.2mm 1.5mm; text-align: left; vertical-align: top; }
+  .pp th { background: #eee; }
+  .pp .mx { position: absolute; left: 15mm; top: 30mm; border-collapse: collapse; font-size: 9pt; width: auto; }
+  .pp .mx td { width: 24mm; height: 17mm; text-align: center; vertical-align: middle; font-weight: 800; font-size: 11pt; }
+  .pp .mx th { background: none; text-align: center; }
+  .pp .mx td.c { background: #d9eedf; }
   * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 }
+@media (max-width: 560px) { .list { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -176,7 +121,7 @@ dialog.editor::backdrop { background: rgba(0, 0, 0, .5); }
         <ul>
           <li><a href="design-principles.html">Design principles</a></li>
           <li><a href="black-square.html">Black square problem</a></li>
-          <li><a href="word-board.html" aria-current="page">Word image board</a></li>
+          <li><a href="word-board.html" aria-current="page">Chaos picture list</a></li>
           <li><a href="perfume-bottles.html">Perfume bottle compositions</a></li>
           <li><a href="gesture-timer.html">Gesture timer</a></li>
           <li><a href="mark-making.html">Mark-making &amp; media</a></li>
@@ -195,157 +140,59 @@ dialog.editor::backdrop { background: rgba(0, 0, 0, .5); }
 
 <main class="wrap">
   <div class="intro">
-    <h1>Word image board</h1>
-    <p>Collect 18 pictures that show your word literally or conceptually, crop each to a 6 cm square, and label each one with one design element and one design principle. Your board is saved in this browser, so you can come back to it.</p>
+    <h1>Chaos: picture list</h1>
+    <p>Pictures that show the word <b>chaos</b>, each matched to one design element and one design principle from the course's design matrix, with the reason it fits and where it comes from. Choose 18, then print them at 6 × 6 cm on two A4 sheets.</p>
     <ul class="jump">
       <li><a href="#brief">The brief</a></li>
-      <li><a href="#board">Your 18 squares</a></li>
-      <li><a href="#finder">Find pictures</a></li>
-      <li><a href="#ideas">Picture ideas</a></li>
-      <li><a href="#vocab">Elements &amp; principles</a></li>
-      <li><a href="#printSec">Print</a></li>
+      <li><a href="#matrix">Design matrix</a></li>
+      <li><a href="#pictures">Pictures</a></li>
     </ul>
   </div>
 
-  <!-- ---------- Brief ---------- -->
   <section id="brief" aria-labelledby="briefTitle">
     <h2 class="sec-title" id="briefTitle">The brief</h2>
     <div class="brief">
       <div class="panel">
-        <h3>Your word</h3>
-        <div class="word-row"><label class="sr-only" for="word">Your word</label><input id="word" type="text" value="Chaos" maxlength="24" autocomplete="off"></div>
-        <p class="hint">Type your own word if it isn't chaos. Picture ideas are written for chaos; other words get general search ideas.</p>
-      </div>
-      <div class="panel">
-        <h3>Task</h3>
+        <h3>Project 1: Wordscapes · Part 1: Visual Research</h3>
         <ul>
-          <li>Find <b>18 pictures</b> that represent the word <b>literally or conceptually</b>.</li>
-          <li>Cut each into a <b>6 cm × 6 cm square</b> and glue them on the sheet provided.</li>
-          <li>Each picture shows <b>1 design element</b> and <b>1 design principle</b>, for example <b>Colour / Emphasis</b>.</li>
+          <li>Find <b>18 images</b> that represent <b>chaos</b>, literally or conceptually.</li>
+          <li>Each image shows <b>one design principle</b> and <b>one design element</b>.</li>
+          <li>Crop to <b>6 cm × 6 cm</b> squares without stretching or squashing, glue neatly onto the grid template, and label each with its principle and element.</li>
+          <li>Deliverable: <b>2 A4 Visual Research sheets</b>.</li>
         </ul>
       </div>
       <div class="panel">
-        <h3>Literal or conceptual?</h3>
+        <h3>How to use this page</h3>
         <ul>
-          <li><b>Literal</b>: the picture shows the thing itself (a storm, a crowd, a messy room).</li>
-          <li><b>Conceptual</b>: the picture shows the idea or feeling, or something that behaves like it (TV static, a fractal, a toppled domino run).</li>
-          <li>A mix of both makes a stronger board.</li>
+          <li>Press <b>Choose</b> on 18 pictures. Your choices are saved in this browser.</li>
+          <li>Try to spread them across the <b>design matrix</b>: different elements and principles, and no pair used twice.</li>
+          <li>Press <b>Print my sheets</b> for the two A4 sheets of 6 cm squares with labels (print at 100%), and <b>Print sources</b> for the list of credits and reasons.</li>
         </ul>
       </div>
     </div>
   </section>
 
-  <!-- ---------- Board ---------- -->
-  <section id="board" aria-labelledby="boardTitle">
-    <h2 class="sec-title" id="boardTitle">Your 18 squares</h2>
-    <p class="sec-lead">Click a square to add a picture (choose a file, paste one, or drag one in from another browser tab), crop it, and pick its element and principle. You can also drop a picture straight onto a square.</p>
-    <div class="board-tools">
-      <button type="button" class="btn ghost" id="planBtn">Suggest a pair for every empty square</button>
-      <button type="button" class="btn ghost" id="clearPlan">Clear suggestions</button>
-      <button type="button" class="btn ghost" id="clearAll">Clear the whole board</button>
-    </div>
-    <div class="board" id="boardGrid"></div>
-    <div class="checks">
-      <div class="panel">
-        <h3 class="label">Checklist</h3>
-        <ul class="checklist" id="checklist"></ul>
-      </div>
-      <div class="panel">
-        <div class="counts">
-          <div><h4>Elements used</h4><div id="elCounts"></div></div>
-          <div><h4>Principles used</h4><div id="prCounts"></div></div>
-        </div>
-      </div>
-    </div>
+  <section id="matrix" aria-labelledby="mxTitle">
+    <h2 class="sec-title" id="mxTitle">Design matrix</h2>
+    <p class="sec-lead">The course matrix: elements across the top, principles down the side. The number in each square is how many pictures in the list show that pair. Green squares are pairs you have chosen. Click a square to show just those pictures.</p>
+    <div class="matrix-wrap"><table class="matrix" id="mx"></table></div>
+    <p class="legend">Click the same square again, or “Show all”, to see every picture.</p>
   </section>
 
-  <!-- ---------- Finder ---------- -->
-  <section id="finder" aria-labelledby="finderTitle">
-    <h2 class="sec-title" id="finderTitle">Find pictures</h2>
-    <p class="sec-lead">Search two free image libraries: Openverse (Creative Commons photos from many sites) and Wikimedia Commons. Press <em>Use</em> to put a picture straight into a square; the title, photographer and licence are filled in for you. Then click the square to crop it and label it.</p>
-    <form class="finder-bar" id="finderForm" role="search">
-      <label class="sr-only" for="q">Search for pictures</label>
-      <input type="search" id="q" placeholder="e.g. tangled wires" autocomplete="off">
-      <div class="bgrid" role="group" aria-label="Library" id="libBtns"></div>
-      <label class="sr-only" for="target">Put pictures in</label>
-      <select id="target"></select>
-      <button type="submit" class="btn primary">Search</button>
-    </form>
-    <p class="finder-status" id="finderStatus" aria-live="polite">Pick an idea below and press “Find pictures”, or type your own search.</p>
-    <div class="results" id="results"></div>
-    <div class="frow"><button type="button" class="btn ghost" id="more" hidden>More results</button>
-      <a class="btn ghost" id="googleLink" target="_blank" rel="noopener" href="#" style="display:inline-flex;align-items:center;text-decoration:none">Search Google Images instead ↗</a></div>
-  </section>
-
-  <!-- ---------- Ideas ---------- -->
-  <section id="ideas" aria-labelledby="ideasTitle">
-    <h2 class="sec-title" id="ideasTitle">Picture ideas</h2>
-    <p class="sec-lead" id="ideasLead"></p>
-    <div class="idea-tools">
-      <div class="bgrid" role="group" aria-label="Filter ideas" id="ideaFilter"></div>
+  <section id="pictures" aria-labelledby="picTitle">
+    <h2 class="sec-title" id="picTitle">Pictures for “chaos”</h2>
+    <div class="tools">
+      <div class="bgrid" role="group" aria-label="Element" id="elF"></div>
+      <label class="sr-only" for="prF">Principle</label>
+      <select id="prF"></select>
+      <button type="button" class="tbtn" id="onlyChosen" aria-pressed="false">Chosen only</button>
+      <button type="button" class="tbtn" id="showAll">Show all</button>
+      <span class="count" id="count" aria-live="polite"></span>
     </div>
-    <div class="ideas" id="ideaList"></div>
-  </section>
-
-  <!-- ---------- Vocabulary ---------- -->
-  <section id="vocab" aria-labelledby="vocabTitle">
-    <h2 class="sec-title" id="vocabTitle">Elements and principles</h2>
-    <p class="sec-lead">Elements are the ingredients you see in a picture. Principles are how they are arranged. Pick the one element and one principle that are strongest in each photo, and be ready to point to them.</p>
-    <div class="vocab">
-      <div class="panel"><h3 class="label">Design elements</h3><dl id="elList"></dl></div>
-      <div class="panel"><h3 class="label">Design principles</h3><dl id="prList"></dl></div>
-    </div>
-  </section>
-
-  <!-- ---------- Print ---------- -->
-  <section id="printSec" aria-labelledby="printTitle">
-    <h2 class="sec-title" id="printTitle">Print</h2>
-    <p class="sec-lead">The squares print at exactly 6 × 6 cm with a thin cutting outline, 12 to an A4 page, each with its number and labels underneath (outside the cut). In the print dialogue choose <b>actual size / 100%</b>, not "fit to page". Check one square with a ruler before cutting them all.</p>
-    <div class="print-ctl">
-      <div class="bgrid" role="group" aria-label="What to print" id="prMode"></div>
-      <label class="check"><input type="checkbox" id="prLabels" checked> Labels under each square</label>
-      <button type="button" class="btn primary spacer" id="printBtn">Print</button>
-    </div>
-    <p class="hint" id="printInfo"></p>
+    <div class="list" id="list"></div>
+    <div class="selbar" id="selbar" aria-live="polite"></div>
   </section>
 </main>
-
-<!-- ---------- Square editor ---------- -->
-<dialog class="editor" id="editor" aria-labelledby="edTitle">
-  <div class="ed">
-    <div>
-      <h3 id="edTitle">Square 1</h3>
-      <div class="crop" id="crop" tabindex="0" aria-label="Crop area: drag to move the picture, use the zoom slider or arrow keys">
-        <div class="drop" id="cropDrop"><b>Add a picture</b>Choose a file, paste (Ctrl+V), drop one here, or paste an image address below.</div>
-      </div>
-      <label class="range" style="margin-top:10px"><span>Zoom <output id="zoomOut">100%</output></span><input type="range" id="zoom" min="1" max="4" step="0.01" value="1"></label>
-      <div class="row">
-        <button type="button" class="btn primary" id="findForSq">Find pictures</button>
-        <label class="btn ghost" style="display:inline-flex;align-items:center;cursor:pointer">Choose file<input type="file" id="file" accept="image/*" hidden></label>
-        <button type="button" class="btn ghost" id="centre">Re-centre</button>
-        <button type="button" class="btn ghost" id="removeImg">Remove picture</button>
-      </div>
-      <label class="f" style="margin-top:10px;display:grid;gap:4px;font-size:13px;font-weight:700">Or paste an image address<input type="url" id="imgUrl" placeholder="https://…/picture.jpg"></label>
-      <p class="hintline">Right-click a picture on a website and choose “Copy image address”. Some sites block this; if so, save the picture and choose the file instead.</p>
-    </div>
-    <div class="fields">
-      <div class="two">
-        <label class="f">Design element<select id="fEl"></select></label>
-        <label class="f">Design principle<select id="fPr"></select></label>
-      </div>
-      <p class="hintline" id="pairHint"></p>
-      <label class="f">Literal or conceptual?<select id="fKind"><option value="">Choose…</option><option value="literal">Literal</option><option value="conceptual">Conceptual</option></select></label>
-      <label class="f">What it shows, and why it says your word<textarea id="fNote" placeholder="e.g. Tangled cables: the lines go everywhere with no order."></textarea></label>
-      <label class="f">Where it's from (website)<input type="text" id="fSrc" placeholder="e.g. unsplash.com"></label>
-      <p class="hintline" id="planHint"></p>
-    </div>
-  </div>
-  <div class="foot">
-    <button type="button" class="btn ghost" id="prevSq">← Previous</button>
-    <button type="button" class="btn ghost" id="nextSq">Next →</button>
-    <button type="button" class="btn primary" id="done">Done</button>
-  </div>
-</dialog>
 
 <div id="printArea"></div>
 
@@ -355,536 +202,128 @@ dialog.editor::backdrop { background: rgba(0, 0, 0, .5); }
 'use strict';
 
 const $ = id => document.getElementById(id);
-const N = 18;
-
-/* ================= Vocabulary ================= */
-
-const ELEMENTS = [
-  ['Line', 'Marks, edges, cables, cracks, paths. Look for direction: straight, curved, tangled, jagged.'],
-  ['Shape', 'Flat, 2D areas with an edge: shards, silhouettes, signs, blobs.'],
-  ['Form', '3D objects with volume and light and shadow: a crumpled car, a tornado, waves.'],
-  ['Space', 'The room around and between things: crowded, empty, deep or flat.'],
-  ['Colour', 'Hue, brightness and saturation: clashing colours, a burst of red, neon.'],
-  ['Value', 'Light and dark: lightning in a black sky, smoke, high-contrast black and white.'],
-  ['Texture', 'How a surface would feel: rough, cracked, crumpled, splattered.'],
-];
-const PRINCIPLES = [
-  ['Balance', 'How visual weight is spread: symmetrical, asymmetrical, or deliberately off-balance.'],
-  ['Contrast', 'Strong differences: light vs dark, big vs small, calm vs busy.'],
-  ['Emphasis', 'One focal point that grabs attention first.'],
-  ['Movement', 'The path the eye follows, or a sense of motion.'],
-  ['Pattern', 'A repeated motif across a surface.'],
-  ['Rhythm', 'Repetition with a beat or flow, regular or irregular.'],
-  ['Unity', 'Everything feels like it belongs together.'],
-  ['Variety', 'Lots of different elements that keep it interesting.'],
-  ['Proportion & scale', 'Size relationships, normal or exaggerated.'],
-  ['Hierarchy', 'A clear order of importance: first, second, third.'],
-  ['Repetition', 'The same element used again and again.'],
-  ['White space', 'Empty space used on purpose.'],
-  ['Alignment', 'Things lined up along edges or a grid (or pointedly not).'],
-];
-const EL = ELEMENTS.map(e => e[0]), PR = PRINCIPLES.map(p => p[0]);
+const PICS = [{"id":"3bd2bcd3-5f38-4b36-ab23-88666c5bb1bc","title":"Aerial view of Tacloban after Typhoon Haiyan","by":"DFID - UK Department for International Development","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/14214150@N02/11043346434","src":"https://live.staticflickr.com/2843/11043346434_666ed32cc3_b.jpg","thumb":"https://api.openverse.org/v1/images/3bd2bcd3-5f38-4b36-ab23-88666c5bb1bc/thumb/","site":"Flickr","el":"Space","pr":"Proximity","kind":"literal","why":"Seen from above, buildings, roofs and debris are packed together with no gaps between them. With no breathing space, the eye cannot find order: crowded space reads as chaos."},{"id":"2c6150f1-0429-483d-9d86-fe83483ea13f","title":"Protesters Blur By (Desaturation Edit)","by":"Geraint Rowland Photography","lic":"CC BY-NC 2.0","page":"https://www.flickr.com/photos/33909206@N04/7638306424","src":"https://live.staticflickr.com/8028/7638306424_1b94159071_b.jpg","thumb":"https://api.openverse.org/v1/images/2c6150f1-0429-483d-9d86-fe83483ea13f/thumb/","site":"Flickr","el":"Space","pr":"Proximity","kind":"literal","why":"A crowd so dense that every bit of space is filled with heads and bodies. People pressed this close together have no personal space, which feels tense and chaotic."},{"id":"f2c48857-ec67-485d-a726-84e36495499a","title":"Quarry Bay Apartments","by":"ROSS HONG KONG","lic":"CC BY-NC-SA 2.0","page":"https://www.flickr.com/photos/27302727@N03/7163830948","src":"https://live.staticflickr.com/8144/7163830948_cd004c628f_b.jpg","thumb":"https://api.openverse.org/v1/images/f2c48857-ec67-485d-a726-84e36495499a/thumb/","site":"Flickr","el":"Space","pr":"Repetition","kind":"conceptual","why":"The same balcony, window and air-conditioner unit repeats across the whole building, but each one is cluttered differently. The repetition fills the space completely, like an overwhelming wall of noise."},{"id":"2d0ea59a-9444-4c00-9558-c8803c05c397","title":"Music Makes you Lose Control","by":"gilmorec","lic":"CC BY-SA 2.0","page":"https://www.flickr.com/photos/43891969@N07/5470189186","src":"https://live.staticflickr.com/5131/5470189186_6b788b8f89_b.jpg","thumb":"https://api.openverse.org/v1/images/2d0ea59a-9444-4c00-9558-c8803c05c397/thumb/","site":"Flickr","el":"Space","pr":"Movement","kind":"literal","why":"The long exposure blurs people rushing in every direction. The space is full of motion with no clear path, which is exactly how chaos feels."},{"id":"28681748-0325-4a32-b38f-66bebca1e59e","title":"India - Chennai - busy T. Nagar market 2","by":"mckaysavage","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/56796376@N00/3059483658","src":"https://live.staticflickr.com/3251/3059483658_f850c20ea9_b.jpg","thumb":"https://api.openverse.org/v1/images/28681748-0325-4a32-b38f-66bebca1e59e/thumb/","site":"Flickr","el":"Space","pr":"Unity","kind":"literal","why":"Hundreds of people, signs and stalls merge into one busy mass that fills the street from edge to edge. Individually they are different, together they form one chaotic whole."},{"id":"b5f8ae4a-3349-4685-b21b-c82533cf0c9b","title":"Mong Kok Temple Street - 旺角廟街","by":"kllauphotograph.com","lic":"CC BY-NC-SA 2.0","page":"https://www.flickr.com/photos/96070045@N04/14943027415","src":"https://live.staticflickr.com/3919/14943027415_a8f708cd09_b.jpg","thumb":"https://api.openverse.org/v1/images/b5f8ae4a-3349-4685-b21b-c82533cf0c9b/thumb/","site":"Flickr","el":"Space","pr":"Contrast","kind":"literal","why":"A narrow, brightly lit market street squeezed between dark towers. The contrast between the cramped glowing space and the dark buildings makes the crowding feel even more intense."},{"id":"a7db1a00-2fe2-4f01-8295-0c27f5a1d69f","title":"Geeky Armament","by":"moriza","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/44373968@N00/70338434","src":"https://live.staticflickr.com/34/70338434_c6568c1d7e_b.jpg","thumb":"https://api.openverse.org/v1/images/a7db1a00-2fe2-4f01-8295-0c27f5a1d69f/thumb/","site":"Flickr","el":"Space","pr":"Balance","kind":"literal","why":"Laptops, cables and papers are spread over the desk with no plan. The visual weight is scattered randomly, so the composition feels unbalanced and messy."},{"id":"e718f765-0866-4758-a9d1-556c76d47d1d","title":"The Old American Stock Exchange Trading Floor; ca. 1980's","by":"David C. Foster","lic":"CC BY-ND 2.0","page":"https://www.flickr.com/photos/21734563@N04/3036628966","src":"https://live.staticflickr.com/3206/3036628966_eb6601109c_b.jpg","thumb":"https://api.openverse.org/v1/images/e718f765-0866-4758-a9d1-556c76d47d1d/thumb/","site":"Flickr","el":"Space","pr":"Hierarchy","kind":"literal","why":"A trading floor full of desks, screens and people, all competing for attention. There is no clear order of importance, so the eye jumps around the space: hierarchy has broken down."},{"id":"21d95b2d-c9e5-4d1a-82b3-0d33b2fd09fc","title":"Peeling paint walls","by":"Forsaken Fotos","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/55229469@N07/13764299553","src":"https://live.staticflickr.com/7372/13764299553_e7484da62f.jpg","thumb":"https://api.openverse.org/v1/images/21d95b2d-c9e5-4d1a-82b3-0d33b2fd09fc/thumb/","site":"Flickr","el":"Space","pr":"Emphasis","kind":"conceptual","why":"A decaying corridor covered in graffiti and peeling paint. The deep space leads the eye to one bright point of light at the end, which stands out against the surrounding chaos."},{"id":"0c071712-4986-4a73-b2a4-15e1ae90b199","title":"Tornado","by":"Frank Peters","lic":"CC BY-NC-ND 2.0","page":"https://www.flickr.com/photos/59781591@N00/46791089","src":"https://live.staticflickr.com/31/46791089_8249e21772_b.jpg","thumb":"https://api.openverse.org/v1/images/0c071712-4986-4a73-b2a4-15e1ae90b199/thumb/","site":"Flickr","el":"Form","pr":"Movement","kind":"literal","why":"A tornado is a huge three-dimensional form that is spinning and moving. Its twisting funnel shows uncontrollable motion, the literal force of chaos in nature."},{"id":"663defbb-6336-43ab-8c91-124bce3376ca","title":"Falling Domino","by":"Several seconds","lic":"CC BY-NC-ND 2.0","page":"https://www.flickr.com/photos/30015460@N07/15360698252","src":"https://live.staticflickr.com/3899/15360698252_32151e42fb_b.jpg","thumb":"https://api.openverse.org/v1/images/663defbb-6336-43ab-8c91-124bce3376ca/thumb/","site":"Flickr","el":"Form","pr":"Balance","kind":"literal","why":"A burnt-out building whose solid structure has collapsed and twisted. The heavy forms no longer stand straight or balanced: order has fallen apart."},{"id":"9b2d6621-139a-4b62-8519-09c1c7f59c60","title":"Cairo Traffic Jam","by":"walidhassanein","lic":"CC BY-NC-ND 2.0","page":"https://www.flickr.com/photos/87985439@N00/380379732","src":"https://live.staticflickr.com/171/380379732_8d3a32beab_b.jpg","thumb":"https://api.openverse.org/v1/images/9b2d6621-139a-4b62-8519-09c1c7f59c60/thumb/","site":"Flickr","el":"Form","pr":"Repetition","kind":"literal","why":"Car after car repeated in a gridlocked jam. The same form repeats so many times that it becomes overwhelming and trapped: everyday chaos."},{"id":"1782e2d0-181b-4524-8a91-1ebbb8307a99","title":"See if you can spot . . . .","by":"Elsie esq.","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/61132483@N00/2237105780","src":"https://live.staticflickr.com/2349/2237105780_71a364c807_b.jpg","thumb":"https://api.openverse.org/v1/images/1782e2d0-181b-4524-8a91-1ebbb8307a99/thumb/","site":"Flickr","el":"Form","pr":"Proximity","kind":"literal","why":"Thousands of pieces of scrap metal crushed together into one mountain. The forms are piled so close that you cannot tell where one object ends and the next begins."},{"id":"30e76436-cfd1-4d3a-aa14-90a1c57bb6a7","title":"Romanesco Broccoli Fractals","by":"Pyrolytic Carbon","lic":"CC BY-NC-ND 2.0","page":"https://www.flickr.com/photos/69179864@N00/50359614528","src":"https://live.staticflickr.com/65535/50359614528_1811185b88_b.jpg","thumb":"https://api.openverse.org/v1/images/30e76436-cfd1-4d3a-aa14-90a1c57bb6a7/thumb/","site":"Flickr","el":"Form","pr":"Proportion","kind":"conceptual","why":"Romanesco broccoli is a natural fractal: each bump is a smaller copy of the whole, repeated at every scale. Fractals come from chaos theory, where simple rules create endlessly complex forms."},{"id":"fc47a77f-03e7-41a9-a6d1-b9f8336ee1c7","title":"Demolition of P Reactor Stack at SRS","by":"Savannah River Site","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/51009184@N06/5107475597","src":"https://live.staticflickr.com/1103/5107475597_5034c88aee_b.jpg","thumb":"https://api.openverse.org/v1/images/fc47a77f-03e7-41a9-a6d1-b9f8336ee1c7/thumb/","site":"Flickr","el":"Form","pr":"Emphasis","kind":"literal","why":"The toppling chimney of a demolished building is the focal point: one tall form breaking and falling while dust explodes around it. The eye goes straight to the moment of collapse."},{"id":"20180b64-1a6e-4fdb-8d74-50c10bc8aacd","title":"Smoke black background","by":"","lic":"Public domain","page":"https://www.rawpixel.com/image/6018061/photo-image-background-public-domain-black","src":"https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2Zyc21va2VfcHVycGxlX2JhY2tncm91bmRfYmxhY2tfMC1pbWFnZS1reWJhbGl3di5qcGc.jpg","thumb":"https://api.openverse.org/v1/images/20180b64-1a6e-4fdb-8d74-50c10bc8aacd/thumb/","site":"Rawpixel","el":"Form","pr":"White space","kind":"conceptual","why":"Smoke twists into an unpredictable, ever-changing form against an empty black background. The empty space around it makes the swirling, uncontrolled shape stand out."},{"id":"ef132076-053d-4bf2-af0c-606d382fae7e","title":"Starling Murmuration - RSPB Minsmere","by":"Airwolfhound","lic":"CC BY-SA 2.0","page":"https://www.flickr.com/photos/24874528@N04/27182053440","src":"https://live.staticflickr.com/7642/27182053440_e190efd07f_b.jpg","thumb":"https://api.openverse.org/v1/images/ef132076-053d-4bf2-af0c-606d382fae7e/thumb/","site":"Flickr","el":"Shape","pr":"Unity","kind":"literal","why":"Thousands of starlings fly without a leader, yet they form one shifting shape. A murmuration is chaos and order at once: individual chaos creating a unified whole."},{"id":"749cf106-299e-4a9b-9f33-ff308c546817","title":"Starling murmuration over Brighton","by":"susie2778","lic":"CC BY-NC 2.0","page":"https://www.flickr.com/photos/31018850@N04/49454660657","src":"https://live.staticflickr.com/65535/49454660657_57e32f9da5_b.jpg","thumb":"https://api.openverse.org/v1/images/749cf106-299e-4a9b-9f33-ff308c546817/thumb/","site":"Flickr","el":"Shape","pr":"Proportion","kind":"literal","why":"Birds scattered across the sky: the nearest ones look large and the furthest tiny. The changing sizes and random placement of the shapes create a scattered, chaotic feeling of depth."},{"id":"603f3c86-3c39-4a4a-be6e-26ae06d4dd67","title":"Broken Mirror","by":"Rakesh Ashok","lic":"CC BY-NC-ND 2.0","page":"https://www.flickr.com/photos/37515174@N00/3198323549","src":"https://live.staticflickr.com/3515/3198323549_1fd13824b6_b.jpg","thumb":"https://api.openverse.org/v1/images/603f3c86-3c39-4a4a-be6e-26ae06d4dd67/thumb/","site":"Flickr","el":"Shape","pr":"Contrast","kind":"literal","why":"A shattered mirror breaks into jagged pieces of every size and angle. The contrast between the sharp light shards and the dark cracks makes the broken shapes jump out."},{"id":"715d2005-d98e-4508-a0a3-a3292b6e01be","title":"Cracked earth","by":"CIAT International Center for Tropical Agriculture","lic":"CC BY-SA 2.0","page":"https://www.flickr.com/photos/38476503@N08/4459581071","src":"https://live.staticflickr.com/4072/4459581071_3e2636971a_b.jpg","thumb":"https://api.openverse.org/v1/images/715d2005-d98e-4508-a0a3-a3292b6e01be/thumb/","site":"Flickr","el":"Shape","pr":"Repetition","kind":"literal","why":"Dry earth cracks into irregular shapes repeated across the whole surface. The repetition is natural and uneven: no two pieces match, which feels disordered."},{"id":"d056fe03-e338-4789-aef2-59c2b2d3eba8","title":"Portland, Oregon, Timbers, Sunderland, Football, Soccer","by":"frozenchipmunk","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/75718896@N00/29780925","src":"https://live.staticflickr.com/22/29780925_5ecb9fc796.jpg","thumb":"https://api.openverse.org/v1/images/d056fe03-e338-4789-aef2-59c2b2d3eba8/thumb/","site":"Flickr","el":"Shape","pr":"Movement","kind":"literal","why":"Confetti flung into the air: small shapes flying in every direction against the sky. The scattered, diagonal pieces give the picture energetic, uncontrolled movement."},{"id":"04879569-3475-4813-b769-82923fafd725","title":"NASA's Aqua Satellite Captures Hurricane Danielle","by":"NASA Goddard Photo and Video","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/24662369@N07/4931591817","src":"https://live.staticflickr.com/4123/4931591817_fe8edb5d2c_b.jpg","thumb":"https://api.openverse.org/v1/images/04879569-3475-4813-b769-82923fafd725/thumb/","site":"NASA","el":"Shape","pr":"Balance","kind":"literal","why":"A hurricane seen from space: a spiral shape balanced around its eye (radial balance). Its calm centre is surrounded by violent, chaotic storm clouds."},{"id":"93c859bc-b375-48ff-a477-37046d42e226","title":"Untitled","by":"tanakawho","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/28481088@N00/3244246090","src":"https://live.staticflickr.com/3260/3244246090_80853330bd_b.jpg","thumb":"https://api.openverse.org/v1/images/93c859bc-b375-48ff-a477-37046d42e226/thumb/","site":"Flickr","el":"Shape","pr":"White space","kind":"conceptual","why":"A violent red splash of paint against an empty white background. The white space makes the jagged, uncontrolled shape of the splash look even more explosive."},{"id":"05f68ad7-3f03-4d97-95ec-d3f679a6fc33","title":"Western Harvester Ant Swarm on Seedskadee National Wildlife Refuge","by":"USFWS Mountain Prairie","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/51986662@N05/28951059731","src":"https://live.staticflickr.com/8002/28951059731_8b4824abc9_b.jpg","thumb":"https://api.openverse.org/v1/images/05f68ad7-3f03-4d97-95ec-d3f679a6fc33/thumb/","site":"Flickr","el":"Shape","pr":"Proximity","kind":"literal","why":"Hundreds of ants swarm over a stick, crowded so close that their small shapes merge into one seething mass. Swarming is a classic image of chaos."},{"id":"4a8f3f0e-76e4-49b3-bbbf-5b05a7d2589a","title":"Decomp comp","by":"CAJC: in the PNW","lic":"CC BY-SA 2.0","page":"https://www.flickr.com/photos/88913562@N00/51623156533","src":"https://live.staticflickr.com/65535/51623156533_0fd673a364_b.jpg","thumb":"https://api.openverse.org/v1/images/4a8f3f0e-76e4-49b3-bbbf-5b05a7d2589a/thumb/","site":"Flickr","el":"Shape","pr":"Hierarchy","kind":"literal","why":"Leaves fallen at random, with one large yellow leaf as the most important shape and smaller leaves around it. Even in a chaotic scatter, size creates an order of importance."},{"id":"b850589b-4a78-4d12-bd9b-05d5e431429d","title":"Early fireworks","by":"vpickering","lic":"CC BY-NC-ND 2.0","page":"https://www.flickr.com/photos/16688857@N03/14352778120","src":"https://live.staticflickr.com/5523/14352778120_ba6123e332_b.jpg","thumb":"https://api.openverse.org/v1/images/b850589b-4a78-4d12-bd9b-05d5e431429d/thumb/","site":"Flickr","el":"Color","pr":"Emphasis","kind":"literal","why":"An explosion of bright pink and blue fireworks against a black sky. The vivid colour bursting out of the darkness is the focal point: sudden, loud and chaotic."},{"id":"387e1cb6-7f07-4901-80e3-3c28c57e2bac","title":"Fireworks","by":"Verpletterend","lic":"CC BY-SA 2.0","page":"https://www.flickr.com/photos/58544688@N03/5393485546","src":"https://live.staticflickr.com/5213/5393485546_89f70a3102_b.jpg","thumb":"https://api.openverse.org/v1/images/387e1cb6-7f07-4901-80e3-3c28c57e2bac/thumb/","site":"Flickr","el":"Color","pr":"Contrast","kind":"literal","why":"Golden sparks shooting out in every direction against a dark night. The strong contrast between warm, bright colour and darkness makes the burst feel wild."},{"id":"325c2cd6-9118-4e65-9bdd-0a72bb1fa7cf","title":"Never too late to celebrate spring","by":"Jamie McCaffrey","lic":"CC BY-NC 2.0","page":"https://www.flickr.com/photos/15609463@N03/14888989316","src":"https://live.staticflickr.com/5571/14888989316_4a97acb4f7_b.jpg","thumb":"https://api.openverse.org/v1/images/325c2cd6-9118-4e65-9bdd-0a72bb1fa7cf/thumb/","site":"Flickr","el":"Color","pr":"Movement","kind":"literal","why":"A cloud of orange colour powder thrown into the air at a Holi festival. The colour flies and spreads in every direction: joyful chaos."},{"id":"e8a487af-3f8f-4a47-922a-854719b7201b","title":"Ink in water","by":"árticotropical","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/8581973@N02/1860810198","src":"https://live.staticflickr.com/2042/1860810198_ee0450dd5e_b.jpg","thumb":"https://api.openverse.org/v1/images/e8a487af-3f8f-4a47-922a-854719b7201b/thumb/","site":"Flickr","el":"Color","pr":"Unity","kind":"conceptual","why":"Orange ink exploding in water. The billowing shapes are completely unpredictable, but because they share one colour family the image feels unified."},{"id":"89693388-1995-4172-a7dd-d9372f7e0be7","title":"ink in water","by":"trainjason","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/98004108@N03/9193123475","src":"https://live.staticflickr.com/5547/9193123475_9717e18952_b.jpg","thumb":"https://api.openverse.org/v1/images/89693388-1995-4172-a7dd-d9372f7e0be7/thumb/","site":"Flickr","el":"Color","pr":"White space","kind":"conceptual","why":"Blue ink dropped into water spreads in tangled, random tendrils across a white background. The white space makes the chaotic spread of colour easy to see."},{"id":"996b7e93-a415-4c49-8ebf-78bcf928c184","title":"Paint Splatter","by":"Goop on the lens","lic":"CC BY-NC-ND 2.0","page":"https://www.flickr.com/photos/96275286@N00/350187927","src":"https://live.staticflickr.com/156/350187927_79dae2b62e_b.jpg","thumb":"https://api.openverse.org/v1/images/996b7e93-a415-4c49-8ebf-78bcf928c184/thumb/","site":"Flickr","el":"Color","pr":"Repetition","kind":"literal","why":"Splashes and drips of paint repeated all over the ground in many colours. Repeated random marks build up a chaotic, messy surface."},{"id":"77df619b-9ecc-4f64-aab1-f9aac75d0475","title":"graffiti wall","by":"Aldo Photo Studio","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/36012356@N00/178950842","src":"https://live.staticflickr.com/54/178950842_20e2919e85.jpg","thumb":"https://api.openverse.org/v1/images/77df619b-9ecc-4f64-aab1-f9aac75d0475/thumb/","site":"Flickr","el":"Color","pr":"Proximity","kind":"literal","why":"Layers of graffiti and stencils crammed together on one wall. Clashing colours and shapes are packed so close that they fight each other for attention."},{"id":"5a4511a8-d700-4f44-bef3-7a14fa37686e","title":"New York City - Times Square @ Night","by":"myoldpostcards","lic":"CC BY-NC-ND 2.0","page":"https://www.flickr.com/photos/31910582@N05/3041775691","src":"https://live.staticflickr.com/3029/3041775691_ac1c86a6d4_b.jpg","thumb":"https://api.openverse.org/v1/images/5a4511a8-d700-4f44-bef3-7a14fa37686e/thumb/","site":"Flickr","el":"Color","pr":"Hierarchy","kind":"literal","why":"Times Square at night: billboards, neon and screens of every colour shout at once. With so many bright colours competing, there is no clear hierarchy: visual overload."},{"id":"94e147e3-9a92-4e05-9f21-d6ed95ff024b","title":"A Crumpled Paper Ball","by":"Turinboy","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/18922948@N08/2946943615","src":"https://live.staticflickr.com/3045/2946943615_c95e521e6a_b.jpg","thumb":"https://api.openverse.org/v1/images/94e147e3-9a92-4e05-9f21-d6ed95ff024b/thumb/","site":"Flickr","el":"Texture","pr":"Contrast","kind":"conceptual","why":"A crumpled ball of paper: a flat, ordered sheet crushed into a chaos of creases. The light and shadow on the folds give a strong contrast that makes the texture feel rough and messy."},{"id":"f76f46cc-0057-4154-906f-e1fd8cf0c892","title":"Static TV 2","by":"Sifter","lic":"CC BY-NC 2.0","page":"https://www.flickr.com/photos/64174165@N00/378329134","src":"https://live.staticflickr.com/172/378329134_d1bce8d4e8_b.jpg","thumb":"https://api.openverse.org/v1/images/f76f46cc-0057-4154-906f-e1fd8cf0c892/thumb/","site":"Flickr","el":"Texture","pr":"Repetition","kind":"conceptual","why":"TV static is random visual noise: millions of tiny dots repeated with no pattern or meaning. It is a perfect picture of chaos."},{"id":"68cc8984-33a0-4237-86e1-93e0dcf42899","title":"Texture - cracked paint","by":"vidalia_11","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/56832361@N00/2476826198","src":"https://live.staticflickr.com/3024/2476826198_5219ee8848_b.jpg","thumb":"https://api.openverse.org/v1/images/68cc8984-33a0-4237-86e1-93e0dcf42899/thumb/","site":"Flickr","el":"Texture","pr":"Repetition","kind":"literal","why":"Peeling, cracked paint repeated across a wall in uneven flakes. The rough texture shows order breaking down over time."},{"id":"fa462bb0-c48b-4782-b8d0-9e183ff1c2e5","title":"Crashing Waves","by":"Rhys A.","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/51867225@N08/4977900944","src":"https://live.staticflickr.com/4108/4977900944_c8500ef461_b.jpg","thumb":"https://api.openverse.org/v1/images/fa462bb0-c48b-4782-b8d0-9e183ff1c2e5/thumb/","site":"Flickr","el":"Texture","pr":"Movement","kind":"literal","why":"A wave smashing against rocks. The foamy spray has a wild, rough texture, and it bursts upwards with powerful, uncontrolled movement."},{"id":"74adcd20-0846-4b66-99e8-65d8c9772966","title":"Piles of Clothes!","by":"Fred Hsu","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/59769174@N00/27007730","src":"https://live.staticflickr.com/22/27007730_0d2f771467_b.jpg","thumb":"https://api.openverse.org/v1/images/74adcd20-0846-4b66-99e8-65d8c9772966/thumb/","site":"Flickr","el":"Texture","pr":"Proximity","kind":"literal","why":"A huge heap of tangled clothes in every fabric and colour. Soft, crumpled textures are piled so close together that they form a chaotic mass."},{"id":"558b4e92-3e1f-4239-a3f1-a877387e449c","title":"peeling paint wall","by":"oceanaris","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/49873808@N00/4949456347","src":"https://live.staticflickr.com/4115/4949456347_29b3f92ee9_b.jpg","thumb":"https://api.openverse.org/v1/images/558b4e92-3e1f-4239-a3f1-a877387e449c/thumb/","site":"Flickr","el":"Texture","pr":"Unity","kind":"literal","why":"A wall of peeling yellow paint and exposed plaster. Every patch is a different broken texture, but together they form one unified surface of decay."},{"id":"ba099ddd-6b65-44c9-bcc7-45e95a6b4f3f","title":"Lightning","by":"nathan_lounds","lic":"Public domain","page":"https://www.flickr.com/photos/27095118@N00/6771097341","src":"https://live.staticflickr.com/7141/6771097341_63a705e869_b.jpg","thumb":"https://api.openverse.org/v1/images/ba099ddd-6b65-44c9-bcc7-45e95a6b4f3f/thumb/","site":"Flickr","el":"Line","pr":"Contrast","kind":"literal","why":"Bright, jagged lightning lines crack across a dark purple sky. The contrast between the sharp white lines and the dark clouds is violent and sudden."},{"id":"76581c50-3b84-4e81-8ca8-c853f101dd8a","title":"Lightning","by":"john_bolin2002","lic":"CC BY-NC-ND 2.0","page":"https://www.flickr.com/photos/56709527@N00/167030429","src":"https://live.staticflickr.com/48/167030429_c87cea4164_b.jpg","thumb":"https://api.openverse.org/v1/images/76581c50-3b84-4e81-8ca8-c853f101dd8a/thumb/","site":"Flickr","el":"Line","pr":"White space","kind":"conceptual","why":"A single jagged line of light branching unpredictably across a pale background. The empty space around it makes the chaotic path of the line stand out."},{"id":"17f0832b-fd98-4da2-8ea1-261131c72d17","title":"India - Hyderabad - 149 - electricity grid","by":"mckaysavage","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/56796376@N00/3921003774","src":"https://live.staticflickr.com/2546/3921003774_a309384482_b.jpg","thumb":"https://api.openverse.org/v1/images/17f0832b-fd98-4da2-8ea1-261131c72d17/thumb/","site":"Flickr","el":"Line","pr":"Proximity","kind":"literal","why":"Dozens of electrical wires tangled around a pole. The lines are crowded so close and cross so many times that you cannot follow any single one."},{"id":"ba64b8bb-7ce9-4a76-90a7-031be0e7dab1","title":"Wiring In Thailand","by":"Trey Ratcliff","lic":"CC BY-NC-SA 2.0","page":"https://www.flickr.com/photos/95572727@N00/25950732005","src":"https://live.staticflickr.com/1611/25950732005_e45a66b71a_b.jpg","thumb":"https://api.openverse.org/v1/images/ba64b8bb-7ce9-4a76-90a7-031be0e7dab1/thumb/","site":"Flickr","el":"Line","pr":"Repetition","kind":"literal","why":"Wire after wire repeated above a busy street. The repeated lines crisscross in every direction and create a dense, chaotic web."},{"id":"3c67f74e-a1b4-41e6-bddf-1dc86a078498","title":"leeds at night","by":"tricky (rick harrison)","lic":"CC BY-NC-SA 2.0","page":"https://www.flickr.com/photos/81851211@N00/5861614","src":"https://live.staticflickr.com/4/5861614_f03b5812c5_b.jpg","thumb":"https://api.openverse.org/v1/images/3c67f74e-a1b4-41e6-bddf-1dc86a078498/thumb/","site":"Flickr","el":"Line","pr":"Movement","kind":"literal","why":"Long-exposure light trails of traffic streak across the picture. The lines show fast movement in many directions at once: the rush and noise of a city."},{"id":"a9cbd15a-8e6f-4651-b8d8-bd08cd089b71","title":"hole in shattered glass pane","by":"Mr Thinktank","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/34621580@N00/4047887309","src":"https://live.staticflickr.com/2605/4047887309_9885c2668b_b.jpg","thumb":"https://api.openverse.org/v1/images/a9cbd15a-8e6f-4651-b8d8-bd08cd089b71/thumb/","site":"Flickr","el":"Line","pr":"Emphasis","kind":"literal","why":"Cracks radiate outwards from the hole in a broken window. The lines all lead the eye to the point of impact, the focal point of the chaos."},{"id":"1c1c5a87-f5c0-42a8-a62a-a2cde295d031","title":"Tangled tree roots","by":"virtusincertus","lic":"CC BY 2.0","page":"https://www.flickr.com/photos/79346113@N00/9621551618","src":"https://live.staticflickr.com/3688/9621551618_333e4dd0f4_b.jpg","thumb":"https://api.openverse.org/v1/images/1c1c5a87-f5c0-42a8-a62a-a2cde295d031/thumb/","site":"Flickr","el":"Line","pr":"Unity","kind":"literal","why":"Tree roots twist and tangle over the ground in every direction. The lines are disorderly, but they connect into one network, chaos that still belongs together."}];
+const ELEMENTS = ['Space', 'Form', 'Shape', 'Color', 'Texture', 'Line'];
+const PRINCIPLES = ['Balance', 'Contrast', 'Hierarchy', 'Emphasis', 'Movement', 'Unity', 'Proportion', 'White space', 'Repetition', 'Proximity'];
 const esc = t => String(t || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
-$('elList').innerHTML = ELEMENTS.map(([n, d]) => '<dt>' + n + '</dt><dd>' + d + '</dd>').join('');
-$('prList').innerHTML = PRINCIPLES.map(([n, d]) => '<dt>' + n + '</dt><dd>' + d + '</dd>').join('');
-$('fEl').innerHTML = '<option value="">Choose…</option>' + EL.map(e => '<option>' + e + '</option>').join('');
-$('fPr').innerHTML = '<option value="">Choose…</option>' + PR.map(p => '<option>' + p + '</option>').join('');
+let chosen = [];
+try { chosen = JSON.parse(localStorage.getItem('chaosChosen') || '[]').filter(id => PICS.some(p => p.id === id)); } catch (e) { /* storage unavailable */ }
+const save = () => { try { localStorage.setItem('chaosChosen', JSON.stringify(chosen)); } catch (e) { /* ignore */ } };
+const F = { el: '', pr: '', only: false };
 
-/* ================= Ideas ================= */
-// [search term, kind, element, principle, why]
-const CHAOS = [
-  ['Tangled cables or wires', 'literal', 'Line', 'Movement', 'Lines loop and cross in every direction, so the eye can never settle.'],
-  ['Shattered glass', 'literal', 'Line', 'Variety', 'Cracks split the surface into countless different pieces.'],
-  ['Paint splatter (Jackson Pollock)', 'conceptual', 'Colour', 'Rhythm', 'Drips and flicks repeat with an irregular, frantic beat.'],
-  ['Fireworks exploding', 'literal', 'Colour', 'Emphasis', 'A bright burst against a dark sky grabs attention instantly.'],
-  ['Lightning storm', 'literal', 'Value', 'Contrast', 'Blinding white against black: violent light and dark.'],
-  ['Rush-hour crowd from above', 'literal', 'Space', 'Pattern', 'People pack the space in a busy, uneven pattern.'],
-  ['Traffic jam at night', 'literal', 'Colour', 'Repetition', 'Rows of red tail lights repeat into the distance.'],
-  ['Very messy bedroom or desk', 'literal', 'Space', 'Variety', 'Every bit of space is filled with different objects.'],
-  ['Tornado or hurricane', 'literal', 'Form', 'Movement', 'A huge spinning form: you can feel the motion.'],
-  ['Starling murmuration', 'conceptual', 'Shape', 'Movement', 'Thousands of birds form one shifting, unpredictable shape.'],
-  ['Crumpled paper', 'conceptual', 'Texture', 'Variety', 'Creases go every way: order screwed up.'],
-  ['Crashing ocean waves', 'literal', 'Form', 'Movement', 'Water twists and breaks with uncontrolled force.'],
-  ['Broken mirror reflection', 'conceptual', 'Shape', 'Contrast', 'One face split into mismatched fragments.'],
-  ['TV static or glitch art', 'conceptual', 'Texture', 'Unity', 'Pure visual noise: random dots that still read as one surface.'],
-  ['Fractal (Mandelbrot set)', 'conceptual', 'Shape', 'Pattern', 'Chaos theory: endless complexity from a simple rule.'],
-  ['Phone full of notifications', 'conceptual', 'Shape', 'Hierarchy', 'Too many alerts: no clear order of importance.'],
-  ['Graffiti-covered wall', 'literal', 'Colour', 'Variety', 'Layers of tags and colours fight for attention.'],
-  ['Tangled tree roots or vines', 'literal', 'Line', 'Rhythm', 'Twisting lines repeat in an organic, unruly rhythm.'],
-  ['Swirling smoke', 'conceptual', 'Value', 'Movement', 'Soft greys drift and curl with no fixed shape.'],
-  ['Collapsing Jenga tower or falling dominoes', 'conceptual', 'Form', 'Balance', 'The moment balance is lost.'],
-  ['Spilled drink or cereal on the floor', 'literal', 'Space', 'Emphasis', 'A mess spreading across clean empty space.'],
-  ['Wildfire or burning building', 'literal', 'Colour', 'Contrast', 'Hot orange against black smoke: danger and disorder.'],
-  ['Junkyard or scrap heap', 'literal', 'Form', 'Proportion & scale', 'Huge and tiny objects piled with no sense of order.'],
-  ['Abstract expressionist painting (de Kooning)', 'conceptual', 'Texture', 'Movement', 'Thick, slashing brushstrokes full of energy.'],
-  ['One still person in a rushing crowd', 'conceptual', 'Space', 'Emphasis', 'Calm in the middle of chaos makes the chaos stronger.'],
-  ['Neat row with one item knocked over', 'conceptual', 'Shape', 'Alignment', 'Order broken in one place shows how chaos starts.'],
-  ['Cracked dry earth', 'literal', 'Texture', 'Pattern', 'An irregular pattern of cracks covering the ground.'],
-  ['Heart-rate or sound wave going wild', 'conceptual', 'Line', 'Rhythm', 'A line whose rhythm has lost control.'],
-  ['Marbled ink in water', 'conceptual', 'Colour', 'Movement', 'Colours swirl and mix with no plan.'],
-  ['Stock market trading floor', 'literal', 'Space', 'Variety', 'Screens, papers and people crammed together.'],
-  ['Huge pile of laundry', 'literal', 'Texture', 'Unity', 'Mixed fabrics heaped into one tangled mass.'],
-  ['Long-exposure city traffic lights', 'conceptual', 'Line', 'Movement', 'Streaks of light race in every direction.'],
-];
-const GENERIC = w => [
-  [w + ' (close-up / macro)', 'literal', 'Texture', 'Pattern', 'Close-ups often show texture and pattern clearly.'],
-  [w + ' from above (aerial)', 'literal', 'Space', 'Pattern', 'Aerial views turn scenes into patterns and shapes.'],
-  [w + ' silhouette', 'literal', 'Shape', 'Contrast', 'Silhouettes make shape and contrast obvious.'],
-  [w + ' black and white photography', 'literal', 'Value', 'Contrast', 'Removing colour makes value the main element.'],
-  [w + ' abstract art', 'conceptual', 'Colour', 'Movement', 'Artists often express a word through colour and movement.'],
-  [w + ' texture', 'conceptual', 'Texture', 'Variety', 'A surface that feels like the word.'],
-  [w + ' minimalist photography', 'conceptual', 'Space', 'White space', 'Empty space can make a word stronger.'],
-  [w + ' crowd or group', 'literal', 'Form', 'Repetition', 'Many similar things repeated.'],
-  [w + ' symbol or sign', 'conceptual', 'Shape', 'Emphasis', 'A single clear symbol as the focal point.'],
-  [w + ' long exposure', 'conceptual', 'Line', 'Movement', 'Motion turns into lines.'],
-  [w + ' in nature', 'literal', 'Form', 'Unity', 'Natural scenes often feel unified.'],
-  [w + ' street photography', 'literal', 'Space', 'Variety', 'Everyday scenes full of different elements.'],
-];
-let filter = 'all';
-const word = () => ($('word').value.trim() || 'Chaos');
-function currentIdeas() { return word().toLowerCase() === 'chaos' ? CHAOS : GENERIC(word().toLowerCase()); }
-function drawIdeas() {
-  const isChaos = word().toLowerCase() === 'chaos';
-  $('ideasLead').textContent = isChaos
-    ? 'Things to search for, each with an element and principle it shows well. "Find pictures" searches the free libraries above; "Google" opens a normal image search; "Use as a plan" puts the idea on your next empty square.'
-    : 'General ways to search for "' + word() + '": combine your word with a photography style. "Find pictures" searches the free libraries above; "Use as a plan" adds the idea to your next empty square as a plan. Then think of your own: what does ' + word().toLowerCase() + ' look like, sound like, feel like?';
-  const list = currentIdeas().filter(i => filter === 'all' || i[1] === filter);
-  $('ideaList').innerHTML = list.map(([t, k, e, p, why]) =>
-    '<div class="idea"><span class="kind">' + k + '</span><b>' + esc(t) + '</b>' +
-    '<div><span class="tag">' + e + '</span><span class="tag">' + p + '</span></div><p>' + esc(why) + '</p>' +
-    '<div class="acts"><button type="button" data-find="' + esc(t) + '">Find pictures</button><a href="https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(t) + '" target="_blank" rel="noopener">Google ↗</a>' +
-    '<button type="button" data-use="' + esc(t) + '">Use as a plan</button></div></div>').join('');
-  $('ideaList').querySelectorAll('[data-find]').forEach(b => b.addEventListener('click', () => {
-    const idea = currentIdeas().find(i => i[0] === b.dataset.find);
-    findPictures(idea[0], 'next', idea);
-  }));
-  $('ideaList').querySelectorAll('[data-use]').forEach(b => b.addEventListener('click', () => {
-    const idea = currentIdeas().find(i => i[0] === b.dataset.use);
-    const i = slots.findIndex(s => !s.img && !s.url && !s.plan);
-    if (i < 0) { b.textContent = 'No empty squares'; return; }
-    slots[i].plan = { term: idea[0], kind: idea[1], el: idea[2], pr: idea[3] };
-    save(i); drawBoard();
-    b.textContent = 'Added to square ' + (i + 1);
+/* ---------- Matrix ---------- */
+function drawMatrix() {
+  const chosenPairs = chosen.map(id => PICS.find(p => p.id === id)).map(p => p.el + '|' + p.pr);
+  let h = '<thead><tr><th></th>' + ELEMENTS.map(e => '<th scope="col">' + e + '</th>').join('') + '</tr></thead><tbody>';
+  PRINCIPLES.forEach(pr => {
+    h += '<tr><th class="row" scope="row">' + pr + '</th>';
+    ELEMENTS.forEach(el => {
+      const n = PICS.filter(p => p.el === el && p.pr === pr).length;
+      const c = chosenPairs.includes(el + '|' + pr);
+      const act = F.el === el && F.pr === pr;
+      h += '<td class="' + (n ? 'has' : 'none') + (c ? ' chosen' : '') + (act ? ' active' : '') + '"><button type="button" data-el="' + el + '" data-pr="' + pr + '"' + (n ? '' : ' disabled') + ' aria-label="' + el + ' / ' + pr + ': ' + n + ' pictures' + (c ? ', chosen' : '') + '">' + (n ? n : '·') + (c ? ' ✓' : '') + '</button></td>';
+    });
+    h += '</tr>';
+  });
+  $('mx').innerHTML = h + '</tbody>';
+  $('mx').querySelectorAll('button[data-el]').forEach(b => b.addEventListener('click', () => {
+    const same = F.el === b.dataset.el && F.pr === b.dataset.pr;
+    F.el = same ? '' : b.dataset.el; F.pr = same ? '' : b.dataset.pr; F.only = false;
+    syncFilters(); drawAll();
+    if (!same) $('pictures').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }));
 }
-function pickButtons(el, items, current, onPick) {
-  el.innerHTML = '';
-  items.forEach(([key, label]) => {
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'tbtn'; b.textContent = label;
-    b.setAttribute('aria-pressed', String(key === current));
-    b.addEventListener('click', () => { el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b))); onPick(key); });
-    el.appendChild(b);
-  });
-}
-pickButtons($('ideaFilter'), [['all', 'All'], ['literal', 'Literal'], ['conceptual', 'Conceptual']], filter, k => { filter = k; drawIdeas(); });
 
-/* ================= Storage (IndexedDB, so pictures survive a reload) ================= */
-// Each square: { img: Blob|null, url: string, nw, nh, cx, cy, z, el, pr, kind, note, src, plan }
+/* ---------- Filters ---------- */
+function syncFilters() {
+  $('elF').querySelectorAll('.tbtn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.k === F.el)));
+  $('prF').value = F.pr;
+  $('onlyChosen').setAttribute('aria-pressed', String(F.only));
+}
+$('elF').innerHTML = [['', 'All elements']].concat(ELEMENTS.map(e => [e, e])).map(([k, l]) => '<button type="button" class="tbtn" data-k="' + k + '">' + l + '</button>').join('');
+$('elF').querySelectorAll('.tbtn').forEach(b => b.addEventListener('click', () => { F.el = b.dataset.k; syncFilters(); drawAll(); }));
+$('prF').innerHTML = '<option value="">All principles</option>' + PRINCIPLES.map(p => '<option>' + p + '</option>').join('');
+$('prF').addEventListener('change', () => { F.pr = $('prF').value; drawAll(); });
+$('onlyChosen').addEventListener('click', () => { F.only = !F.only; syncFilters(); drawAll(); });
+$('showAll').addEventListener('click', () => { F.el = F.pr = ''; F.only = false; syncFilters(); drawAll(); });
 
-const blank = () => ({ img: null, url: '', nw: 0, nh: 0, cx: .5, cy: .5, z: 1, el: '', pr: '', kind: '', note: '', src: '', plan: null });
-let slots = Array.from({ length: N }, blank);
-let db = null;
-function openDB() {
-  return new Promise(res => {
-    try {
-      const r = indexedDB.open('wordBoard', 1);
-      r.onupgradeneeded = () => r.result.createObjectStore('slots');
-      r.onsuccess = () => res(r.result);
-      r.onerror = () => res(null);
-    } catch (e) { res(null); }
-  });
-}
-function save(i) {
-  if (!db) return;
-  try { db.transaction('slots', 'readwrite').objectStore('slots').put(slots[i], i); } catch (e) { /* storage unavailable */ }
-}
-function loadAll() {
-  return new Promise(res => {
-    if (!db) return res();
-    try {
-      const st = db.transaction('slots').objectStore('slots');
-      const req = st.getAll(), keys = st.getAllKeys();
-      let vals;
-      req.onsuccess = () => { vals = req.result; };
-      keys.onsuccess = () => { keys.result.forEach((k, j) => { if (k < N) slots[k] = Object.assign(blank(), vals[j]); }); res(); };
-      keys.onerror = req.onerror = () => res();
-    } catch (e) { res(); }
-  });
-}
-try { const w = localStorage.getItem('wordBoardWord'); if (w) $('word').value = w; } catch (e) { /* ignore */ }
-
-/* ================= Image display ================= */
-
-const urls = new Map();
-function srcOf(s, i) {
-  if (s.img) {
-    const cached = urls.get(i);
-    if (cached && cached.blob === s.img) return cached.url;
-    if (cached) URL.revokeObjectURL(cached.url);
-    const url = URL.createObjectURL(s.img);
-    urls.set(i, { blob: s.img, url });
-    return url;
-  }
-  return s.url;
-}
-// Cover the square, then zoom; cx, cy are the picture point shown at the centre (0–1)
-function placement(s) {
-  const m = Math.min(s.nw, s.nh) || 1;
-  const w = s.nw / m * s.z * 100, h = s.nh / m * s.z * 100;
-  const cx = clampC(s.cx, w), cy = clampC(s.cy, h);
-  return { w, h, left: 50 - cx * w, top: 50 - cy * h };
-}
-const clampC = (c, size) => { const lo = 50 / size; return Math.max(lo, Math.min(1 - lo, c)); };
-function imgTag(s, i) {
-  const p = placement(s);
-  return '<img alt="" src="' + esc(srcOf(s, i)) + '" style="width:' + p.w.toFixed(3) + '%;height:' + p.h.toFixed(3) + '%;left:' + p.left.toFixed(3) + '%;top:' + p.top.toFixed(3) + '%">';
-}
-const hasImg = s => !!(s.img || s.url);
-
-/* ================= Board ================= */
-
-function drawBoard() {
-  $('boardGrid').innerHTML = slots.map((s, i) => {
-    const tags = s.el && s.pr ? s.el + ' / ' + s.pr : '';
-    const planTxt = !hasImg(s) && s.plan ? '<span class="plan">Plan: ' + esc(s.plan.term || (s.plan.el + ' / ' + s.plan.pr)) + '</span>' : '';
-    return '<div class="slot"><button type="button" class="slot-box' + (hasImg(s) ? ' filled' : '') + '" data-i="' + i + '" aria-label="Square ' + (i + 1) + (tags ? ', ' + tags : '') + '">' +
-      '<span class="num">' + (i + 1) + '</span>' +
-      (hasImg(s) ? imgTag(s, i) : '<span class="empty"><b>+</b>Add picture' + planTxt + '</span>') +
-      '</button><div class="slot-tags' + (hasImg(s) && !tags ? ' missing' : '') + '">' + (tags || (hasImg(s) ? 'Needs element / principle' : (s.plan ? s.plan.el + ' / ' + s.plan.pr : ''))) + '</div></div>';
-  }).join('');
-  $('boardGrid').querySelectorAll('.slot-box').forEach(b => {
-    const i = +b.dataset.i;
-    b.addEventListener('click', () => openEditor(i));
-    b.addEventListener('dragover', e => { e.preventDefault(); b.classList.add('over'); });
-    b.addEventListener('dragleave', () => b.classList.remove('over'));
-    b.addEventListener('drop', e => { e.preventDefault(); b.classList.remove('over'); takeDrop(e.dataTransfer, i); });
-  });
-  drawChecks();
-  drawPrintInfo();
-}
-
-function drawChecks() {
-  const filled = slots.filter(hasImg).length;
-  const labelled = slots.filter(s => hasImg(s) && s.el && s.pr).length;
-  const pairs = slots.filter(s => s.el && s.pr).map(s => s.el + '/' + s.pr);
-  const dupes = pairs.filter((p, k) => pairs.indexOf(p) !== k);
-  const elC = Object.fromEntries(EL.map(e => [e, 0])), prC = Object.fromEntries(PR.map(p => [p, 0]));
-  slots.forEach(s => { if (s.el) elC[s.el]++; if (s.pr) prC[s.pr]++; });
-  const kinds = slots.filter(s => s.kind);
-  const lit = kinds.filter(s => s.kind === 'literal').length, con = kinds.length - lit;
-  const items = [
-    [filled === N, filled + ' of ' + N + ' squares have a picture.'],
-    [labelled === filled && filled > 0, labelled + ' of ' + filled + ' pictures have both an element and a principle.'],
-    [dupes.length === 0, dupes.length ? 'Repeated pairs: ' + [...new Set(dupes)].join(', ').replace(/\//g, ' / ') + '. Try a different combination so every square says something new.' : 'No element / principle pair is repeated.'],
-    [EL.every(e => elC[e] >= 1), EL.every(e => elC[e] >= 1) ? 'All seven elements are used at least once.' : 'Not used yet: ' + EL.filter(e => !elC[e]).join(', ') + '. Using all seven shows you know them.'],
-    [Object.values(prC).filter(Boolean).length >= 8, Object.values(prC).filter(Boolean).length + ' different principles used (aim for 8 or more).'],
-    [lit > 0 && con > 0, 'Literal: ' + lit + ', conceptual: ' + con + '. A mix of both is strongest.'],
-  ];
-  $('checklist').innerHTML = items.map(([ok, t]) => '<li' + (ok ? ' class="ok"' : '') + '>' + esc(t) + '</li>').join('');
-  const bars = (counts, max) => Object.entries(counts).map(([k, v]) => '<div class="bar' + (v ? '' : ' zero') + '"><span>' + k + '</span><i><span style="width:' + Math.min(100, v / max * 100) + '%"></span></i><span>' + v + '</span></div>').join('');
-  $('elCounts').innerHTML = bars(elC, 5);
-  $('prCounts').innerHTML = bars(prC, 4);
-}
-
-// Spread suggestions so every element gets used two or three times and principles vary
-$('planBtn').addEventListener('click', () => {
-  const used = slots.filter(s => s.el && s.pr).map(s => s.el + '/' + s.pr);
-  const elC = Object.fromEntries(EL.map(e => [e, 0])), prC = Object.fromEntries(PR.map(p => [p, 0]));
-  slots.forEach(s => { const t = s.el ? s : s.plan; if (t && t.el) { elC[t.el]++; prC[t.pr]++; } });
-  const pool = currentIdeas();
-  slots.forEach((s, i) => {
-    if (hasImg(s) || s.plan) return;
-    // Prefer an idea whose element and principle are least used so far
-    const ranked = pool.filter(([, , e, p]) => !used.includes(e + '/' + p))
-      .map(idea => ({ idea, score: elC[idea[2]] * 3 + prC[idea[3]] + Math.random() }))
-      .sort((a, b) => a.score - b.score);
-    const pickI = ranked[0] && ranked[0].idea;
-    if (!pickI) return;
-    s.plan = { term: pickI[0], kind: pickI[1], el: pickI[2], pr: pickI[3] };
-    used.push(pickI[2] + '/' + pickI[3]); elC[pickI[2]]++; prC[pickI[3]]++;
-    save(i);
-  });
-  drawBoard();
-});
-$('clearPlan').addEventListener('click', () => { slots.forEach((s, i) => { if (s.plan) { s.plan = null; save(i); } }); drawBoard(); });
-$('clearAll').addEventListener('click', () => {
-  if (!confirm('Remove all 18 pictures and labels from this board? This cannot be undone.')) return;
-  slots = Array.from({ length: N }, blank);
-  slots.forEach((_, i) => save(i));
-  drawBoard();
-});
-$('word').addEventListener('input', () => { try { localStorage.setItem('wordBoardWord', $('word').value); } catch (e) { /* ignore */ } drawIdeas(); drawPrintInfo(); });
-
-/* ================= Adding pictures ================= */
-
-// extra: { fallback: second address to try, credit: source text, done: callback(ok) }
-function setImage(i, blob, url, extra) {
-  const s = slots[i], x = extra || {};
-  const probe = new Image();
-  probe.onload = () => {
-    Object.assign(s, { img: blob || null, url: blob ? '' : probe.src, nw: probe.naturalWidth, nh: probe.naturalHeight, cx: .5, cy: .5, z: 1 });
-    if (x.credit) s.src = x.credit;
-    if (s.plan && !s.el) { s.el = s.plan.el; s.pr = s.plan.pr; s.kind = s.plan.kind; }
-    save(i); drawBoard();
-    if (edIndex === i && dlg.open) fillEditor();
-    if (x.done) x.done(true);
-  };
-  probe.onerror = () => {
-    if (x.fallback) { const f = x.fallback; x.fallback = null; probe.src = f; return; }
-    if (x.done) x.done(false); else alert('That picture could not be loaded. Try saving it to your computer and choosing the file instead.');
-  };
-  probe.src = blob ? URL.createObjectURL(blob) : url;
-}
-function takeDrop(dt, i) {
-  if (!dt) return;
-  const file = [...(dt.files || [])].find(f => f.type.startsWith('image/'));
-  if (file) { setImage(i, file); return; }
-  const html = dt.getData('text/html');
-  const m = html && html.match(/<img[^>]+src="([^"]+)"/i);
-  const url = (m && m[1]) || dt.getData('text/uri-list') || dt.getData('text/plain');
-  if (url && /^(https?:|data:image)/.test(url.trim())) setImage(i, null, url.trim());
-}
-
-/* ================= Editor ================= */
-
-const dlg = $('editor');
-let edIndex = 0;
-function openEditor(i) {
-  edIndex = i;
-  fillEditor();
-  if (!dlg.open) dlg.showModal();
-}
-function fillEditor() {
-  const s = slots[edIndex];
-  $('edTitle').textContent = 'Square ' + (edIndex + 1) + ' of ' + N;
-  const crop = $('crop');
-  crop.querySelectorAll('img').forEach(n => n.remove());
-  $('cropDrop').style.display = hasImg(s) ? 'none' : '';
-  if (hasImg(s)) crop.insertAdjacentHTML('beforeend', imgTag(s, edIndex));
-  $('zoom').value = s.z; $('zoomOut').textContent = Math.round(s.z * 100) + '%';
-  $('fEl').value = s.el; $('fPr').value = s.pr; $('fKind').value = s.kind; $('fNote').value = s.note; $('fSrc').value = s.src;
-  $('imgUrl').value = s.url && !s.url.startsWith('data:') ? s.url : '';
-  $('planHint').textContent = s.plan ? 'Plan for this square: search "' + s.plan.term + '" (' + s.plan.el + ' / ' + s.plan.pr + ').' : '';
-  pairHint();
-  $('prevSq').disabled = edIndex === 0; $('nextSq').disabled = edIndex === N - 1;
-}
-function pairHint() {
-  const e = ELEMENTS.find(x => x[0] === $('fEl').value), p = PRINCIPLES.find(x => x[0] === $('fPr').value);
-  $('pairHint').textContent = e && p ? 'Say it like this: the ' + e[0].toLowerCase() + ' creates ' + p[0].toLowerCase() + ' because…' : e ? e[1] : p ? p[1] : '';
-}
-function updateCrop() {
-  const s = slots[edIndex], img = $('crop').querySelector('img');
-  if (!img) return;
-  const p = placement(s);
-  Object.assign(img.style, { width: p.w + '%', height: p.h + '%', left: p.left + '%', top: p.top + '%' });
-}
-$('zoom').addEventListener('input', () => { const s = slots[edIndex]; s.z = +$('zoom').value; $('zoomOut').textContent = Math.round(s.z * 100) + '%'; updateCrop(); });
-$('zoom').addEventListener('change', () => { save(edIndex); drawBoard(); });
-$('centre').addEventListener('click', () => { const s = slots[edIndex]; s.cx = s.cy = .5; s.z = 1; $('zoom').value = 1; $('zoomOut').textContent = '100%'; updateCrop(); save(edIndex); drawBoard(); });
-$('removeImg').addEventListener('click', () => { const s = slots[edIndex]; Object.assign(s, { img: null, url: '', nw: 0, nh: 0 }); save(edIndex); drawBoard(); fillEditor(); });
-$('file').addEventListener('change', e => { const f = e.target.files[0]; if (f) setImage(edIndex, f); e.target.value = ''; });
-$('imgUrl').addEventListener('change', () => { const u = $('imgUrl').value.trim(); if (u) setImage(edIndex, null, u); });
-['fEl', 'fPr', 'fKind', 'fNote', 'fSrc'].forEach(id => $(id).addEventListener('input', () => {
-  const s = slots[edIndex];
-  s.el = $('fEl').value; s.pr = $('fPr').value; s.kind = $('fKind').value; s.note = $('fNote').value; s.src = $('fSrc').value;
-  pairHint(); save(edIndex); drawBoard();
-}));
-$('prevSq').addEventListener('click', () => { if (edIndex > 0) { edIndex--; fillEditor(); } });
-$('nextSq').addEventListener('click', () => { if (edIndex < N - 1) { edIndex++; fillEditor(); } });
-$('done').addEventListener('click', () => dlg.close());
-
-// Drag to pan the picture inside the square
-const crop = $('crop');
-let pan = null;
-crop.addEventListener('pointerdown', e => {
-  const s = slots[edIndex];
-  if (!hasImg(s)) { $('file').click(); return; }
-  pan = { x: e.clientX, y: e.clientY };
-  crop.setPointerCapture(e.pointerId);
-});
-crop.addEventListener('pointermove', e => {
-  if (!pan) return;
-  const s = slots[edIndex], box = crop.getBoundingClientRect(), p = placement(s);
-  const wPx = p.w / 100 * box.width, hPx = p.h / 100 * box.height;
-  s.cx = clampC(s.cx - (e.clientX - pan.x) / wPx, p.w);
-  s.cy = clampC(s.cy - (e.clientY - pan.y) / hPx, p.h);
-  pan = { x: e.clientX, y: e.clientY };
-  updateCrop();
-});
-const endPan = () => { if (pan) { pan = null; save(edIndex); drawBoard(); } };
-crop.addEventListener('pointerup', endPan);
-crop.addEventListener('pointercancel', endPan);
-crop.addEventListener('keydown', e => {
-  const s = slots[edIndex];
-  const d = { ArrowLeft: [-.02, 0], ArrowRight: [.02, 0], ArrowUp: [0, -.02], ArrowDown: [0, .02] }[e.key];
-  if (!d || !hasImg(s)) return;
-  e.preventDefault();
-  const p = placement(s);
-  s.cx = clampC(s.cx + d[0], p.w); s.cy = clampC(s.cy + d[1], p.h);
-  updateCrop(); save(edIndex);
-});
-crop.addEventListener('wheel', e => {
-  const s = slots[edIndex];
-  if (!hasImg(s)) return;
-  e.preventDefault();
-  s.z = Math.max(1, Math.min(4, s.z * (e.deltaY < 0 ? 1.06 : 1 / 1.06)));
-  $('zoom').value = s.z; $('zoomOut').textContent = Math.round(s.z * 100) + '%';
-  updateCrop();
-}, { passive: false });
-crop.addEventListener('dragover', e => e.preventDefault());
-crop.addEventListener('drop', e => { e.preventDefault(); takeDrop(e.dataTransfer, edIndex); });
-// Paste a copied picture into the open square
-document.addEventListener('paste', e => {
-  if (!dlg.open) return;
-  const item = [...(e.clipboardData ? e.clipboardData.items : [])].find(it => it.type.startsWith('image/'));
-  if (item) { e.preventDefault(); setImage(edIndex, item.getAsFile()); return; }
-  const t = e.clipboardData && e.clipboardData.getData('text');
-  if (t && /^https?:\/\/\S+$/.test(t.trim()) && document.activeElement !== $('imgUrl')) setImage(edIndex, null, t.trim());
-});
-dlg.addEventListener('close', () => drawBoard());
-
-/* ================= Finding pictures ================= */
-// Openverse and Wikimedia Commons both allow searches from a web page without a key.
-
-const F = { lib: 'openverse', q: '', page: 1, idea: null };
-pickButtons($('libBtns'), [['openverse', 'Openverse'], ['commons', 'Wikimedia']], F.lib, k => { F.lib = k; if (F.q) runSearch(true); });
-function fillTargets(sel) {
-  const t = $('target');
-  t.innerHTML = '<option value="next">Next empty square</option>' + slots.map((s, i) => '<option value="' + i + '">Square ' + (i + 1) + (hasImg(s) ? ' (replace)' : '') + '</option>').join('');
-  t.value = String(sel == null ? 'next' : sel);
-}
-const stripTags = h => { const d = document.createElement('div'); d.innerHTML = h || ''; return (d.textContent || '').trim(); };
-async function searchOpenverse(q, page) {
-  const r = await fetch('https://api.openverse.org/v1/images/?q=' + encodeURIComponent(q) + '&page_size=20&page=' + page + '&mature=false');
-  if (!r.ok) throw new Error('Openverse ' + r.status);
-  const j = await r.json();
-  return (j.results || []).map(x => ({
-    thumb: x.thumbnail || x.url, full: x.url, alt: x.thumbnail,
-    title: x.title || 'Untitled', by: x.creator || 'unknown', lic: ((x.license || '') + ' ' + (x.license_version || '')).trim().toUpperCase(),
-    page: x.foreign_landing_url || x.url,
+/* ---------- Picture cards ---------- */
+function drawList() {
+  const list = PICS.filter(p => (!F.el || p.el === F.el) && (!F.pr || p.pr === F.pr) && (!F.only || chosen.includes(p.id)));
+  $('count').textContent = list.length + ' of ' + PICS.length + ' pictures';
+  $('list').innerHTML = list.map(p => {
+    const k = chosen.indexOf(p.id);
+    return '<article class="pic' + (k >= 0 ? ' on' : '') + '">' +
+      '<div class="img"><img loading="lazy" alt="' + esc(p.title) + '" src="' + esc(p.thumb) + '" data-alt="' + esc(p.src) + '">' + (k >= 0 ? '<span class="badge">' + (k + 1) + '</span>' : '') + '</div>' +
+      '<div class="body"><div class="pair">' + p.el + ' / ' + p.pr + '<span>' + p.kind + '</span></div>' +
+      '<p>' + esc(p.why) + '</p>' +
+      '<div class="src">“' + esc(p.title) + '” by ' + esc(p.by) + ' · ' + esc(p.lic) + ' · <a href="' + esc(p.page) + '" target="_blank" rel="noopener">' + esc(p.site || 'source') + ' ↗</a></div>' +
+      '<button type="button" class="choose" data-id="' + p.id + '">' + (k >= 0 ? 'Chosen (' + (k + 1) + ') · remove' : 'Choose') + '</button></div></article>';
+  }).join('') || '<p>No pictures match. Press “Show all”.</p>';
+  $('list').querySelectorAll('img').forEach(im => { im.onerror = () => { if (im.dataset.alt && im.src !== im.dataset.alt) { im.src = im.dataset.alt; im.dataset.alt = ''; } }; });
+  $('list').querySelectorAll('.choose').forEach(b => b.addEventListener('click', () => {
+    const id = b.dataset.id, k = chosen.indexOf(id);
+    if (k >= 0) chosen.splice(k, 1);
+    else if (chosen.length < 18) chosen.push(id);
+    else { alert('You already have 18. Remove one first.'); return; }
+    save(); drawAll();
   }));
 }
-async function searchCommons(q, page) {
-  const off = (page - 1) * 20;
-  const u = 'https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=20&gsroffset=' + off +
-    '&gsrsearch=' + encodeURIComponent(q + ' filetype:bitmap') + '&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=1000';
-  const r = await fetch(u);
-  if (!r.ok) throw new Error('Commons ' + r.status);
-  const j = await r.json();
-  const pages = Object.values((j.query && j.query.pages) || {}).sort((a, b) => (a.index || 0) - (b.index || 0));
-  return pages.map(p => {
-    const ii = (p.imageinfo || [])[0] || {}, md = ii.extmetadata || {};
-    return {
-      thumb: ii.thumburl || ii.url, full: ii.thumburl || ii.url, alt: ii.url,
-      title: (p.title || '').replace(/^File:/, '').replace(/\.[a-z0-9]+$/i, ''),
-      by: stripTags(md.Artist && md.Artist.value) || 'unknown', lic: (md.LicenseShortName && md.LicenseShortName.value) || '',
-      page: ii.descriptionurl || '',
-    };
-  }).filter(x => x.thumb);
-}
-let results = [];
-async function runSearch(fresh) {
-  if (fresh) { F.page = 1; results = []; $('results').innerHTML = ''; }
-  const q = F.q;
-  $('googleLink').href = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(q || word());
-  if (!q) return;
-  $('finderStatus').textContent = 'Searching ' + (F.lib === 'openverse' ? 'Openverse' : 'Wikimedia Commons') + ' for “' + q + '”…';
-  $('more').hidden = true;
-  try {
-    const found = F.lib === 'openverse' ? await searchOpenverse(q, F.page) : await searchCommons(q, F.page);
-    results = results.concat(found);
-    drawResults();
-    $('finderStatus').textContent = results.length
-      ? results.length + ' pictures for “' + q + '”' + (F.idea ? ' (suggested pair: ' + F.idea[2] + ' / ' + F.idea[3] + ')' : '') + '. Press Use to add one to a square.'
-      : 'Nothing found for “' + q + '”. Try fewer or simpler words, the other library, or Google.';
-    $('more').hidden = found.length < 20;
-  } catch (e) {
-    $('finderStatus').textContent = 'The picture library could not be reached (' + e.message + '). Check the internet connection, try the other library, or use Google and save pictures to your computer.';
-  }
-}
-function drawResults() {
-  $('results').innerHTML = results.map((r, k) =>
-    '<div class="res"><div class="thumb"><img loading="lazy" alt="' + esc(r.title) + '" src="' + esc(r.thumb) + '"></div>' +
-    '<div class="meta"><b title="' + esc(r.title) + '">' + esc(r.title) + '</b>' + esc(r.by) + (r.lic ? ' · ' + esc(r.lic) : '') + '</div>' +
-    '<div class="acts"><button type="button" data-k="' + k + '">Use</button>' + (r.page ? '<a href="' + esc(r.page) + '" target="_blank" rel="noopener">Source ↗</a>' : '') + '</div></div>').join('');
-  $('results').querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => {
-    const r = results[+b.dataset.k];
-    const t = $('target').value;
-    const i = t === 'next' ? slots.findIndex(s => !hasImg(s)) : +t;
-    if (i < 0) { $('finderStatus').textContent = 'All 18 squares are full. Choose a square to replace in the list next to Search.'; return; }
-    b.disabled = true; b.textContent = 'Adding…';
-    const credit = '“' + r.title + '” by ' + r.by + (r.lic ? ' (' + r.lic + ')' : '') + (r.page ? ' — ' + r.page : '');
-    if (F.idea && !slots[i].plan && !slots[i].el) slots[i].plan = { term: F.idea[0], kind: F.idea[1], el: F.idea[2], pr: F.idea[3] };
-    setImage(i, null, r.full, { fallback: r.alt && r.alt !== r.full ? r.alt : r.thumb, credit, done: ok => {
-      b.disabled = false;
-      b.textContent = ok ? 'Added to ' + (i + 1) : 'Could not load';
-      if (ok) { $('finderStatus').textContent = 'Added to square ' + (i + 1) + '. Click the square on your board to crop it and choose its element and principle.'; fillTargets(t); }
-    } });
-  }));
-}
-function findPictures(q, target, idea) {
-  F.q = q; F.idea = idea || null;
-  $('q').value = q;
-  fillTargets(target);
-  $('finder').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  runSearch(true);
-}
-$('finderForm').addEventListener('submit', e => { e.preventDefault(); F.q = $('q').value.trim(); F.idea = null; runSearch(true); });
-$('more').addEventListener('click', () => { F.page++; runSearch(false); });
-$('findForSq').addEventListener('click', () => {
-  const s = slots[edIndex];
-  const q = s.plan ? s.plan.term : word();
-  const idea = s.plan ? [s.plan.term, s.plan.kind, s.plan.el, s.plan.pr] : null;
-  dlg.close();
-  findPictures(q, edIndex, idea);
-});
-fillTargets('next');
-$('googleLink').href = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(word());
 
-/* ================= Printing ================= */
-
-let PRM = 'squares';
-pickButtons($('prMode'), [['squares', 'Squares to cut (2 pages)'], ['list', 'Label list (1 page)'], ['both', 'Both']], PRM, k => { PRM = k; drawPrintInfo(); });
-function drawPrintInfo() {
-  const filled = slots.filter(hasImg).length;
-  $('printInfo').textContent = filled + ' of ' + N + ' squares have pictures' + (filled < N ? '; empty squares print as grey 6 cm boxes.' : '.') + ' Pictures from image addresses print only if that website allows it; pictures from files always print.';
+/* ---------- Selection bar ---------- */
+function drawBar() {
+  const sel = chosen.map(id => PICS.find(p => p.id === id));
+  const pairs = sel.map(p => p.el + ' / ' + p.pr);
+  const dup = [...new Set(pairs.filter((x, i) => pairs.indexOf(x) !== i))];
+  const els = new Set(sel.map(p => p.el)), prs = new Set(sel.map(p => p.pr));
+  let msg = '';
+  if (dup.length) msg = '<span class="warn">Same pair twice: ' + dup.join(', ') + '. Swap one for a different pair.</span>';
+  else if (chosen.length === 18) msg = '<span class="ok">18 chosen, all different pairs · ' + els.size + ' of 6 elements · ' + prs.size + ' of 10 principles.</span>';
+  else msg = '<span class="count">' + els.size + ' of 6 elements · ' + prs.size + ' of 10 principles used</span>';
+  $('selbar').innerHTML = '<b>' + chosen.length + ' / 18 chosen</b>' + msg +
+    '<span class="spacer"><button type="button" class="btn ghost" id="pSrc">Print sources</button><button type="button" class="btn primary" id="pSheets">Print my sheets</button></span>';
+  $('pSheets').addEventListener('click', () => printIt(true));
+  $('pSrc').addEventListener('click', () => printIt(false));
 }
-// 3 across × 4 down, 6 cm squares with room for labels underneath
-function squaresPage(from, to, labels) {
-  let h = '<div class="pp"><h2>' + esc(word().toUpperCase()) + ' · ' + (from + 1) + '–' + to + '</h2><p class="sub">Cut along the thin outline of each square (6 × 6 cm). Check one with a ruler first.</p>';
-  for (let i = from; i < to; i++) {
-    const k = i - from, col = k % 3, row = Math.floor(k / 3);
-    const x = 15 + col * 63, y = 24 + row * 68;
-    const s = slots[i];
-    h += '<div class="sq' + (hasImg(s) ? '' : ' blank') + '" style="left:' + x + 'mm;top:' + y + 'mm">' + (hasImg(s) ? imgTag(s, i) : '') + '</div>';
-    if (labels) h += '<div class="cap" style="left:' + x + 'mm;top:' + (y + 61) + 'mm"><b>' + (i + 1) + '. ' + esc(s.el || '—') + ' / ' + esc(s.pr || '—') + '</b>' + (s.kind ? ' · ' + s.kind : '') + '</div>';
-  }
+
+function drawAll() { drawMatrix(); drawList(); drawBar(); }
+
+/* ---------- Printing ---------- */
+function sheet(items, from, part) {
+  let h = '<div class="pp"><div class="h1">Project 1 · Wordscapes: Part 1 Visual Research</div><div class="h2">CHAOS · ' + part + '</div><div class="nm">NAME ______________________</div>';
+  items.forEach((p, k) => {
+    const col = k % 3, row = Math.floor(k / 3);
+    const x = 15 + col * 63, y = 28 + row * 86;
+    h += '<div class="sq" style="left:' + x + 'mm;top:' + y + 'mm"><img alt="" src="' + esc(p.src) + '" data-alt="' + esc(p.thumb) + '"></div>';
+    h += '<div class="cap" style="left:' + x + 'mm;top:' + (y + 62) + 'mm">' + (from + k + 1) + '. ' + p.pr + ' / ' + p.el + '<br><span>“' + esc(p.title).slice(0, 48) + '” · ' + esc(p.by).slice(0, 30) + '</span></div>';
+  });
   return h + '</div>';
 }
-function listPage() {
-  let h = '<div class="pp"><h2>' + esc(word().toUpperCase()) + ' · 18 PICTURES</h2><p class="sub">Element and principle for each square, with what it shows and where it came from.</p><table><thead><tr><th>#</th><th>Element</th><th>Principle</th><th>Literal / conceptual</th><th>What it shows and why</th><th>Source</th></tr></thead><tbody>';
-  slots.forEach((s, i) => { h += '<tr><td>' + (i + 1) + '</td><td>' + esc(s.el) + '</td><td>' + esc(s.pr) + '</td><td>' + esc(s.kind) + '</td><td>' + esc(s.note) + '</td><td>' + esc(s.src) + '</td></tr>'; });
+function sourcesPage(sel) {
+  let h = '<div class="pp"><div class="h1">Project 1 · Wordscapes: Part 1 Visual Research</div><div class="h2">CHAOS · SOURCES AND REASONS</div><table><thead><tr><th>#</th><th>Principle / element</th><th>Why it shows chaos</th><th>Source</th></tr></thead><tbody>';
+  sel.forEach((p, k) => { h += '<tr><td>' + (k + 1) + '</td><td>' + p.pr + ' / ' + p.el + '</td><td>' + esc(p.why) + '</td><td>“' + esc(p.title) + '” by ' + esc(p.by) + ', ' + esc(p.lic) + '. ' + esc(p.page) + '</td></tr>'; });
   return h + '</tbody></table></div>';
 }
-$('printBtn').addEventListener('click', () => {
-  const labels = $('prLabels').checked;
-  let h = '';
-  if (PRM !== 'list') h += squaresPage(0, 12, labels) + squaresPage(12, 18, labels);
-  if (PRM !== 'squares') h += listPage();
-  $('printArea').innerHTML = h;
-  // Give the pictures a moment to load before the print dialogue opens
+function matrixPage(sel) {
+  let h = '<div class="pp"><div class="h1">Project 1 · Wordscapes: Part 1 Visual Research</div><div class="h2">CHAOS · DESIGN MATRIX</div><table class="mx"><tr><th></th>' + ELEMENTS.map(e => '<th>' + e + '</th>').join('') + '</tr>';
+  PRINCIPLES.forEach(pr => {
+    h += '<tr><th style="text-align:right">' + pr + '</th>' + ELEMENTS.map(el => { const ks = sel.map((p, k) => p.el === el && p.pr === pr ? k + 1 : 0).filter(Boolean); return '<td class="' + (ks.length ? 'c' : '') + '">' + ks.join(', ') + '</td>'; }).join('') + '</tr>';
+  });
+  return h + '</table></div>';
+}
+function printIt(sheets) {
+  const sel = chosen.map(id => PICS.find(p => p.id === id));
+  if (!sel.length) { alert('Choose some pictures first.'); return; }
+  $('printArea').innerHTML = sheets ? sheet(sel.slice(0, 9), 0, 'SHEET 1') + (sel.length > 9 ? sheet(sel.slice(9, 18), 9, 'SHEET 2') : '') + matrixPage(sel) : sourcesPage(sel);
   const imgs = [...$('printArea').querySelectorAll('img')];
-  Promise.all(imgs.map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; }))).then(() => window.print());
-});
+  imgs.forEach(im => { im.onerror = () => { if (im.dataset.alt) { im.src = im.dataset.alt; im.dataset.alt = ''; } }; });
+  // Wait for the full-size pictures (up to 8 s) before opening the print dialogue
+  Promise.race([Promise.all(imgs.map(im => im.complete ? 0 : new Promise(r => { im.addEventListener('load', r); im.addEventListener('error', () => setTimeout(r, 1500)); }))), new Promise(r => setTimeout(r, 8000))]).then(() => window.print());
+}
 
-/* ================= Start ================= */
-
-openDB().then(d => { db = d; return loadAll(); }).then(() => { drawBoard(); drawIdeas(); });
-drawBoard();
-drawIdeas();
-
+syncFilters();
+drawAll();
 })();
 </script>
 </body>

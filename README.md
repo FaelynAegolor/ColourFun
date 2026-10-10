@@ -166,15 +166,14 @@ The page has:
 - **Shading**: light from the right, as grey tones, pencil hatching or outline. Right-facing faces are lightest, top light grey, bottom darker, left-facing darkest. The front face can be white or a colour.
 - **Options**: guide lines, dashed hidden back edges and labels can be toggled. Printing gives the page exactly as shown.
 
-## Word Image Board
+## Chaos Picture List
 
-`word-board.html` supports collecting 18 pictures that represent a word (chaos by default), literally or conceptually, each labelled with one design element and one design principle.
+`word-board.html` supports Project 1 (Wordscapes, Part 1: Visual Research) for the word **chaos**:
 
-- **Board**: 18 squares. Add a picture by file, paste, drag-and-drop or image address, crop it square by dragging and zooming, and choose element, principle, literal/conceptual, a note and the source. Everything is saved in the browser (IndexedDB).
-- **Find pictures**: search Openverse (Creative Commons) or Wikimedia Commons from the page. "Use" puts a result in a square and fills in the title, creator and licence. A Google Images link is included too.
-- **Picture ideas**: about 30 chaos ideas, each with a suggested element/principle pair, plus general search ideas for other words. "Use as a plan" and "Suggest a pair for every empty square" spread the elements and principles.
-- **Checklist**: all 18 filled and labelled, no repeated pairs, all seven elements used, at least 8 principles, and a literal/conceptual mix.
-- **Print**: pictures at exactly 6 × 6 cm (12 per A4 page) with labels, and a label list. Print at 100%.
+- **Pictures**: 46 curated, openly licensed photos (via Openverse: Flickr, NASA, Rawpixel). Each is matched to one element and one principle from the course design matrix, with a reason it shows chaos and a full credit (title, creator, licence, link).
+- **Design matrix**: 6 elements × 10 principles, showing how many pictures cover each pair and which pairs are chosen. Click a cell to filter.
+- **Choosing**: pick 18, saved in the browser. A warning appears if a pair is used twice.
+- **Printing**: two A4 sheets of 6 × 6 cm images with principle/element labels, the filled matrix, and a separate sources-and-reasons page.
 
 ## Perfume Bottle Compositions
 
