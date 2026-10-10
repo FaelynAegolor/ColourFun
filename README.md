@@ -179,7 +179,7 @@ The page has:
 
 `perfume-bottles.html` supports drawing 15 compositions of the same two cuboid perfume bottles, each arranged differently, shaded to look 3D, with no table or shadows.
 
-- **Your two bottles**: body height, width, depth, cap height and width for each bottle, saved in the browser. Every composition uses them.
+- **Your two bottles**: body height, width, depth and cap size for each bottle, plus a cuboid, cylinder or sphere cap, saved in the browser. Every composition uses them.
 - **15 compositions**: real 3D perspective renders, one arrangement each:
   - side by side (square-on, or both turned)
   - overlaps (tall behind and short behind)

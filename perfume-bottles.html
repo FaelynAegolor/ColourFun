@@ -267,11 +267,13 @@ const VW = 500, VH = 400;
 // Sizes in cm. Body is a cuboid; the cap is a smaller cuboid centred on top.
 
 const DEFAULT_BOTTLES = {
-  A: { w: 3.2, d: 2.2, h: 8.5, cw: 1.6, ch: 2.2, tint: '#e9b8c8' },
-  B: { w: 4.6, d: 3.2, h: 5.5, cw: 2.2, ch: 1.4, tint: '#b8cde9' },
+  A: { w: 3.2, d: 2.2, h: 8.5, cw: 1.6, ch: 2.2, cap: 'cube', tint: '#e9b8c8' },
+  B: { w: 4.6, d: 3.2, h: 5.5, cw: 2.2, ch: 1.4, cap: 'sphere', tint: '#b8cde9' },
 };
 let BOT = JSON.parse(JSON.stringify(DEFAULT_BOTTLES));
 try { const s = JSON.parse(localStorage.getItem('perfumeBottles') || 'null'); if (s && s.A && s.B) BOT = s; } catch (e) { /* storage unavailable */ }
+// Cap height: a sphere's height is its diameter (the cap width)
+const capH = b => (b.cap === 'sphere' ? b.cw : b.ch);
 const saveBottles = () => { try { localStorage.setItem('perfumeBottles', JSON.stringify(BOT)); } catch (e) { /* ignore */ } };
 
 /* ================= 3D ================= */
@@ -293,7 +295,7 @@ const corners = (x0, x1, y0, y1, z0, z1) => [0, 1, 2, 3, 4, 5, 6, 7].map(i => v3
 // Local bottle space: x across, y along the height (0 at the base), z front/back.
 // A placement turns that into the world: standing or lying on a side, turned (yaw), moved on the table.
 function placer(b, pl) {
-  const L = b.h + b.ch, cy = Math.cos(pl.yaw * Math.PI / 180), sy = Math.sin(pl.yaw * Math.PI / 180);
+  const L = b.h + capH(b), cy = Math.cos(pl.yaw * Math.PI / 180), sy = Math.sin(pl.yaw * Math.PI / 180);
   const pose = p => pl.lying ? v3(p.y - L / 2, p.x + b.w / 2, p.z) : p;
   const poseN = n => pl.lying ? v3(n.y, n.x, n.z) : n;
   const yaw = q => v3(q.x * cy - q.z * sy, q.y, q.x * sy + q.z * cy);
@@ -301,7 +303,7 @@ function placer(b, pl) {
 }
 // Footprint on the table (for keeping the bottles apart)
 function footprint(b, pl) {
-  const P = placer(b, pl), L = b.h + b.ch;
+  const P = placer(b, pl), L = b.h + capH(b);
   const pts = pl.lying ? [v3(0, 0, -b.d / 2), v3(0, L, -b.d / 2), v3(0, L, b.d / 2), v3(0, 0, b.d / 2)] : [v3(-b.w / 2, 0, -b.d / 2), v3(b.w / 2, 0, -b.d / 2), v3(b.w / 2, 0, b.d / 2), v3(-b.w / 2, 0, b.d / 2)];
   if (pl.lying) pts.forEach(p => { p.x = -b.w / 2; });
   return pts.map(p => { const q = P.pt(p); return { x: q.x, y: q.z }; });
@@ -340,6 +342,41 @@ function camera(cam) {
   return { pos, proj: p => { const d = sub(p, pos), z = dot(d, f); return { x: dot(d, r) / z, y: -dot(d, u) / z, z }; } };
 }
 
+// Round caps as faceted meshes in local bottle space. Curved facets are 'soft':
+// filled without ink edges, and the cap gets one outline round its silhouette.
+function capMesh(b) {
+  const r = b.cw / 2, v = [], f = [];
+  if (b.cap === 'cylinder') {
+    const N = 36, y0 = b.h, y1 = b.h + b.ch;
+    for (const y of [y0, y1]) for (let i = 0; i < N; i++) { const a = i / N * 2 * Math.PI; v.push(v3(r * Math.cos(a), y, r * Math.sin(a))); }
+    for (let i = 0; i < N; i++) {
+      const j = (i + 1) % N, a = (i + .5) / N * 2 * Math.PI;
+      f.push({ i: [i, j, N + j, N + i], n: v3(Math.cos(a), 0, Math.sin(a)), soft: true });
+    }
+    f.push({ i: [...Array(N).keys()].map(i => N + i), n: v3(0, 1, 0) });
+    f.push({ i: [...Array(N).keys()], n: v3(0, -1, 0) });
+  } else {
+    const ST = 18, SL = 32, c = v3(0, b.h + r, 0);
+    v.push(v3(0, c.y + r, 0));
+    for (let k = 1; k < ST; k++) { const t = k / ST * Math.PI; for (let j = 0; j < SL; j++) { const a = j / SL * 2 * Math.PI; v.push(v3(r * Math.sin(t) * Math.cos(a), c.y + r * Math.cos(t), r * Math.sin(t) * Math.sin(a))); } }
+    v.push(v3(0, c.y - r, 0));
+    const ring = (k, j) => 1 + (k - 1) * SL + (j % SL), last = v.length - 1;
+    const add = idx => { const m = idx.reduce((s2, q) => v3(s2.x + v[q].x, s2.y + v[q].y, s2.z + v[q].z), v3(0, 0, 0)); f.push({ i: idx, n: norm(sub(v3(m.x / idx.length, m.y / idx.length, m.z / idx.length), c)), soft: true }); };
+    for (let j = 0; j < SL; j++) add([0, ring(1, j + 1), ring(1, j)]);
+    for (let k = 1; k < ST - 1; k++) for (let j = 0; j < SL; j++) add([ring(k, j), ring(k, j + 1), ring(k + 1, j + 1), ring(k + 1, j)]);
+    for (let j = 0; j < SL; j++) add([last, ring(ST - 1, j), ring(ST - 1, j + 1)]);
+  }
+  return { v, f };
+}
+function hull2(pts) {
+  pts = pts.slice().sort((a, b) => a.x - b.x || a.y - b.y);
+  const cr = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x), lo = [], up = [];
+  for (const p of pts) { while (lo.length > 1 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+  for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (up.length > 1 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); }
+  up.pop(); lo.pop();
+  return lo.concat(up);
+}
+
 // Build every visible face of both bottles (body and cap) in camera space
 function scene(c) {
   const cam = camera(c.cam), L = LIGHTS[S.light];
@@ -347,16 +384,21 @@ function scene(c) {
   ['A', 'B'].forEach(k => {
     const b = BOT[k], P = placer(b, c[k]);
     boxes.push({ k, part: 'body', P, b, local: corners(-b.w / 2, b.w / 2, 0, b.h, -b.d / 2, b.d / 2) });
-    boxes.push({ k, part: 'cap', P, b, local: corners(-b.cw / 2, b.cw / 2, b.h, b.h + b.ch, -b.cw / 2, b.cw / 2) });
+    if (!b.cap || b.cap === 'cube') boxes.push({ k, part: 'cap', P, b, local: corners(-b.cw / 2, b.cw / 2, b.h, b.h + b.ch, -b.cw / 2, b.cw / 2) });
+    else { const m = capMesh(b); boxes.push({ k, part: 'cap', P, b, local: m.v, mesh: m.f }); }
   });
   boxes.forEach(bx => {
     bx.world = bx.local.map(bx.P.pt);
-    const cen = bx.world.reduce((s, p) => v3(s.x + p.x / 8, s.y + p.y / 8, s.z + p.z / 8), v3(0, 0, 0));
+    const nv = bx.world.length;
+    const cen = bx.world.reduce((s, p) => v3(s.x + p.x / nv, s.y + p.y / nv, s.z + p.z / nv), v3(0, 0, 0));
     bx.dist = Math.hypot(cen.x - cam.pos.x, cen.y - cam.pos.y, cen.z - cam.pos.z);
-    bx.faces = FACES.map((F, fi) => {
+    const faceList = bx.mesh ? bx.mesh.map(F => ({ c: F.i, n: F.n, soft: F.soft })) : FACES;
+    bx.faces = faceList.map((F, fi) => {
       const n = bx.P.nrm(F.n), pts = F.c.map(i => bx.world[i]);
       const fc = pts.reduce((s, p) => v3(s.x + p.x / 4, s.y + p.y / 4, s.z + p.z / 4), v3(0, 0, 0));
-      return { fi, n, pts, vis: dot(n, sub(cam.pos, fc)) > 1e-6, light: dot(n, L) };
+      const np = pts.length;
+      const fc2 = np === 4 ? fc : pts.reduce((s, p) => v3(s.x + p.x / np, s.y + p.y / np, s.z + p.z / np), v3(0, 0, 0));
+      return { fi: bx.mesh ? -1 : fi, n, pts, soft: !!F.soft, vis: dot(n, sub(cam.pos, fc2)) > 1e-6, light: dot(n, L) };
     });
   });
   return { cam, boxes: boxes.sort((a, b) => b.dist - a.dist) };
@@ -383,11 +425,29 @@ function draw(c, W, H, opt) {
   }
   sc.boxes.forEach(bx => {
     const b = bx.b;
+    if (bx.mesh) {
+      bx.faces.forEach(F => {
+        if (!F.vis) return;
+        const t = toneIndex(F.light);
+        // Curved facets blend smoothly between tones; pencil keeps hatching bands
+        const sm = Math.max(0, Math.min(1, (F.light + .5) / 1.4));
+        const g = Math.round(0x66 + (0xf3 - 0x66) * sm);
+        const fill = S.style === 'outline' ? '#fff' : S.style === 'colour' ? mix(b.tint, (.32 + .68 * sm) * .85) : S.style === 'grey' ? 'rgb(' + g + ',' + (g - 2) + ',' + (g - 6) + ')' : TONES[S.style][t];
+        s += F.soft
+          ? '<path d="' + path(F.pts) + '" fill="' + fill + '" stroke="' + fill + '" stroke-width="' + sw * .6 + '" stroke-linejoin="round"/>'
+          : '<path d="' + path(F.pts) + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="' + sw + '" stroke-linejoin="round"/>';
+      });
+      const h = hull2(bx.world.map(scr));
+      s += '<path d="M' + h.map(q => f1(q.x) + ' ' + f1(q.y)).join('L') + 'Z" fill="none" stroke="' + INK + '" stroke-width="' + sw + '" stroke-linejoin="round"/>';
+      return;
+    }
     bx.faces.forEach(F => {
       if (!F.vis) return;
       const t = toneIndex(F.light);
       const fill = S.style === 'outline' ? '#fff' : S.style === 'colour' ? mix(b.tint, [1, .78, .55, .32][t] * (bx.part === 'cap' ? .8 : 1)) : TONES[S.style][t];
-      s += '<path d="' + path(F.pts) + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="' + sw + '" stroke-linejoin="round"/>';
+      s += F.soft
+        ? '<path d="' + path(F.pts) + '" fill="' + fill + '" stroke="' + fill + '" stroke-width="' + sw * .6 + '" stroke-linejoin="round"/>'
+        : '<path d="' + path(F.pts) + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="' + sw + '" stroke-linejoin="round"/>';
       if (bx.part !== 'body') return;
       // Label on the front face (local +z)
       if (S.label && F.fi === 5) {
@@ -499,8 +559,8 @@ function drawPair() {
   const c = { A: { x: -2.8, z: 0, yaw: -25 }, B: { x: 2.8, z: 0, yaw: -25 }, cam: { az: 0, el: 16 } };
   separate(c, 1);
   $('pairSvg').innerHTML = '<g transform="translate(25 0) scale(.9)">' + draw(c, VW, VH, { frame: false }).replace('<rect width="500" height="400" fill="#fff"/>', '') + '</g>' +
-    '<text x="12" y="372" style="font:700 15px Archivo,sans-serif;fill:#555">A: ' + BOT.A.w + ' × ' + BOT.A.d + ' × ' + (BOT.A.h + BOT.A.ch).toFixed(1) + ' cm</text>' +
-    '<text x="12" y="392" style="font:700 15px Archivo,sans-serif;fill:#555">B: ' + BOT.B.w + ' × ' + BOT.B.d + ' × ' + (BOT.B.h + BOT.B.ch).toFixed(1) + ' cm</text>';
+    '<text x="12" y="372" style="font:700 15px Archivo,sans-serif;fill:#555">A: ' + BOT.A.w + ' × ' + BOT.A.d + ' × ' + (BOT.A.h + capH(BOT.A)).toFixed(1) + ' cm</text>' +
+    '<text x="12" y="392" style="font:700 15px Archivo,sans-serif;fill:#555">B: ' + BOT.B.w + ' × ' + BOT.B.d + ' × ' + (BOT.B.h + capH(BOT.B)).toFixed(1) + ' cm</text>';
 }
 
 // Four steps for drawing one bottle, shown with bottle A
@@ -511,14 +571,14 @@ function drawDemo() {
     ['Shade: the face towards the light lightest, the top light, the far side darkest.', { style: 'grey', label: false, shine: false, cap: true }],
     ['Add the label and leave a white strip of highlight on the lit face for glass.', { style: 'grey', label: true, shine: true, cap: true }],
   ];
-  const keep = { ...S }, chKeep = BOT.A.ch;
+  const keep = { ...S }, chKeep = BOT.A.ch, capKeep = BOT.A.cap;
   $('stepsDemo').innerHTML = steps.map(([txt, o], k) => {
     Object.assign(S, { style: o.style, label: o.label, shine: o.shine, table: false });
-    if (!o.cap) BOT.A.ch = .0001;
+    if (!o.cap) { BOT.A.ch = .0001; BOT.A.cap = 'cube'; }
     const c = { A: { x: 0, z: 0, yaw: 32 }, B: { x: 60, z: 60, yaw: 0 }, cam: { az: 0, el: 18 } };
     // Only bottle A: hide B far outside the view by drawing A alone
     const svgBody = drawSingle(c);
-    BOT.A.ch = chKeep;
+    BOT.A.ch = chKeep; BOT.A.cap = capKeep;
     return '<figure class="paper"><svg viewBox="0 0 300 300" aria-hidden="true">' + svgBody + '</svg><figcaption><b>' + (k + 1) + '.</b> ' + txt + '</figcaption></figure>';
   }).join('');
   Object.assign(S, keep);
@@ -537,7 +597,12 @@ function drawSingle(c) {
 
 function sliders(key) {
   const b = BOT[key], el = $('ctl' + key);
-  const fields = [['h', 'Body height', 3, 14], ['w', 'Width', 1.5, 7], ['d', 'Depth', 1, 6], ['ch', 'Cap height', .5, 4], ['cw', 'Cap width', .6, 4]];
+  const fields = [['h', 'Body height', 3, 14], ['w', 'Width', 1.5, 7], ['d', 'Depth', 1, 6], ['ch', 'Cap height', .5, 4], ['cw', 'Cap width / diameter', .6, 4]];
+  el.insertAdjacentHTML('beforeend', '<div class="label" style="margin:4px 0 6px">Cap shape</div><div class="bgrid" role="group" aria-label="Cap shape, bottle ' + key + '" data-caps="' + key + '" style="margin-bottom:10px"></div>');
+  pickButtons(el.querySelector('[data-caps]'), [['cube', 'Cuboid'], ['cylinder', 'Cylinder'], ['sphere', 'Sphere']], b.cap || 'cube', k => {
+    BOT[key].cap = k; saveBottles(); syncCapHeight(key);
+    comps.forEach((_, i) => build(i)); drawAll();
+  });
   el.insertAdjacentHTML('beforeend', fields.map(([f, label, mn, mx]) => '<label class="range"><span>' + label + ' <output data-o="' + key + f + '">' + b[f] + ' cm</output></span><input type="range" min="' + mn + '" max="' + mx + '" step=".1" value="' + b[f] + '" data-k="' + key + '" data-f="' + f + '"></label>').join(''));
   el.querySelectorAll('input[type="range"]').forEach(inp => inp.addEventListener('input', () => {
     BOT[key][inp.dataset.f] = +inp.value;
@@ -548,7 +613,12 @@ function sliders(key) {
     drawAll();
   }));
 }
-sliders('A'); sliders('B');
+function syncCapHeight(key) {
+  const inp = $('ctl' + key).querySelector('input[data-f="ch"]');
+  inp.disabled = BOT[key].cap === 'sphere';
+  inp.closest('label').style.opacity = inp.disabled ? .45 : 1;
+}
+sliders('A'); sliders('B'); syncCapHeight('A'); syncCapHeight('B');
 $('ctlB').insertAdjacentHTML('beforeend', '<button type="button" class="btn ghost" id="resetBottles" style="margin-top:6px">Reset both bottles</button>');
 $('resetBottles').addEventListener('click', () => { BOT = JSON.parse(JSON.stringify(DEFAULT_BOTTLES)); saveBottles(); location.reload(); });
 
