@@ -166,14 +166,15 @@ The page has:
 - **Shading**: light from the right, as grey tones, pencil hatching or outline. Right-facing faces are lightest, top light grey, bottom darker, left-facing darkest. The front face can be white or a colour.
 - **Options**: guide lines, dashed hidden back edges and labels can be toggled. Printing gives the page exactly as shown.
 
-## Chaos Picture List
+## Chaos Image Matrix
 
 `word-board.html` supports Project 1 (Wordscapes, Part 1: Visual Research) for the word **chaos**:
 
-- **Pictures**: 46 curated, openly licensed photos (via Openverse: Flickr, NASA, Rawpixel). Each is matched to one element and one principle from the course design matrix, with a reason it shows chaos and a full credit (title, creator, licence, link).
-- **Design matrix**: 6 elements × 10 principles, showing how many pictures cover each pair and which pairs are chosen. Click a cell to filter.
-- **Choosing**: pick 18, saved in the browser. A warning appears if a pair is used twice.
-- **Printing**: two A4 sheets of 6 × 6 cm images with principle/element labels, the filled matrix, and a separate sources-and-reasons page.
+- **Design matrix**: the course matrix (6 elements × 10 principles) with two images in every square, 120 in all. The images come from paintings, prints, comics, early animation, nature, space, microscopy and chemistry, each marked literal or conceptual chaos.
+- **Detail view**: click any thumbnail to see it large, with an explicit reason it shows its element, a reason it shows its principle, why it shows chaos, and the source and licence.
+- **Choosing**: pick 18, saved in the browser, with a warning if two come from the same square.
+- **Printing**: two A4 sheets of 6 × 6 cm images with labels and reasons, plus a sources page.
+- **Images**: stored in `chaos-images/`, all public domain or Creative Commons (Wikimedia Commons, Flickr via Openverse, NASA).
 
 ## Perfume Bottle Compositions
 
