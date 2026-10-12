@@ -202,7 +202,8 @@ The page has:
 
 - **Ideas**: 12 cards, from a pool of 12 ideas per medium. Each says what to draw and how to do it in that medium (pencil grades, pen sizes, layering, marker order), the elements and principles it uses, literal or conceptual, and the chaos-matrix image that inspired it.
 - **Regenerate and lock**: regenerate each card or all unlocked cards, and lock favourites. Saved in the browser.
-- **Print**: three A4 drawing sheets with 9.5 cm boxes, labelled with the idea, elements and principles and space for notes, plus a one-page ideas list.
+- **Example drawings**: every one of the 48 ideas has a drawing to copy, in its medium's style. It builds up in 6–7 animated steps, each with an instruction (pencil grades, pen sizes, layering, marker order). Cards show the finished drawing; "How to draw it, step by step" opens the player. Drawings live in `drawings-pencil.js`, `drawings-fineliner.js`, `drawings-colpencil.js` and `drawings-markers.js`, rendered by `drawing-kit.js`. `drawing-test.html?file=drawings-pencil.js` previews a set, and adding `&id=pencil-3` shows every step of one drawing.
+- **Print**: three A4 drawing sheets with 9.5 cm boxes, labelled with the idea, elements and principles and space for notes; the same sheets with the example drawings as references; and a one-page ideas list.
 
 ## Site structure
 

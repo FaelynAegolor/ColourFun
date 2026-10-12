@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Drawing test harness</title>
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="lesson.css">
+<style>
+body { background: #fff; color: #111; padding: 10px; }
+.grid { display: grid; grid-template-columns: repeat(4, 300px); gap: 10px; }
+.grid figure { margin: 0; border: 1px solid #ccc; }
+.grid svg { width: 300px; height: 300px; display: block; }
+.grid figcaption { font: 12px sans-serif; padding: 4px; }
+.steps { display: grid; grid-template-columns: repeat(4, 300px); gap: 10px; }
+.steps figure { margin: 0; border: 1px solid #ccc; }
+.steps svg { width: 300px; height: 300px; display: block; }
+.steps figcaption { font: 11px sans-serif; padding: 4px; }
+</style>
+</head>
+<body>
+<!-- Usage: drawing-test.html?file=drawings-pencil.js          final step of every drawing in the file
+            drawing-test.html?file=drawings-pencil.js&id=pencil-3  every step of one drawing (no animation) -->
+<div id="out"></div>
+<script src="drawing-kit.js"></script>
+<script>
+window.__e = [];
+window.onerror = (m, u, l, c) => { __e.push(m + ' @' + u + ':' + l + ':' + c); };
+const q = new URLSearchParams(location.search);
+const s = document.createElement('script');
+s.src = q.get('file');
+s.onload = s.onerror = () => {
+  DrawingKit.ensureDefs();
+  const out = document.getElementById('out');
+  const id = q.get('id');
+  const keys = Object.keys(DRAWINGS).filter(k => !id || k === id);
+  let h = '<h2 style="color:red;font:16px sans-serif">' + (__e.join(' | ') || 'no errors') + ' · ' + keys.length + ' drawings</h2>';
+  if (id) {
+    h += '<div class="steps">' + DRAWINGS[id].steps.map((st, k) => '<figure><svg viewBox="0 0 400 400" data-k="' + k + '"></svg><figcaption>' + (k + 1) + '. ' + st.t + '</figcaption></figure>').join('') + '</div>';
+  } else {
+    h += '<div class="grid">' + keys.map(k => '<figure><svg viewBox="0 0 400 400" data-id="' + k + '"></svg><figcaption>' + k + ' · ' + DRAWINGS[k].steps.length + ' steps</figcaption></figure>').join('') + '</div>';
+  }
+  out.innerHTML = h;
+  out.querySelectorAll('svg').forEach(sv => {
+    const d = DRAWINGS[sv.dataset.id || id];
+    try { DrawingKit.render(sv, d.steps, sv.dataset.k != null ? +sv.dataset.k : d.steps.length - 1, false); }
+    catch (e) { sv.insertAdjacentHTML('afterend', '<b style="color:red">' + e.message + '</b>'); }
+  });
+};
+document.body.appendChild(s);
+</script>
+</body>
+</html>

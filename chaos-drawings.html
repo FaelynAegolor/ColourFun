@@ -43,7 +43,29 @@
 .inspo img { width: 52px; height: 52px; object-fit: cover; border-radius: 6px; flex: none; }
 .inspo:hover b { text-decoration: underline; }
 .inspo b { color: var(--ink); font-weight: 700; display: block; }
-.card .acts { display: flex; gap: 8px; padding: 0 14px 14px; }
+.card .acts { display: flex; gap: 8px; padding: 0 14px 14px; flex-wrap: wrap; }
+.card .acts .how { flex-basis: 100%; background: var(--c); border-color: var(--c); color: #fff; }
+.prev { display: block; padding: 0; border: 0; border-bottom: 1px solid var(--border); background: #fffefa; cursor: pointer; position: relative; }
+.prev svg { display: block; width: 100%; height: auto; aspect-ratio: 1; }
+.prev span { position: absolute; right: 8px; bottom: 8px; background: rgba(0,0,0,.72); color: #fff; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+.prev:hover span { background: var(--accent); }
+dialog.player { border: 0; border-radius: 16px; padding: 0; width: min(1000px, calc(100vw - 20px)); max-height: calc(100vh - 20px); background: var(--panel); color: var(--ink); box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+dialog.player::backdrop { background: rgba(0,0,0,.55); }
+.pl { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; padding: 20px; }
+.pl .art { background: #fffefa; border: 1px solid #cfcbc2; border-radius: 10px; overflow: hidden; }
+.pl .art svg { display: block; width: 100%; height: auto; aspect-ratio: 1; }
+.pl h3 { margin: 0 0 2px; font-size: 20px; }
+.pl .sub { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+.pl .count { font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.pl .stext { font-size: 17px; line-height: 1.5; margin: 6px 0 14px; min-height: 6em; }
+.pl .pdots { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
+.pl .pdots button { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border); background: var(--panel); color: var(--ink); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.pl .pdots button.done { background: color-mix(in srgb, var(--accent) 18%, var(--panel)); }
+.pl .pdots button[aria-current="step"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.pl .pbtns { display: flex; gap: 8px; flex-wrap: wrap; }
+.pl .pbtns .btn { min-height: 42px; padding: 6px 14px; font-size: 14px; }
+.pl .tags { margin-top: 14px; }
+@media (max-width: 760px) { .pl { grid-template-columns: 1fr; } .pl .stext { min-height: 0; } }
 .card .acts button { flex: 1; min-height: 42px; border-radius: 10px; font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; border: 2px solid var(--accent); background: transparent; color: var(--ink); }
 .card .acts button.lock[aria-pressed="true"] { background: var(--c); border-color: var(--c); color: #fff; }
 .card .acts button:disabled { opacity: .4; cursor: default; }
@@ -134,7 +156,7 @@
 <main class="wrap">
   <div class="intro">
     <h1>Chaos: 12 drawing ideas</h1>
-    <p>Ideas for the 12 chaos drawings: three each in pencil, black fineliner, coloured pencil and markers. Each idea says what to draw, how to do it in that medium, and which design elements and principles it uses. Each one also links to the chaos image that inspired it. Press <em>Regenerate</em> for a new idea and <em>Lock</em> the ones you want to keep.</p>
+    <p>Ideas for the 12 chaos drawings: three each in pencil, black fineliner, coloured pencil and markers. Each idea says what to draw, how to do it in that medium, and which design elements and principles it uses. Each one also links to the chaos image that inspired it. Every idea comes with an example drawing you can copy, which builds up step by step. Press <em>Regenerate</em> for a new idea and <em>Lock</em> the ones you want to keep.</p>
   </div>
 
   <section aria-labelledby="briefTitle">
@@ -177,7 +199,7 @@
 
   <section aria-labelledby="printTitle">
     <h2 class="sec-title" id="printTitle">Print</h2>
-    <p class="sec-lead">A4 portrait. The <b>drawing sheets</b> have the 12 boxes at 9.5 × 9.5 cm (four to a page, so they fit inside a printer’s margins), each labelled with its medium, idea, element and principle. The <b>ideas list</b> prints all 12 ideas with full instructions. Print at 100% / actual size.</p>
+    <p class="sec-lead">A4 portrait. The <b>drawing sheets</b> have the 12 boxes at 9.5 × 9.5 cm (four to a page, so they fit inside a printer’s margins), each labelled with its medium, idea, element and principle. The <b>reference drawings</b> print the example drawings in the same boxes, to copy from. The <b>ideas list</b> prints all 12 ideas with full instructions. Print at 100% / actual size.</p>
     <div class="print-ctl">
       <div class="bgrid" role="group" aria-label="What to print" id="prMode"></div>
       <button type="button" class="btn primary spacer" id="printBtn">Print</button>
@@ -185,9 +207,35 @@
   </section>
 </main>
 
+<dialog class="player" id="player" aria-labelledby="plTitle">
+  <div class="pl">
+    <div class="art"><svg id="plSvg" viewBox="0 0 400 400" role="img" aria-labelledby="plText"></svg></div>
+    <div>
+      <h3 id="plTitle"></h3>
+      <p class="sub" id="plSub"></p>
+      <div class="count" id="plCount"></div>
+      <p class="stext" id="plText" aria-live="polite"></p>
+      <div class="pdots" id="plDots" aria-label="Steps"></div>
+      <div class="pbtns">
+        <button type="button" class="btn ghost" id="plPrev">Back</button>
+        <button type="button" class="btn primary" id="plNext">Next</button>
+        <button type="button" class="btn ghost" id="plPlay">Play all</button>
+        <button type="button" class="btn ghost" id="plAgain">Replay step</button>
+        <button type="button" class="btn ghost" id="plClose">Close</button>
+      </div>
+      <div class="tags" id="plTags"></div>
+    </div>
+  </div>
+</dialog>
+
 <div id="printArea"></div>
 
 <script src="site.js"></script>
+<script src="drawing-kit.js"></script>
+<script src="drawings-pencil.js"></script>
+<script src="drawings-fineliner.js"></script>
+<script src="drawings-colpencil.js"></script>
+<script src="drawings-markers.js"></script>
 <script>
 (function () {
 'use strict';
@@ -391,12 +439,13 @@ function card(s, i) {
   const it = POOL[s.m][s.idx], md = MEDIA.find(x => x.key === s.m), n = slots.filter((x, j) => j <= i && x.m === s.m).length;
   return '<article class="card' + (s.locked ? ' locked' : '') + '" style="--c:' + md.c + '">' +
     '<div class="top">' + md.name + ' ' + n + '<span class="kind ' + it.k + '">' + (it.k === 'literal' ? 'Literal' : 'Conceptual') + '</span></div>' +
+    (drawingFor(s) ? '<button type="button" class="prev" data-i="' + i + '" aria-label="Show how to draw ' + esc(it.t) + '"><svg viewBox="0 0 400 400" data-final="' + i + '" aria-hidden="true"></svg><span>Step by step ▶</span></button>' : '') +
     '<div class="body"><h4>' + esc(it.t) + '</h4>' +
     '<p><span class="lbl">Draw</span>' + esc(it.d) + '</p>' +
     '<p><span class="lbl">How, in ' + md.name.toLowerCase() + '</span>' + esc(it.m) + '</p>' +
     '<div><span class="lbl">Elements and principles</span><div class="tags">' + it.el.map(e => '<span class="el">' + e + '</span>').join('') + it.pr.map(p => '<span class="pr">' + p + '</span>').join('') + '</div></div>' +
     (INSPO[it.i] ? '<a class="inspo" href="word-board.html" title="Open the chaos image matrix"><img alt="" loading="lazy" src="chaos-images/' + it.i + '-t.jpg"><span>Inspired by<b>' + esc(INSPO[it.i]) + '</b></span></a>' : '') +
-    '</div><div class="acts"><button type="button" class="lock" data-i="' + i + '" aria-pressed="' + s.locked + '">' + (s.locked ? '🔒 Locked' : 'Lock') + '</button>' +
+    '</div><div class="acts">' + (drawingFor(s) ? '<button type="button" class="how" data-i="' + i + '">How to draw it, step by step</button>' : '') + '<button type="button" class="lock" data-i="' + i + '" aria-pressed="' + s.locked + '">' + (s.locked ? '🔒 Locked' : 'Lock') + '</button>' +
     '<button type="button" class="regen" data-i="' + i + '"' + (s.locked ? ' disabled' : '') + '>Regenerate</button></div></article>';
 }
 function draw() {
@@ -404,17 +453,57 @@ function draw() {
     slots.map((s, i) => s.m === md.key ? card(s, i) : '').join('') + '</div></div>').join('');
   $('groups').querySelectorAll('.lock').forEach(b => b.addEventListener('click', () => { const s = slots[+b.dataset.i]; s.locked = !s.locked; save(); draw(); }));
   $('groups').querySelectorAll('.regen').forEach(b => b.addEventListener('click', () => { regen(+b.dataset.i); save(); draw(); }));
+  $('groups').querySelectorAll('.how, .prev').forEach(b => b.addEventListener('click', () => openPlayer(+b.dataset.i)));
+  $('groups').querySelectorAll('svg[data-final]').forEach(sv => { const d = drawingFor(slots[+sv.dataset.final]); DrawingKit.render(sv, d.steps, d.steps.length - 1, false); });
   const n = slots.filter(s => s.locked).length;
   $('lockCount').textContent = n + ' of 12 locked';
 }
 $('regenAll').addEventListener('click', () => { slots.forEach((s, i) => { if (!s.locked) regen(i); }); save(); draw(); });
 $('unlockAll').addEventListener('click', () => { slots.forEach(s => { s.locked = false; }); save(); draw(); });
 
+/* ---------- Step-by-step player ---------- */
+function drawingFor(s) { return (window.DRAWINGS || {})[s.m + '-' + s.idx]; }
+const PL = { i: 0, step: 0, timer: 0 };
+function plDraw(animate) {
+  const s = slots[PL.i], d = drawingFor(s), steps = d.steps;
+  DrawingKit.render($('plSvg'), steps, PL.step, animate);
+  $('plCount').textContent = 'Step ' + (PL.step + 1) + ' of ' + steps.length;
+  $('plText').textContent = steps[PL.step].t;
+  $('plPrev').disabled = PL.step === 0;
+  $('plNext').disabled = PL.step === steps.length - 1;
+  $('plDots').innerHTML = steps.map((_, k) => '<button type="button" aria-label="Step ' + (k + 1) + '"' + (k === PL.step ? ' aria-current="step"' : k < PL.step ? ' class="done"' : '') + ' data-k="' + k + '">' + (k + 1) + '</button>').join('');
+  $('plDots').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { plStop(); PL.step = +b.dataset.k; plDraw(true); }));
+}
+function openPlayer(i) {
+  const s = slots[i], it = POOL[s.m][s.idx], md = MEDIA.find(x => x.key === s.m);
+  plStop(); PL.i = i; PL.step = 0;
+  $('plTitle').textContent = it.t;
+  $('plSub').textContent = md.name + ' · ' + (it.k === 'literal' ? 'literal' : 'conceptual') + ' chaos · draw it in a 10 × 10 cm box';
+  $('plTags').innerHTML = it.el.map(e => '<span class="el">' + e + '</span>').join('') + it.pr.map(p => '<span class="pr">' + p + '</span>').join('');
+  plDraw(true);
+  if (!$('player').open) $('player').showModal();
+}
+function plStop() { clearTimeout(PL.timer); PL.timer = 0; $('plPlay').textContent = 'Play all'; }
+$('plPrev').addEventListener('click', () => { plStop(); if (PL.step > 0) { PL.step--; plDraw(true); } });
+$('plNext').addEventListener('click', () => { plStop(); const n = drawingFor(slots[PL.i]).steps.length; if (PL.step < n - 1) { PL.step++; plDraw(true); } });
+$('plAgain').addEventListener('click', () => plDraw(true));
+$('plClose').addEventListener('click', () => { plStop(); $('player').close(); });
+$('player').addEventListener('close', plStop);
+$('player').addEventListener('click', e => { if (e.target === $('player')) $('player').close(); });
+$('plPlay').addEventListener('click', () => {
+  if (PL.timer) { plStop(); return; }
+  const n = drawingFor(slots[PL.i]).steps.length;
+  $('plPlay').textContent = 'Pause';
+  PL.step = 0; plDraw(true);
+  const next = () => { if (PL.step >= n - 1) { plStop(); return; } PL.step++; plDraw(true); PL.timer = setTimeout(next, 3600); };
+  PL.timer = setTimeout(next, 3600);
+});
+
 /* ---------- Printing ---------- */
 let PRM = 'boxes';
 (function () {
   const el = $('prMode');
-  [['boxes', 'Drawing sheets (3 pages)'], ['list', 'Ideas list (1 page)'], ['both', 'Both']].forEach(([k, l]) => {
+  [['boxes', 'Blank drawing sheets (3 pages)'], ['ref', 'Reference drawings (3 pages)'], ['list', 'Ideas list (1 page)'], ['both', 'Blank sheets + ideas list']].forEach(([k, l]) => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'tbtn'; b.textContent = l; b.setAttribute('aria-pressed', String(k === PRM));
     b.addEventListener('click', () => { el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b))); PRM = k; });
@@ -422,14 +511,15 @@ let PRM = 'boxes';
   });
 })();
 const head = t => '<div class="h1">Project 1 · Wordscapes: Chaos drawings</div><div class="h2">' + t + '</div><div class="nm">NAME ______________________</div>';
-function boxPages() {
+function boxPages(withRef) {
   let h = '';
   for (let p = 0; p < 3; p++) {
     h += '<div class="pp">' + head('CHAOS · DRAWINGS ' + (p * 4 + 1) + '–' + (p * 4 + 4));
     for (let k = 0; k < 4; k++) {
       const i = p * 4 + k, s = slots[i], it = POOL[s.m][s.idx], md = MEDIA.find(x => x.key === s.m);
       const x = k % 2 ? 108 : 7, y = 19 + Math.floor(k / 2) * 139;
-      h += '<div class="box" style="left:' + x + 'mm;top:' + y + 'mm;border-color:' + md.c + '"></div>';
+      const d = withRef && drawingFor(s);
+      h += '<div class="box" style="left:' + x + 'mm;top:' + y + 'mm;border-color:' + md.c + '">' + (d ? '<svg viewBox="0 0 400 400" data-pr="' + i + '" style="width:100%;height:100%;display:block"></svg>' : '') + '</div>';
       h += '<div class="bl" style="left:' + x + 'mm;top:' + (y + 96.5) + 'mm"><b>' + (i + 1) + '. ' + md.name + ': ' + esc(it.t) + '</b><br>Elements: ' + it.el.join(', ') + ' · Principles: ' + it.pr.join(', ') + ' · ' + it.k + '<br><span>Notes: ___________________________________________________</span><br><span>_________________________________________________________</span></div>';
     }
     h += '</div>';
@@ -445,7 +535,8 @@ function listPage() {
   return h + '</div></div>';
 }
 $('printBtn').addEventListener('click', () => {
-  $('printArea').innerHTML = (PRM !== 'list' ? boxPages() : '') + (PRM !== 'boxes' ? listPage() : '');
+  $('printArea').innerHTML = PRM === 'ref' ? boxPages(true) : (PRM !== 'list' ? boxPages() : '') + (PRM === 'list' || PRM === 'both' ? listPage() : '');
+  $('printArea').querySelectorAll('svg[data-pr]').forEach(sv => { const d = drawingFor(slots[+sv.dataset.pr]); DrawingKit.render(sv, d.steps, d.steps.length - 1, false); });
   window.print();
 });
 
