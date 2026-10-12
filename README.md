@@ -196,6 +196,14 @@ The page has:
 - **Drawing and shading tips**: a four-step demo plus tips.
 - **Print**: a 15-composition examples sheet, a blank 15-frame sheet, or the selected composition full page.
 
+## Chaos Drawing Ideas
+
+`chaos-drawings.html` supports the chaos drawing extension: 12 drawings of about 10 × 10 cm, 3 each in pencil, black ink fineliner, colour pencil and coloured markers.
+
+- **Ideas**: 12 cards, from a pool of 12 ideas per medium. Each says what to draw and how to do it in that medium (pencil grades, pen sizes, layering, marker order), the elements and principles it uses, literal or conceptual, and the chaos-matrix image that inspired it.
+- **Regenerate and lock**: regenerate each card or all unlocked cards, and lock favourites. Saved in the browser.
+- **Print**: three A4 drawing sheets with 9.5 cm boxes, labelled with the idea, elements and principles and space for notes, plus a one-page ideas list.
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
