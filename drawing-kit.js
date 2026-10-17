@@ -6,7 +6,7 @@
 //   Elements in the current step animate (see lesson.css: .ln/.hl draw on, .sh wipes, .cn/.fd fade).
 (function () {
   const DEFS = `
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<svg id="dk-defs" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
   <!-- Graphite / colour-pencil grain: slight wobble plus a speckled, broken stroke -->
   <filter id="grain" x="-5%" y="-5%" width="110%" height="110%">
     <feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="2" result="w"/>
@@ -46,6 +46,18 @@
     if (document.getElementById('grain')) return;
     document.body.insertAdjacentHTML('afterbegin', DEFS);
   }
+  // The same drawing can be on the page more than once (card, player, print). Give every id
+  // defined in the markup a per-render suffix so url(#…) always points at its own copy,
+  // even when another copy is hidden (hidden gradients, clips and filters stop working).
+  let renderCount = 0;
+  function uniqueIds(markup) {
+    const ids = [...new Set([...markup.matchAll(/\sid=["']([^"']+)["']/g)].map(m => m[1]))];
+    if (!ids.length) return markup;
+    const sfx = '-r' + (++renderCount);
+    const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp('(id=["\']|url\\(["\']?#|href=["\']#)(' + ids.map(esc).join('|') + ')(?=["\'\\)])', 'g');
+    return markup.replace(re, (m, a, id) => a + id + sfx);
+  }
   function render(svg, steps, upTo, animate) {
     ensureDefs();
     let erased = -1;
@@ -59,7 +71,7 @@
         out[it.l] += '<g' + (cls ? ' class="' + cls + '"' : '') + (cur ? ' style="--i:' + n + '"' : '') + '>' + it.s + '</g>';
       });
     });
-    svg.innerHTML = '<rect width="400" height="400" fill="#fffefa"/><g>' + out.b + '</g><g>' + out.f + '</g><g>' + out.l + '</g>';
+    svg.innerHTML = uniqueIds('<rect width="400" height="400" fill="#fffefa"/><g>' + out.b + '</g><g>' + out.f + '</g><g>' + out.l + '</g>');
   }
   window.DrawingKit = { render, ensureDefs };
   window.DRAWINGS = window.DRAWINGS || {};

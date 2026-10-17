@@ -81,7 +81,7 @@ dialog.player::backdrop { background: rgba(0,0,0,.55); }
 @page { size: A4 portrait; margin: 0; }
 @media print {
   html, body { background: #fff; }
-  body > *:not(#printArea) { display: none !important; }
+  body > *:not(#printArea):not(#dk-defs) { display: none !important; }
   #printArea { display: block; }
   .pp { position: relative; width: 210mm; height: 296mm; overflow: hidden; break-after: page; page-break-after: always; font-family: Archivo, Helvetica, Arial, sans-serif; color: #141414; }
   .pp:last-child { break-after: auto; page-break-after: auto; }
@@ -138,6 +138,7 @@ dialog.player::backdrop { background: rgba(0,0,0,.55); }
           <li><a href="word-board.html">Chaos image matrix</a></li>
           <li><a href="perfume-bottles.html">Perfume bottle compositions</a></li>
           <li><a href="chaos-drawings.html" aria-current="page">Chaos drawing ideas</a></li>
+          <li><a href="chaos-27.html">Chaos: 27 boxes</a></li>
           <li><a href="gesture-timer.html">Gesture timer</a></li>
           <li><a href="mark-making.html">Mark-making &amp; media</a></li>
         </ul>
@@ -231,6 +232,7 @@ dialog.player::backdrop { background: rgba(0,0,0,.55); }
 <div id="printArea"></div>
 
 <script src="site.js"></script>
+<script src="chaos-ideas.js"></script>
 <script src="drawing-kit.js"></script>
 <script src="drawings-pencil.js"></script>
 <script src="drawings-fineliner.js"></script>
@@ -243,162 +245,9 @@ dialog.player::backdrop { background: rgba(0,0,0,.55); }
 const $ = id => document.getElementById(id);
 // Idea pool. Each: t title, k literal|conceptual, i inspiration image id (chaos matrix), el elements, pr principles,
 // d what to draw in the 10 cm box, m how to do it in this medium.
-const POOL = {
-pencil: [
- { t: 'Shattered mirror self-portrait', k: 'conceptual', i: 'SH-CO1', el: ['Shape', 'Value'], pr: ['Contrast', 'Emphasis'],
-   d: 'Draw your own face reflected in a mirror that has cracked into 8–12 jagged pieces. Shift each piece slightly out of line, so an eye, half a mouth or an ear doesn’t match its neighbour. Make one fragment, showing a single eye, the sharpest and darkest.',
-   m: 'Rule the cracks lightly with a 4H, then shade each fragment as its own small drawing: 2H–HB for skin, 2B–4B for the darkest shadows. Leave a hair-thin white line along every crack and press hardest next to it for contrast.' },
- { t: 'Tornado over a small town', k: 'literal', i: 'FO-MO1', el: ['Form', 'Value'], pr: ['Movement', 'Proportion'],
-   d: 'A huge twisting funnel fills two-thirds of the box, touching down behind a row of tiny houses along the bottom edge. Debris (roof tiles, a bicycle, paper) spirals round the funnel.',
-   m: 'Blend the stormy sky with the side of a 2B and a tissue. Build the funnel in curved strokes that follow its twist, darkest (6B) on the shadow side. Keep the houses crisp with an HB so the scale contrast is obvious.' },
- { t: 'Crumpled paper from life', k: 'conceptual', i: 'TX-CO1', el: ['Texture', 'Value'], pr: ['Contrast'],
-   d: 'Crumple a sheet of paper, light it from one side with a desk lamp and draw it large so it nearly fills the box: an ordered flat sheet crushed into disorder.',
-   m: 'Map the main folds with a 4H. Shade every plane with a single flat tone: H for faces towards the light, HB for mid planes, 2B–4B for deep creases. Keep the ridges sharp; don’t blend the whole thing smooth.' },
- { t: 'Roots strangling a brick', k: 'literal', i: 'LI-UN1', el: ['Line', 'Texture'], pr: ['Unity', 'Movement'],
-   d: 'Tree roots crawl in from the box edges, wrap round a cracked brick in the centre and split it apart. The roots should knot, cross and disappear behind each other.',
-   m: 'Draw the roots as long, confident HB lines, thick to thin. Shade them round with 2B on the underside. Use a 2H for the brick’s texture so the roots stay the strongest marks.' },
- { t: 'The tower that just tipped', k: 'literal', i: 'FO-BA2', el: ['Form'], pr: ['Balance', 'Movement'],
-   d: 'A tall stack of Jenga blocks (or books) caught at the moment it starts to topple: the top half leans off-balance and two blocks are already falling into the air.',
-   m: 'Draw the blocks as boxes in two-point perspective with a 2H and a ruler. Light top faces with 2H, side faces HB and 2B. Add a few speed lines with a sharp H behind the falling blocks.' },
- { t: 'Drought cracks and one seedling', k: 'literal', i: 'SH-RE1', el: ['Shape', 'Texture'], pr: ['Repetition', 'Emphasis'],
-   d: 'Cracked, dry mud plates cover the whole box, getting smaller towards the top for depth. In one crack near a thirds point, a single small green-grey seedling pushes through.',
-   m: 'Fill the cracks with a 4B and leave each plate light (H–HB) with slight shading at its curled edges. Make the seedling the cleanest, most detailed thing in the drawing.' },
- { t: 'Ship in a storm (after Turner)', k: 'literal', i: 'SP-EM1', el: ['Space', 'Value'], pr: ['Emphasis', 'Movement'],
-   d: 'A small dark ship in the middle of a swirling vortex of wind, waves and snow, where you can’t tell sea from sky.',
-   m: 'Rub graphite powder (shaved from a 4B) over the whole box with a tissue in circular sweeps. Lift out swirls of light with a putty rubber. Then draw the ship and mast in 6B as the darkest, sharpest point.' },
- { t: 'Smoke rising from a candle', k: 'literal', i: 'FO-WS1', el: ['Form', 'Space'], pr: ['White space', 'Movement'],
-   d: 'A snuffed candle at the bottom of the box, with a thin column of smoke that twists, splits and curls into chaos as it rises. Leave lots of empty space round it.',
-   m: 'Shade a soft graded background with 2B, darker at the top. Lift the smoke out with a putty rubber shaped to a point, then add the shadow side of each curl with an HB.' },
- { t: 'Crowd with no faces', k: 'conceptual', i: 'SP-PX1', el: ['Space', 'Shape'], pr: ['Proximity', 'Repetition'],
-   d: 'Dozens of heads and shoulders packed edge to edge, filling the box completely. Draw them as simple rounded shapes with no features, overlapping, getting smaller towards the top.',
-   m: 'Overlap is everything: draw the front row first, then only the visible parts of the rows behind. Shade front heads 2B–4B and the furthest rows 2H, so the crowd fades back.' },
- { t: 'Impossible staircases', k: 'conceptual', i: 'SP-RE1', el: ['Space', 'Line'], pr: ['Repetition', 'Movement'],
-   d: 'An interior full of staircases that go up, down and sideways, crossing over and under each other and ending in mid-air, like Piranesi’s prisons or Escher’s Relativity.',
-   m: 'Use a ruler and a 2H for all the construction. Repeat the same step unit again and again. Shade the undersides of the stairs with 2B so they read as solid, and leave the treads light.' },
- { t: 'Clock exploding into its parts', k: 'conceptual', i: 'SH-HI1', el: ['Shape', 'Form'], pr: ['Hierarchy', 'Movement'],
-   d: 'A clock face in the middle, cracked open, with its cogs, springs, numbers and hands bursting outwards towards the edges: time falling apart.',
-   m: 'Make the clock face the largest and most finished part (HB with 2B shadows). Draw the flying pieces smaller and lighter (2H–H) as they get further out, so there is a clear first, second and third.' },
- { t: 'A head unravelling', k: 'conceptual', i: 'LI-PX2', el: ['Line'], pr: ['Movement', 'Proximity'],
-   d: 'A head in profile whose back half unwinds into a mass of scribbled lines that get faster and wilder as they leave the head: a mind in chaos.',
-   m: 'Draw the face as a calm, careful contour with an HB. Let the line speed up and get darker (2B–6B) as it turns into the scribble, packed tight where it leaves the head.' },
-],
-fineliner: [
- { t: 'Lightning over the city', k: 'literal', i: 'LI-CO1', el: ['Line', 'Value'], pr: ['Contrast', 'Emphasis'],
-   d: 'A black night sky over a row of rooftops, split by one huge branching bolt of lightning.',
-   m: 'Pencil the bolt first. Fill the sky with dense cross-hatching (0.3 and 0.5) right up to the bolt, leaving the bolt as bare white paper. Outline the rooftops in 0.8 as a solid silhouette.' },
- { t: 'Pole of tangled cables', k: 'literal', i: 'LI-PX1', el: ['Line'], pr: ['Proximity', 'Repetition'],
-   d: 'A telegraph pole in the middle with dozens of cables looping, sagging and knotting round it, running off all four edges.',
-   m: 'Use three pen sizes: 0.8 for the nearest cables, 0.3 for middle ones, 0.05 for the furthest. Where cables cross, break the back line slightly so the front one reads as in front.' },
- { t: 'Murmuration in stipple', k: 'literal', i: 'SH-UN1', el: ['Shape', 'Space'], pr: ['Unity', 'Movement'],
-   d: 'A flock of starlings forming one swirling shape against an empty sky, thick in the middle and breaking up into single birds at the edges.',
-   m: 'Draw the whole flock in dots with a 0.1: pack them tight in the dense middle and space them out towards the edges. Draw a few birds at the edge as tiny ticks so you can tell they are birds.' },
- { t: 'Electric tree', k: 'literal', i: 'LI-BA1', el: ['Line'], pr: ['Balance', 'Proportion'],
-   d: 'A Lichtenberg figure: a single trunk at the bottom that splits into branches, then smaller branches, then hair-thin twigs, spreading evenly to both sides.',
-   m: 'Start with a 0.8 for the trunk, switch to 0.5, 0.3 and 0.1 as the branches split, and finish with a 0.05. Never go back over a line, so it stays crisp.' },
- { t: 'Fractal creeping in', k: 'conceptual', i: 'SH-PR1', el: ['Shape'], pr: ['Proportion', 'Repetition'],
-   d: 'A neat square grid starts in one corner, and from the opposite corner a fractal (spirals inside spirals) creeps in and eats the grid.',
-   m: 'Draw the grid with a ruler and a 0.3. Draw the fractal freehand: one big spiral, then smaller copies on its edge, then smaller again, using thinner pens as they shrink.' },
- { t: 'Bullet hole in a window', k: 'literal', i: 'LI-EM1', el: ['Line', 'Shape'], pr: ['Emphasis', 'Movement'],
-   d: 'A window seen straight on, with a hole near a thirds point and cracks radiating out of it, plus a few rings of cracks round it.',
-   m: 'Fill the hole solid black with a 0.8. Draw the radiating cracks in one quick stroke each with a 0.1, thicker near the hole. Leave the rest of the glass empty.' },
- { t: 'Continuous-line chaos', k: 'conceptual', i: 'LI-BA2', el: ['Line'], pr: ['Movement', 'Unity'],
-   d: 'A drawing done without lifting the pen: one looping, swinging line that traces the path of a double pendulum, or your own hand moving fast.',
-   m: 'Use one 0.5 pen and keep it on the paper the whole time. Vary your speed: slow curves become dark and tight, fast swings stay open. Don’t correct anything.' },
- { t: 'Junk mountain', k: 'literal', i: 'FO-HI2', el: ['Form', 'Texture'], pr: ['Proximity', 'Hierarchy'],
-   d: 'A towering pile of scrap: bikes, chairs, tyres, TVs and pipes, crammed together until it reaches the top of the box.',
-   m: 'Outline the front objects in 0.5 and the ones behind in 0.1. Shade the gaps between objects with dense cross-hatching so the pile looks deep and dark inside.' },
- { t: 'Ants on a dropped sandwich', k: 'literal', i: 'SH-PX1', el: ['Shape'], pr: ['Proximity', 'Emphasis'],
-   d: 'A bitten sandwich on the ground, swarming with dozens of ants that stream in from one corner in a wiggling line.',
-   m: 'Draw each ant as three tiny dots and six flicks with a 0.05. Cluster them densely on the sandwich and thin them out along the trail. Keep the sandwich lightly drawn in 0.1.' },
- { t: 'Broken web', k: 'literal', i: 'LI-UN2', el: ['Line', 'Space'], pr: ['Unity', 'White space'],
-   d: 'A spider web that has been torn: half is perfect, the other half hangs in broken, tangled strands, with a beetle caught in the middle.',
-   m: 'Rule the intact half carefully with a 0.05. Draw the broken half freehand in looser, sagging lines. Leave the background completely empty.' },
- { t: 'Wave of lines (after Hokusai)', k: 'literal', i: 'SP-MO1', el: ['Line', 'Space'], pr: ['Movement', 'Repetition'],
-   d: 'A giant breaking wave curling over a tiny boat, built entirely from flowing parallel lines and claw-like foam.',
-   m: 'Fill the wave with parallel curved lines in 0.3, closer together in the shadows. Draw the foam as small claw shapes in 0.1. Use a 0.8 only for the wave’s outer edge.' },
- { t: 'Earthquake seismograph city', k: 'conceptual', i: 'LI-RE2', el: ['Line'], pr: ['Repetition', 'Movement'],
-   d: 'Rows of seismograph lines run across the box. In the middle the lines go wild, and their spikes turn into the outline of a city skyline collapsing.',
-   m: 'Rule faint pencil guides. Draw each row with a 0.1, calm at the edges and jagged in the middle. Draw the collapsing buildings in 0.5 so they stand out from the lines.' },
-],
-colpencil: [
- { t: 'Fireworks finale', k: 'literal', i: 'CO-EM1', el: ['Colour', 'Value'], pr: ['Emphasis', 'Contrast'],
-   d: 'Three overlapping firework bursts over a dark sky, one big and two small, with sparks trailing down.',
-   m: 'Draw the sparks in bright yellow, pink and blue first, pressing hard. Then layer indigo, then black, over the sky right up to the sparks. The bright colour shines against the dark.' },
- { t: 'Ink dropped in water', k: 'conceptual', i: 'CO-UN1', el: ['Colour'], pr: ['Unity', 'Movement'],
-   d: 'A cloud of ink swirling and billowing down through clear water from a single drop at the top.',
-   m: 'Use one analogous family (yellow, orange, red). Layer lightly in circular strokes, light in the middle and deeper at the edges of each billow. Blend with a colourless blender or white pencil.' },
- { t: 'House on fire', k: 'literal', i: 'CO-CO2', el: ['Colour'], pr: ['Contrast', 'Emphasis'],
-   d: 'A house burning at night, its flames reflected in a puddle or river in front.',
-   m: 'Warm against cool: flames in yellow, orange and red, the night sky and water in blue, violet and dark green. Burnish the brightest flame with white.' },
- { t: 'Aurora over a campsite', k: 'literal', i: 'CO-UN2', el: ['Colour', 'Space'], pr: ['Movement', 'Proportion'],
-   d: 'Huge ribbons of aurora sweeping across the sky, with tiny glowing tents and pine trees along the bottom edge.',
-   m: 'Draw the ribbons in vertical strokes of green blending into pink. Layer dark blue round them. Keep the tents small and warm orange so the sky dominates.' },
- { t: 'Pollen grains, magnified', k: 'literal', i: 'TX-BA1', el: ['Texture', 'Colour'], pr: ['Balance', 'Variety'],
-   d: 'A close-up crowd of pollen grains: spiky balls, smooth beans and bumpy ovals, spread evenly across the box.',
-   m: 'Give each kind its own colour and texture: tiny dots for bumps, short flicks for spikes. Shade each grain round with a darker version of its colour on one side.' },
- { t: 'Crowded coral reef', k: 'literal', i: 'FO-UN2', el: ['Form', 'Colour'], pr: ['Unity', 'Proximity'],
-   d: 'Branching, plate and brain corals piled together, with small fish darting through the gaps.',
-   m: 'Use one shared light direction. Build each coral form in 3 layers: base colour, darker shadow side, and a white highlight. Leave a blue water colour showing between them.' },
- { t: 'Kaleidoscope gone wrong', k: 'conceptual', i: 'CO-BA2', el: ['Colour', 'Shape'], pr: ['Balance', 'Contrast'],
-   d: 'A perfectly symmetrical kaleidoscope pattern, except one segment, which has shattered into random shapes and clashing colours.',
-   m: 'Draw the symmetrical part with a compass and ruler and colour it in harmonious colours. Colour the broken segment in complementary colours to show the break.' },
- { t: 'Exploding Rubik’s cube', k: 'conceptual', i: 'SH-PX2', el: ['Colour', 'Form'], pr: ['Repetition', 'Movement'],
-   d: 'A Rubik’s cube in the centre bursting apart, its little coloured cubes flying out in every direction and getting smaller as they go.',
-   m: 'Shade each small cube with three tones of its colour (top light, sides darker). Keep the colours pure and flat inside each face, so the scramble reads clearly.' },
- { t: 'Lava breaking through', k: 'literal', i: 'CO-EM2', el: ['Colour', 'Texture'], pr: ['Emphasis', 'Contrast'],
-   d: 'Black, cracked lava crust covering the box, with glowing orange molten rock showing through the cracks.',
-   m: 'Colour the cracks first in yellow and orange, pressing hard. Then layer black and dark brown over the crust, leaving the bright cracks clean.' },
- { t: 'A Scream sky over your street', k: 'conceptual', i: 'CO-MO2', el: ['Colour', 'Line'], pr: ['Movement', 'Emphasis'],
-   d: 'Your own street or bedroom window, but the sky above it swirls in waves of red, orange and blue, like Munch’s Scream.',
-   m: 'Draw the sky in long, curving parallel strokes of colour that follow the swirl. Keep the street in calm, straight lines and duller colours so the sky feels wild.' },
- { t: 'Rusting machine', k: 'literal', i: 'TX-UN2', el: ['Texture', 'Colour'], pr: ['Unity'],
-   d: 'An old bicycle, car or machine part being eaten by rust, flaking and pitted.',
-   m: 'Use burnt orange, brown and a little turquoise for patina. Stipple and dab for the rough texture, and scratch out highlights with a craft knife.' },
- { t: 'Spilt marbles', k: 'literal', i: 'SH-MO1', el: ['Colour', 'Form'], pr: ['Proximity', 'Movement'],
-   d: 'A jar knocked over, with marbles rolling out and spreading across the box: clustered near the jar, scattered further away.',
-   m: 'Draw each marble as a sphere: base colour, darker shadow side, a bright white highlight, and a hint of reflected light underneath.' },
-],
-markers: [
- { t: 'Comic book KA-BOOM', k: 'conceptual', i: 'SH-EM1', el: ['Shape', 'Colour'], pr: ['Emphasis', 'Contrast'],
-   d: 'A giant jagged explosion shape with the word "KA-BOOM" bursting out of it, and pieces flying off.',
-   m: 'Use complementary colours: a yellow burst on a purple background, red letters outlined in black. Lay the colour down in quick, even strokes so it stays flat.' },
- { t: 'Graffiti wall', k: 'literal', i: 'CO-PX1', el: ['Colour', 'Shape'], pr: ['Proximity', 'Hierarchy'],
-   d: 'A brick wall crammed with overlapping graffiti tags, bubble letters, stickers and drips, so every piece fights for attention.',
-   m: 'Draw the background tags first in lighter markers, then layer bolder letters on top. Outline everything in black marker last.' },
- { t: 'Neon overload', k: 'literal', i: 'CO-HI1', el: ['Colour'], pr: ['Hierarchy', 'Proximity'],
-   d: 'A city street at night packed with glowing neon signs, screens and arrows pointing in every direction.',
-   m: 'Fill the background with a dark marker, then add the signs in fluorescent pink, green and blue. Leave a thin white edge round some signs to look like glow.' },
- { t: 'Shapes colliding (after Kandinsky)', k: 'conceptual', i: 'SH-CO2', el: ['Shape', 'Line', 'Colour'], pr: ['Contrast', 'Balance'],
-   d: 'An abstract composition of circles, triangles, squares and straight lines crashing into each other from all directions, with one large circle as the anchor.',
-   m: 'Fill each shape with one flat marker colour. Where two shapes overlap, colour the overlap a third colour so they seem to collide. Add thin straight lines with a fine black marker and a ruler; spread the strongest colours to both sides so it stays balanced.' },
- { t: 'Paint-splatter explosion', k: 'literal', i: 'CO-RE1', el: ['Colour', 'Shape'], pr: ['Repetition', 'Movement'],
-   d: 'Splashes, drips and flicks of paint layered over each other until they fill the box, all flying out from one point slightly off centre.',
-   m: 'Draw the biggest splashes first in light colours (yellow, pink), then smaller ones in stronger colours on top. Add drips running down and tiny dots flicked outward. Repeat the same splash shape in several sizes.' },
- { t: 'Holi colour cloud', k: 'literal', i: 'CO-MO1', el: ['Colour'], pr: ['Movement', 'Emphasis'],
-   d: 'A figure mid-throw, flinging a handful of coloured powder that explodes into a huge cloud filling most of the box.',
-   m: 'Lay each colour down while the last is still wet so they blend at the edges. Make the cloud brightest where it leaves the hand and softer towards the edges. Keep the figure as a simple dark silhouette so the colour is the focus.' },
- { t: 'Traffic jam from above', k: 'literal', i: 'FO-RE1', el: ['Form', 'Colour'], pr: ['Repetition', 'Proximity'],
-   d: 'A bird’s-eye view of a gridlocked crossroads, every lane packed bumper to bumper with car roofs pointing in all directions.',
-   m: 'Draw each car as a rounded rectangle in a bright flat colour, with a darker strip of the same colour for the windscreen and a light strip for the roof highlight, so each reads as a 3D form. Leave thin grey gaps for the road.' },
- { t: 'Mandala breaking apart', k: 'conceptual', i: 'CO-BA2', el: ['Shape', 'Colour'], pr: ['Balance', 'Repetition'],
-   d: 'A neat, symmetrical mandala that starts to break apart halfway round: its petals and dots peel off and fly loose towards the edge.',
-   m: 'Pencil the mandala with a compass first. Colour the neat half in a strict repeated colour order. In the broken half, mix the colours up and tilt the flying pieces, so you can see order turning into chaos.' },
- { t: 'Hurricane spiral', k: 'literal', i: 'SH-BA1', el: ['Shape', 'Colour'], pr: ['Balance', 'Movement'],
-   d: 'A hurricane seen from space: white cloud arms spiralling round a dark eye, over a deep blue sea, with a strip of coastline in one corner.',
-   m: 'Fill the sea in two blues first. Leave the cloud arms as white paper, then add light grey and pale blue along their edges in curving strokes that follow the spiral. Keep the arms evenly spread round the eye (radial balance).' },
- { t: 'Tangled yarn', k: 'conceptual', i: 'TX-WS1', el: ['Line', 'Colour'], pr: ['Unity', 'Movement'],
-   d: 'Three balls of brightly coloured yarn unravelling and tangling together into one big knot across the box.',
-   m: 'Give each strand its own colour and draw it with a fine-tip marker in one continuous line. At every crossing, stop one strand just short of the other, so you can see which goes over and under.' },
- { t: 'Emoji crowd', k: 'conceptual', i: 'SP-PX1', el: ['Shape', 'Colour'], pr: ['Proximity', 'Repetition'],
-   d: 'Dozens of round yellow faces packed edge to edge, all slightly different: laughing, crying, angry, shocked. One red screaming face in the middle stands out.',
-   m: 'Fill the yellow circles with quick, even strokes and add a darker yellow on one side of each for roundness. Draw the expressions with a fine black marker. Make the one screaming face red, the only different colour.' },
- { t: 'Glitch screen', k: 'conceptual', i: 'TX-RE1', el: ['Texture', 'Colour'], pr: ['Repetition', 'Contrast'],
-   d: 'An old TV whose picture has broken into glitch: horizontal stripes of colour shifted out of line, blocks of static, and a face half hidden in the noise.',
-   m: 'Rule horizontal bands with a pencil, then fill them in bright RGB colours (red, green, blue), shifting each band slightly sideways. Add static with tiny black and white dots on top.' },
-],
-};
+const POOL = window.CHAOS_POOL;
 
-const INSPO = {"SP-BA1": "Hieronymus Bosch, The Garden of Earthly Delights (c. 1500)", "SP-BA2": "NASA/ESA, Hubble Ultra Deep Field (2004)", "SP-CO1": "Winsor McCay, drawing for the animated film The Sinking of the Lusitania (1918)", "SP-CO2": "NASA/ESA Hubble, Orion Nebula mosaic (2006)", "SP-HI1": "Gustave Doré, Satan’s flight through Chaos, Paradise Lost (1866)", "SP-HI2": "Pieter Bruegel the Elder, Netherlandish Proverbs (1559)", "SP-EM1": "J. M. W. Turner, Snow Storm: Steam-Boat off a Harbour’s Mouth (1842)", "SP-EM2": "NASA/ESA Hubble, Crab Nebula (2005)", "SP-MO1": "Katsushika Hokusai, The Great Wave off Kanagawa (c. 1831)", "SP-MO2": "NASA/ESA Hubble, Antennae Galaxies (2006)", "SP-UN1": "Starlings over Brighton (photograph)", "SP-UN2": "Millennium Simulation, the cosmic web (dark-matter simulation)", "SP-PR1": "Pieter Bruegel the Elder, The Tower of Babel (1563)", "SP-PR2": "Winsor McCay, Little Nemo in Slumberland, \"The Walking Bed\" (1908)", "SP-WS1": "Sesshū Tōyō, Splashed-Ink Landscape (haboku, 1495)", "SP-WS2": "Blue ink spreading in water (photograph)", "SP-RE1": "Giovanni Battista Piranesi, Imaginary Prisons (Carceri), etching (1761)", "SP-RE2": "Quarry Bay apartments, Hong Kong (photograph)", "SP-PX1": "Protest crowd (photograph)", "SP-PX2": "Bacterial colony growing on agar (photograph)", "FO-BA1": "Laocoön and His Sons, marble sculpture (Vatican Museums)", "FO-BA2": "Burnt-out building (photograph)", "FO-CO1": "Peter Paul Rubens, The Fall of the Damned (c. 1620)", "FO-CO2": "Lightning in the ash plume of Eyjafjallajökull volcano, Iceland (2010)", "FO-HI1": "Théodore Géricault, The Raft of the Medusa (1819)", "FO-HI2": "Scrap-metal heap (photograph)", "FO-EM1": "Eugène Delacroix, The Death of Sardanapalus (1827)", "FO-EM2": "Mount St Helens eruption cloud, 1980 (USGS photograph)", "FO-MO1": "Tornado (photograph)", "FO-MO2": "Mount St Helens eruption column (USGS photograph)", "FO-UN1": "Auguste Rodin, The Gates of Hell (bronze, 1880–1917)", "FO-UN2": "Coral reef, Great Barrier Reef (photograph)", "FO-PR1": "Romanesco broccoli (photograph)", "FO-PR2": "Menger sponge, 3D fractal (computer render)", "FO-WS1": "Smoke against a black background (photograph)", "FO-WS2": "Milk drop coronet (high-speed photograph)", "FO-RE1": "Cairo traffic jam (photograph)", "FO-RE2": "Protein structure, ribbon diagram (science illustration)", "FO-PX1": "Honey bee swarm hanging from a tree (photograph)", "FO-PX2": "Crushed cars stacked in a scrapyard (US National Archives photograph)", "SH-BA1": "Hurricane seen from space (NASA)", "SH-BA2": "Wassily Kandinsky, Composition VII (1913)", "SH-CO1": "Shattered mirror (photograph)", "SH-CO2": "Wassily Kandinsky, Composition VIII (1923)", "SH-HI1": "Wassily Kandinsky, Several Circles (1926)", "SH-HI2": "Fallen leaves (photograph)", "SH-EM1": "Comic-book starbursts (\"WHACK!\", \"POW!\") (illustration)", "SH-EM2": "Cassiopeia A supernova remnant (NASA Hubble, Spitzer and Chandra)", "SH-MO1": "Confetti thrown into the air (photograph)", "SH-MO2": "Umberto Boccioni, States of Mind: The Farewells (1911)", "SH-UN1": "Starling murmuration (photograph)", "SH-UN2": "Trencadís (broken-tile mosaic) bench in the style of Gaudí (photograph)", "SH-PR1": "Mandelbrot set zoom (computer image)", "SH-PR2": "Norwegian fjord coastline from space (NASA)", "SH-WS1": "Red paint splash (photograph)", "SH-WS2": "Rorschach-style inkblot (illustration)", "SH-RE1": "Cracked dry earth (photograph)", "SH-RE2": "Belousov–Zhabotinsky reaction in a dish (chemistry photograph)", "SH-PX1": "Ant swarm (photograph)", "SH-PX2": "Pile of jigsaw puzzle pieces (photograph)", "CO-BA1": "Wassily Kandinsky, Improvisation 28 (1912)", "CO-BA2": "Kaleidoscope pattern (photograph)", "CO-CO1": "Firework sparks (photograph)", "CO-CO2": "J. M. W. Turner, The Burning of the Houses of Lords and Commons (1834)", "CO-HI1": "Times Square at night (photograph)", "CO-HI2": "Pieter Bruegel the Elder, The Fall of the Rebel Angels (1562)", "CO-EM1": "Fireworks burst (photograph)", "CO-EM2": "Lava flowing at night, Hawaii (photograph)", "CO-MO1": "Holi colour powder (photograph)", "CO-MO2": "Edvard Munch, The Scream (pastel, 1893)", "CO-UN1": "Orange ink in water (photograph)", "CO-UN2": "Aurora borealis over snow (photograph)", "CO-PR1": "J. M. W. Turner, The Slave Ship (1840)", "CO-PR2": "Orange sky from wildfire smoke (photograph)", "CO-WS1": "Paper chromatography of ink (chemistry photograph)", "CO-WS2": "Wassily Kandinsky, Untitled (first abstract watercolour, 1910)", "CO-RE1": "Paint splatter on the ground (photograph)", "CO-RE2": "Crystals under polarised light (micrograph)", "CO-PX1": "Graffiti wall (photograph)", "CO-PX2": "Piles of books in a second-hand bookshop (photograph)", "TX-BA1": "Pollen grains under a scanning electron microscope (Dartmouth)", "TX-BA2": "Lichen rosette on rock (photograph)", "TX-CO1": "Crumpled paper (photograph)", "TX-CO2": "Pāhoehoe (ropy) lava, Hawaii (photograph)", "TX-HI1": "Road cracked by an earthquake (photograph)", "TX-HI2": "Vincent van Gogh, Wheatfield with Crows (1890)", "TX-EM1": "Abstract drip painting (photograph)", "TX-EM2": "Coronavirus particles on a cell, coloured electron micrograph (NIAID)", "TX-MO1": "Wave crashing on rocks (photograph)", "TX-MO2": "Vincent van Gogh, The Starry Night (1889)", "TX-UN1": "Peeling paint wall (photograph)", "TX-UN2": "Rusted metal surface (photograph)", "TX-PR1": "Frost feathers on a window (photograph)", "TX-PR2": "Moss with spore capsules, macro photograph", "TX-WS1": "Tangled yarn balls (photograph)", "TX-WS2": "Slime mould fruiting bodies (photograph)", "TX-RE1": "TV static (photograph)", "TX-RE2": "Sea urchin (photograph)", "TX-PX1": "Pile of clothes (photograph)", "TX-PX2": "Junk pile (photograph)", "LI-BA1": "Lichtenberg figure, electrical discharge in acrylic (photograph)", "LI-BA2": "Double pendulum, long-exposure light trace (photograph)", "LI-CO1": "Lightning (photograph)", "LI-CO2": "Huai Su, Autobiography, wild cursive calligraphy (Tang dynasty, 777)", "LI-HI1": "Lena River Delta from space (NASA Landsat)", "LI-HI2": "Bare oak branches (photograph)", "LI-EM1": "Broken window (photograph)", "LI-EM2": "Lichtenberg figure in an acrylic block (photograph)", "LI-MO1": "Émile Cohl, Fantasmagorie (1908), still from the first fully hand-drawn animated film", "LI-MO2": "Particle tracks in a bubble chamber (CERN/Fermilab photograph)", "LI-UN1": "Tangled tree roots (photograph)", "LI-UN2": "Spider web with dew (photograph)", "LI-PR1": "River delta channels (satellite image)", "LI-PR2": "Manganese dendrites on limestone (photograph)", "LI-WS1": "Lightning streak (photograph)", "LI-WS2": "Random walk diagram (science illustration)", "LI-RE1": "Overhead wires (photograph)", "LI-RE2": "Seismogram recording an earthquake (photograph)", "LI-PX1": "Tangled electrical wires (photograph)", "LI-PX2": "Black scribble (illustration)"};
+const INSPO = window.CHAOS_INSPO;
 const MEDIA = [
   { key: 'pencil', name: 'Pencil', c: '#8b8882', note: 'Graphite in a range of grades. Think in value: light grades (4H–H) for pale areas, HB for mid-tones, soft grades (2B–6B) for the darkest darks.' },
   { key: 'fineliner', name: 'Black ink fineliner', c: '#1d1d1f', note: 'Black ink only and no erasing, so pencil lightly first. Tone comes from how close your marks are: hatching, cross-hatching and stippling, with different pen sizes.' },

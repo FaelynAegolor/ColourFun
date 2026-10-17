@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Chaos: 27 Boxes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="lesson.css">
+<style>
+.wrap { max-width: 1240px; }
+.brief { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: start; }
+.brief ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 15px; }
+.brief h3 { margin: 0 0 8px; font-size: 15px; }
+.media { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 14px; }
+.media div { border-radius: 12px; padding: 10px 12px; background: var(--panel); border: 1px solid var(--border); border-top: 5px solid var(--c); font-size: 13px; }
+.media b { display: block; font-size: 15px; }
+
+.tools { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 4px 0 16px; }
+.tools .muted { color: var(--muted); font-size: 14px; }
+.group { margin-top: 28px; }
+.group h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 4px; font-size: 22px; }
+.group h3 i { width: 18px; height: 18px; border-radius: 5px; background: var(--c); display: inline-block; }
+.group > p { margin: 0 0 12px; color: var(--muted); font-size: 14px; max-width: 80ch; }
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.card { background: var(--panel); border: 2px solid var(--border); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
+.card.locked { border-color: var(--c); box-shadow: 0 0 0 2px var(--c); }
+.card .top { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: color-mix(in srgb, var(--c) 16%, var(--panel)); font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.card .top .kind { margin-left: auto; color: #fff; border-radius: 999px; padding: 2px 8px; font-size: 10px; }
+.kind.literal { background: #1F5FBF; } .kind.conceptual { background: #7B3F99; }
+.card .body { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.card h4 { margin: 0; font-size: 18px; line-height: 1.25; }
+.card p { margin: 0; font-size: 14px; line-height: 1.45; }
+.card .lbl { display: block; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.tags span { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); }
+.tags span.el { border-color: #F7941D; }
+.tags span.pr { border-color: #1F5FBF; }
+.inspo { display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--muted); text-decoration: none; }
+.inspo img { width: 52px; height: 52px; object-fit: cover; border-radius: 6px; flex: none; }
+.inspo:hover b { text-decoration: underline; }
+.inspo.mine img { outline: 3px solid #2E8B57; }
+.zgrid { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 8px; }
+.zgrid button { position: relative; padding: 0; border: 2px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--panel); color: var(--ink); cursor: pointer; text-align: left; font: inherit; }
+.zgrid button[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.zgrid img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+.zgrid .zl { display: block; font-size: 10px; font-weight: 800; letter-spacing: .03em; padding: 4px 5px 5px; line-height: 1.2; text-transform: uppercase; }
+.zgrid .zn { position: absolute; left: 4px; top: 4px; background: rgba(0,0,0,.75); color: #fff; font-size: 11px; font-weight: 800; border-radius: 4px; padding: 0 5px; }
+.zgrid .zc { position: absolute; right: 4px; top: 4px; background: #2E8B57; color: #fff; font-size: 11px; font-weight: 800; border-radius: 999px; padding: 0 6px; }
+.zgrid .zc.none { background: #999; }
+.card.dim { opacity: .3; }
+.card.hit { box-shadow: 0 0 0 3px var(--accent); }
+.inspo.mine img { outline: 2px solid #2E8B57; }
+@media (max-width: 960px) { .zgrid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .zgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.inspo b { color: var(--ink); font-weight: 700; display: block; }
+.card .acts { display: flex; gap: 8px; padding: 0 14px 14px; flex-wrap: wrap; }
+.card .acts .how { flex-basis: 100%; background: var(--c); border-color: var(--c); color: #fff; }
+.prev { display: block; padding: 0; border: 0; border-bottom: 1px solid var(--border); background: #fffefa; cursor: pointer; position: relative; }
+.prev svg { display: block; width: 100%; height: auto; aspect-ratio: 1; }
+.prev span { position: absolute; right: 8px; bottom: 8px; background: rgba(0,0,0,.72); color: #fff; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+.prev:hover span { background: var(--accent); }
+dialog.player { border: 0; border-radius: 16px; padding: 0; width: min(1000px, calc(100vw - 20px)); max-height: calc(100vh - 20px); background: var(--panel); color: var(--ink); box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+dialog.player::backdrop { background: rgba(0,0,0,.55); }
+.pl { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; padding: 20px; }
+.pl .art { background: #fffefa; border: 1px solid #cfcbc2; border-radius: 10px; overflow: hidden; }
+.pl .art svg { display: block; width: 100%; height: auto; aspect-ratio: 1; }
+.pl h3 { margin: 0 0 2px; font-size: 20px; }
+.pl .sub { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+.pl .count { font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.pl .stext { font-size: 17px; line-height: 1.5; margin: 6px 0 14px; min-height: 6em; }
+.pl .pdots { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
+.pl .pdots button { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border); background: var(--panel); color: var(--ink); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.pl .pdots button.done { background: color-mix(in srgb, var(--accent) 18%, var(--panel)); }
+.pl .pdots button[aria-current="step"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.pl .pbtns { display: flex; gap: 8px; flex-wrap: wrap; }
+.pl .pbtns .btn { min-height: 42px; padding: 6px 14px; font-size: 14px; }
+.pl .tags { margin-top: 14px; }
+@media (max-width: 760px) { .pl { grid-template-columns: 1fr; } .pl .stext { min-height: 0; } }
+.card .acts button { flex: 1; min-height: 42px; border-radius: 10px; font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; border: 2px solid var(--accent); background: transparent; color: var(--ink); }
+.card .acts button.lock[aria-pressed="true"] { background: var(--c); border-color: var(--c); color: #fff; }
+.card .acts button:disabled { opacity: .4; cursor: default; }
+
+.print-ctl { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.print-ctl .bgrid { display: flex; gap: 6px; flex-wrap: wrap; }
+.print-ctl .spacer { margin-left: auto; }
+
+@media (max-width: 1000px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .media { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) { .cards { grid-template-columns: 1fr; } }
+
+#printArea { display: none; }
+@page { size: A4 portrait; margin: 0; }
+@media print {
+  html, body { background: #fff; }
+  body > *:not(#printArea):not(#dk-defs) { display: none !important; }
+  #printArea { display: block; }
+  .pp { position: relative; width: 210mm; height: 296mm; overflow: hidden; break-after: page; page-break-after: always; font-family: Archivo, Helvetica, Arial, sans-serif; color: #141414; }
+  .pp:last-child { break-after: auto; page-break-after: auto; }
+  .pp .h1 { position: absolute; left: 7mm; top: 6mm; font-size: 8pt; font-weight: 700; }
+  .pp .h2 { position: absolute; left: 7mm; top: 10.5mm; font-size: 12pt; font-weight: 800; letter-spacing: .08em; }
+  .pp .nm { position: absolute; right: 7mm; top: 11mm; font-size: 8pt; font-weight: 700; }
+  .box { position: absolute; width: 95mm; height: 95mm; border: .3mm solid #333; }
+  .bl { position: absolute; width: 95mm; font-size: 7.4pt; line-height: 1.3; }
+  .bl b { font-size: 8.4pt; }
+  .bl span { color: #555; }
+  .list { position: absolute; left: 10mm; top: 22mm; width: 190mm; display: grid; grid-template-columns: 1fr 1fr; gap: 3.5mm 6mm; font-size: 7.3pt; line-height: 1.32; }
+  .list div { border-left: 1.2mm solid var(--c); padding-left: 2.5mm; break-inside: avoid; }
+  .list b { font-size: 8.5pt; display: block; }
+  .list em { font-style: normal; color: #555; display: block; margin-top: .6mm; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Colour</button>
+        <ul>
+          <li><a href="colour-schemes.html">Colour schemes</a></li>
+          <li><a href="colour-interaction.html">Colour interaction</a></li>
+          <li><a href="paint-mixing.html">Paint mixing</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Form &amp; space</button>
+        <ul>
+          <li><a href="shape-shading.html">3D shape shading</a></li>
+          <li><a href="ellipses.html">Ellipses</a></li>
+          <li><a href="perspective.html">Perspective</a></li>
+          <li><a href="letter-3d.html">3D letter</a></li>
+          <li><a href="atmospheric-perspective.html">Atmospheric perspective</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Reference tools</button>
+        <ul>
+          <li><a href="value-notan.html">Value &amp; notan</a></li>
+          <li><a href="grid-proportion.html">Grid &amp; proportion</a></li>
+          <li><a href="composition.html">Composition</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Practice</button>
+        <ul>
+          <li><a href="design-principles.html">Design principles</a></li>
+          <li><a href="black-square.html">Black square problem</a></li>
+          <li><a href="word-board.html">Chaos image matrix</a></li>
+          <li><a href="perfume-bottles.html">Perfume bottle compositions</a></li>
+          <li><a href="chaos-drawings.html">Chaos drawing ideas</a></li>
+          <li><a href="chaos-27.html" aria-current="page">Chaos: 27 boxes</a></li>
+          <li><a href="gesture-timer.html">Gesture timer</a></li>
+          <li><a href="mark-making.html">Mark-making &amp; media</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>Chaos: 27 boxes</h1>
+    <p>Ideas for 27 chaos boxes of 10 × 10 cm in seven media: pencil, black ink, coloured pencil, coloured markers, collage, construction paper and mixed media. Each idea grows from one of your 18 Visual Research images, says what to make and how to do it in that medium, and names the design elements and principles it uses. Every idea has an example you can copy that builds up step by step. Press <em>Regenerate</em> for a new idea and <em>Lock</em> the ones you want to keep.</p>
+  </div>
+
+  <section aria-labelledby="briefTitle">
+    <h2 class="sec-title" id="briefTitle">The brief</h2>
+    <div class="brief">
+      <div class="panel">
+        <h3>Project 1: Wordscapes · Chaos, 27 boxes</h3>
+        <ul>
+          <li><b>27 boxes</b> of <b>10 × 10 cm</b>, inspired by your chaos images.</li>
+          <li>3 <b>pencil</b> (HB, H, 2H, 2B…), 3 <b>black ink</b>, 3 <b>coloured pencil</b>, 3 <b>coloured markers</b>.</li>
+          <li>3 <b>collage</b>, 3 <b>construction coloured paper</b>, and <b>9 mixed media</b>.</li>
+          <li>Reference the design elements and principles to show they have been considered.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Inspired by your 18 images</h3>
+        <ul>
+          <li>Every idea grows from one of the 18 images on your Visual Research sheets, shown on its card with your label.</li>
+          <li>The ideas spread across your images, so most of the 18 are used. Regenerate keeps it that way.</li>
+          <li>Click one of your images below to highlight the ideas that came from it.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="media">
+      <div style="--c:#8b8882"><b>Pencil</b>Light grades (H) for pale areas, soft grades (B) for darks, a putty rubber to lift highlights.</div>
+      <div style="--c:#1d1d1f"><b>Black ink</b>No erasing: hatching, cross-hatching and stippling, with pen sizes 0.05–0.8.</div>
+      <div style="--c:#E4252C"><b>Coloured pencil</b>Layer light to dark, burnish with white, warm against cool.</div>
+      <div style="--c:#1F5FBF"><b>Markers</b>Flat, bold colour: light colours first, blend while wet, outline last.</div>
+      <div style="--c:#B5651D"><b>Collage</b>Cut and torn printed paper: newspaper, magazines, maps, your printed chaos images.</div>
+      <div style="--c:#2E8B57"><b>Construction paper</b>Flat coloured paper cut or torn, layered and glued; can be folded into 3D.</div>
+      <div style="--c:#7B3F99"><b>Mixed media</b>Two or more media in one box: e.g. collage + pencil, watercolour + ink, paper + marker.</div>
+    </div>
+  </section>
+
+  <section aria-labelledby="zTitle">
+    <h2 class="sec-title" id="zTitle">Your 18 images</h2>
+    <p class="sec-lead" id="zLead"></p>
+    <div class="zgrid" id="zGrid"></div>
+  </section>
+
+  <section aria-labelledby="ideasTitle">
+    <h2 class="sec-title" id="ideasTitle">Your 27 ideas</h2>
+    <div class="tools">
+      <button type="button" class="btn primary" id="regenAll">Regenerate all unlocked</button>
+      <button type="button" class="btn ghost" id="unlockAll">Unlock all</button>
+      <span class="muted" id="lockCount" aria-live="polite"></span>
+    </div>
+    <div id="groups"></div>
+  </section>
+
+  <section aria-labelledby="printTitle">
+    <h2 class="sec-title" id="printTitle">Print</h2>
+    <p class="sec-lead">A4 portrait. The <b>blank sheets</b> have the 27 boxes at 9.5 × 9.5 cm (four to a page, so they fit inside a printer’s margins, 7 pages), each labelled with its medium, idea, element and principle. The <b>reference sheets</b> print the examples in the same boxes, to copy from, in two parts (boxes 1–12, then 13–27) because the drawings are detailed. The <b>ideas list</b> prints all 27 ideas with instructions (3 pages). Print at 100% / actual size.</p>
+    <div class="print-ctl">
+      <div class="bgrid" role="group" aria-label="What to print" id="prMode"></div>
+      <button type="button" class="btn primary spacer" id="printBtn">Print</button>
+    </div>
+  </section>
+</main>
+
+<dialog class="player" id="player" aria-labelledby="plTitle">
+  <div class="pl">
+    <div class="art"><svg id="plSvg" viewBox="0 0 400 400" role="img" aria-labelledby="plText"></svg></div>
+    <div>
+      <h3 id="plTitle"></h3>
+      <p class="sub" id="plSub"></p>
+      <div class="count" id="plCount"></div>
+      <p class="stext" id="plText" aria-live="polite"></p>
+      <div class="pdots" id="plDots" aria-label="Steps"></div>
+      <div class="pbtns">
+        <button type="button" class="btn ghost" id="plPrev">Back</button>
+        <button type="button" class="btn primary" id="plNext">Next</button>
+        <button type="button" class="btn ghost" id="plPlay">Play all</button>
+        <button type="button" class="btn ghost" id="plAgain">Replay step</button>
+        <button type="button" class="btn ghost" id="plClose">Close</button>
+      </div>
+      <div class="tags" id="plTags"></div>
+    </div>
+  </div>
+</dialog>
+
+<div id="printArea"></div>
+
+<script src="site.js"></script>
+<script src="chaos-ideas.js"></script>
+<script src="drawing-kit.js"></script>
+<script src="drawings-pencil.js"></script>
+<script src="drawings-fineliner.js"></script>
+<script src="drawings-colpencil.js"></script>
+<script src="drawings-markers.js"></script>
+<script src="drawings-collage.js"></script>
+<script src="drawings-paper.js"></script>
+<script src="drawings-mixed.js"></script>
+<script>
+(function () {
+'use strict';
+
+const $ = id => document.getElementById(id);
+// Idea pool. Each: t title, k literal|conceptual, i inspiration image id (chaos matrix), el elements, pr principles,
+// d what to draw in the 10 cm box, m how to do it in this medium.
+const POOL = window.CHAOS_POOL;
+
+const INSPO = window.CHAOS_INSPO;
+const MEDIA = [
+  { key: 'pencil', name: 'Pencil', c: '#8b8882', note: 'Graphite in a range of grades. Think in value: light grades (4H–H) for pale areas, HB for mid-tones, soft grades (2B–6B) for the darkest darks.' },
+  { key: 'fineliner', name: 'Black ink fineliner', c: '#1d1d1f', note: 'Black ink only and no erasing, so pencil lightly first. Tone comes from how close your marks are: hatching, cross-hatching and stippling, with different pen sizes.' },
+  { key: 'colpencil', name: 'Colour pencil', c: '#E4252C', note: 'Build colour in light layers, darkest last. Burnish with white or a blender for smooth, bright areas, and use warm against cool for contrast.' },
+  { key: 'markers', name: 'Coloured markers', c: '#1F5FBF', note: 'Markers are bold and flat and can’t be erased. Plan the light colours first, work quickly so strokes blend, and add black outlines last.' },
+  { key: 'collage', name: 'Collage', c: '#B5651D', note: 'Cut and torn printed paper (newspaper, magazines, maps, prints of your chaos images), layered and glued. Torn edges feel rough and chaotic; cut edges feel sharp.' },
+  { key: 'paper', name: 'Construction paper', c: '#2E8B57', note: 'Flat coloured paper, cut or torn, layered and glued. No drawing: shapes, colour and layering do all the work. Fold or curl it for 3D.' },
+  { key: 'mixed', name: 'Mixed media', c: '#7B3F99', n: 9, note: 'Two or more media in one box. Plan the order: wet media and glue first, drawing on top once dry.' },
+];
+const esc = t => String(t || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+
+// 12 slots: { m: medium key, idx: index in POOL[m], locked }
+let slots = null;
+try { slots = JSON.parse(localStorage.getItem('chaos27z') || 'null'); } catch (e) { /* storage unavailable */ }
+const TOTAL = MEDIA.reduce((n, md) => n + (md.n || 3), 0);
+const valid = s => Array.isArray(s) && s.length === TOTAL && s.every(x => POOL[x.m] && POOL[x.m][x.idx]);
+// Zaina's 18 Visual Research images; every idea maps to one of them
+const ZIMG = window.CHAOS_Z, ZMAP = window.CHAOS_ZMAP;
+const zOf = (m, idx) => ZMAP[m][idx];
+const nm = el => el === 'Color' ? 'Colour' : el;
+const zLabel = z => nm(ZIMG[z - 1].el) + ' / ' + ZIMG[z - 1].pr;
+// Order candidates so ideas from images not yet used on the page come first
+function spreadFirst(m, order, usedZ) {
+  return order.filter(k => !usedZ.includes(zOf(m, k))).concat(order.filter(k => usedZ.includes(zOf(m, k))));
+}
+function fresh() {
+  const out = [], usedZ = [];
+  MEDIA.forEach(md => {
+    const order = [...POOL[md.key].keys()].sort(() => Math.random() - .5);
+    for (let k = 0; k < (md.n || 3); k++) {
+      const pick = spreadFirst(md.key, order.filter(x => !out.some(o => o.m === md.key && o.idx === x)), usedZ)[0];
+      out.push({ m: md.key, idx: pick, locked: false });
+      usedZ.push(zOf(md.key, pick));
+    }
+  });
+  return out;
+}
+function freshBest() {
+  let best = null, score = -1;
+  for (let t = 0; t < 300; t++) {
+    const f = fresh(), sc = new Set(f.map(x => zOf(x.m, x.idx))).size;
+    if (sc > score) { best = f; score = sc; }
+    if (score === 18) break;
+  }
+  return best;
+}
+if (!valid(slots)) slots = freshBest();
+const save = () => { try { localStorage.setItem('chaos27z', JSON.stringify(slots)); } catch (e) { /* ignore */ } };
+
+// Pick an idea for this medium not already on the page; prefer ones not seen recently
+const seen = {};
+function regen(i) {
+  const s = slots[i];
+  const used = slots.filter((x, j) => j !== i && x.m === s.m).map(x => x.idx);
+  seen[s.m] = seen[s.m] || [];
+  seen[s.m].push(s.idx);
+  let pool = [...POOL[s.m].keys()].filter(k => !used.includes(k) && k !== s.idx);
+  const unseen = pool.filter(k => !seen[s.m].includes(k));
+  if (unseen.length) pool = unseen; else seen[s.m] = [];
+  const usedZ = slots.filter((x, j) => j !== i).map(x => zOf(x.m, x.idx));
+  const fav = pool.filter(k => !usedZ.includes(zOf(s.m, k)));
+  if (fav.length && Math.random() < .8) pool = fav;
+  s.idx = pool[Math.floor(Math.random() * pool.length)];
+}
+
+let focusZ = 0;
+function card(s, i) {
+  const it = POOL[s.m][s.idx], md = MEDIA.find(x => x.key === s.m), n = slots.filter((x, j) => j <= i && x.m === s.m).length;
+  const zc = zOf(s.m, s.idx), cls = focusZ ? (zc === focusZ ? ' hit' : ' dim') : '';
+  return '<article class="card' + (s.locked ? ' locked' : '') + cls + '" style="--c:' + md.c + '">' +
+    '<div class="top">' + md.name + ' ' + n + '<span class="kind ' + it.k + '">' + (it.k === 'literal' ? 'Literal' : 'Conceptual') + '</span></div>' +
+    (drawingFor(s) ? '<button type="button" class="prev" data-i="' + i + '" aria-label="Show how to draw ' + esc(it.t) + '"><svg viewBox="0 0 400 400" data-final="' + i + '" aria-hidden="true"></svg><span>Step by step ▶</span></button>' : '') +
+    '<div class="body"><h4>' + esc(it.t) + '</h4>' +
+    '<p><span class="lbl">Draw</span>' + esc(it.d) + '</p>' +
+    '<p><span class="lbl">How, in ' + md.name.toLowerCase() + '</span>' + esc(it.m) + '</p>' +
+    '<div><span class="lbl">Elements and principles</span><div class="tags">' + it.el.map(e => '<span class="el">' + e + '</span>').join('') + it.pr.map(p => '<span class="pr">' + p + '</span>').join('') + '</div></div>' +
+    (function () { const z = zOf(s.m, s.idx), zi = ZIMG[z - 1]; return '<a class="inspo mine" href="#zTitle" title="See your 18 images"><img alt="" loading="lazy" src="chaos-images/z' + String(z).padStart(2, '0') + '-t.jpg"><span>Inspired by your image ' + z + ' · ' + zLabel(z) + '<b>' + esc(zi.d) + '</b>' + esc(window.CHAOS_ZWHY[s.m][s.idx]) + '</span></a>'; })() +
+    '</div><div class="acts">' + (drawingFor(s) ? '<button type="button" class="how" data-i="' + i + '">How to draw it, step by step</button>' : '') + '<button type="button" class="lock" data-i="' + i + '" aria-pressed="' + s.locked + '">' + (s.locked ? '🔒 Locked' : 'Lock') + '</button>' +
+    '<button type="button" class="regen" data-i="' + i + '"' + (s.locked ? ' disabled' : '') + '>Regenerate</button></div></article>';
+}
+function draw() {
+  $('groups').innerHTML = MEDIA.map(md => '<div class="group" style="--c:' + md.c + '"><h3><i></i>' + md.name + '</h3><p>' + md.note + '</p><div class="cards">' +
+    slots.map((s, i) => s.m === md.key ? card(s, i) : '').join('') + '</div></div>').join('');
+  $('groups').querySelectorAll('.lock').forEach(b => b.addEventListener('click', () => { const s = slots[+b.dataset.i]; s.locked = !s.locked; save(); draw(); }));
+  $('groups').querySelectorAll('.regen').forEach(b => b.addEventListener('click', () => { regen(+b.dataset.i); save(); draw(); }));
+  $('groups').querySelectorAll('.how, .prev').forEach(b => b.addEventListener('click', () => openPlayer(+b.dataset.i)));
+  $('groups').querySelectorAll('svg[data-final]').forEach(sv => { const d = drawingFor(slots[+sv.dataset.final]); DrawingKit.render(sv, d.steps, d.steps.length - 1, false); });
+  const n = slots.filter(s => s.locked).length;
+  $('lockCount').textContent = n + ' of ' + TOTAL + ' locked';
+  drawZ();
+}
+$('regenAll').addEventListener('click', () => { slots.forEach((s, i) => { if (!s.locked) regen(i); }); save(); draw(); });
+$('unlockAll').addEventListener('click', () => { slots.forEach(s => { s.locked = false; }); save(); draw(); });
+
+/* ---------- Step-by-step player ---------- */
+function drawingFor(s) { return (window.DRAWINGS || {})[s.m + '-' + s.idx]; }
+const PL = { i: 0, step: 0, timer: 0 };
+function plDraw(animate) {
+  const s = slots[PL.i], d = drawingFor(s), steps = d.steps;
+  DrawingKit.render($('plSvg'), steps, PL.step, animate);
+  $('plCount').textContent = 'Step ' + (PL.step + 1) + ' of ' + steps.length;
+  $('plText').textContent = steps[PL.step].t;
+  $('plPrev').disabled = PL.step === 0;
+  $('plNext').disabled = PL.step === steps.length - 1;
+  $('plDots').innerHTML = steps.map((_, k) => '<button type="button" aria-label="Step ' + (k + 1) + '"' + (k === PL.step ? ' aria-current="step"' : k < PL.step ? ' class="done"' : '') + ' data-k="' + k + '">' + (k + 1) + '</button>').join('');
+  $('plDots').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { plStop(); PL.step = +b.dataset.k; plDraw(true); }));
+}
+function openPlayer(i) {
+  const s = slots[i], it = POOL[s.m][s.idx], md = MEDIA.find(x => x.key === s.m);
+  plStop(); PL.i = i; PL.step = 0;
+  $('plTitle').textContent = it.t;
+  $('plSub').textContent = md.name + ' · inspired by your image ' + zOf(s.m, s.idx) + ' (' + ZIMG[zOf(s.m, s.idx) - 1].d.toLowerCase() + ') · make it in a 10 × 10 cm box';
+  $('plTags').innerHTML = it.el.map(e => '<span class="el">' + e + '</span>').join('') + it.pr.map(p => '<span class="pr">' + p + '</span>').join('');
+  plDraw(true);
+  if (!$('player').open) $('player').showModal();
+}
+function plStop() { clearTimeout(PL.timer); PL.timer = 0; $('plPlay').textContent = 'Play all'; }
+$('plPrev').addEventListener('click', () => { plStop(); if (PL.step > 0) { PL.step--; plDraw(true); } });
+$('plNext').addEventListener('click', () => { plStop(); const n = drawingFor(slots[PL.i]).steps.length; if (PL.step < n - 1) { PL.step++; plDraw(true); } });
+$('plAgain').addEventListener('click', () => plDraw(true));
+$('plClose').addEventListener('click', () => { plStop(); $('player').close(); });
+$('player').addEventListener('close', plStop);
+$('player').addEventListener('click', e => { if (e.target === $('player')) $('player').close(); });
+$('plPlay').addEventListener('click', () => {
+  if (PL.timer) { plStop(); return; }
+  const n = drawingFor(slots[PL.i]).steps.length;
+  $('plPlay').textContent = 'Pause';
+  PL.step = 0; plDraw(true);
+  const next = () => { if (PL.step >= n - 1) { plStop(); return; } PL.step++; plDraw(true); PL.timer = setTimeout(next, 3600); };
+  PL.timer = setTimeout(next, 3600);
+});
+
+/* ---------- Printing ---------- */
+let PRM = 'boxes';
+(function () {
+  const el = $('prMode');
+  [['boxes', 'Blank sheets (7 pages)'], ['ref', 'Reference, boxes 1–12 (3 pages)'], ['ref2', 'Reference, boxes 13–27 (4 pages)'], ['list', 'Ideas list (3 pages)'], ['both', 'Blank sheets + ideas list']].forEach(([k, l]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tbtn'; b.textContent = l; b.setAttribute('aria-pressed', String(k === PRM));
+    b.addEventListener('click', () => { el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b))); PRM = k; });
+    el.appendChild(b);
+  });
+})();
+const head = t => '<div class="h1">Project 1 · Wordscapes: Chaos, 27 boxes</div><div class="h2">' + t + '</div><div class="nm">NAME ______________________</div>';
+function boxPages(withRef, p0, p1) {
+  let h = '';
+  for (let p = p0 || 0; p < (p1 || Math.ceil(TOTAL / 4)); p++) {
+    h += '<div class="pp">' + head('CHAOS · BOXES ' + (p * 4 + 1) + '–' + Math.min(TOTAL, p * 4 + 4));
+    for (let k = 0; k < 4 && p * 4 + k < TOTAL; k++) {
+      const i = p * 4 + k, s = slots[i], it = POOL[s.m][s.idx], md = MEDIA.find(x => x.key === s.m);
+      const x = k % 2 ? 108 : 7, y = 19 + Math.floor(k / 2) * 139;
+      const d = withRef && drawingFor(s);
+      h += '<div class="box" style="left:' + x + 'mm;top:' + y + 'mm;border-color:' + md.c + '">' + (d ? '<svg viewBox="0 0 400 400" data-pr="' + i + '" style="width:100%;height:100%;display:block"></svg>' : '') + '</div>';
+      h += '<div class="bl" style="left:' + x + 'mm;top:' + (y + 96.5) + 'mm"><b>' + (i + 1) + '. ' + md.name + ': ' + esc(it.t) + '</b><br>Elements: ' + it.el.join(', ') + ' · Principles: ' + it.pr.join(', ') + ' · from your image ' + zOf(s.m, s.idx) + '<br><span>Notes: ___________________________________________________</span><br><span>_________________________________________________________</span></div>';
+    }
+    h += '</div>';
+  }
+  return h;
+}
+function listPage() {
+  let h = '';
+  for (let p = 0; p < 3; p++) h += listChunk(p * 10, Math.min(TOTAL, p * 10 + 10), p);
+  return h;
+}
+function listChunk(from, to, p) {
+  let h = '<div class="pp">' + head('CHAOS · 27 IDEAS (' + (p + 1) + ' OF 3)') + '<div class="list">';
+  slots.slice(from, to).forEach((s, k) => { const i = from + k;
+    const it = POOL[s.m][s.idx], md = MEDIA.find(x => x.key === s.m);
+    h += '<div style="--c:' + md.c + '"><b>' + (i + 1) + '. ' + md.name + ': ' + esc(it.t) + '</b>' + esc(it.d) + '<em>How: ' + esc(it.m) + '</em><em>' + it.el.join(', ') + ' · ' + it.pr.join(', ') + ' · ' + it.k + '</em></div>';
+  });
+  return h + '</div></div>';
+}
+$('printBtn').addEventListener('click', () => {
+  $('printArea').innerHTML = PRM === 'ref' ? boxPages(true, 0, 3) : PRM === 'ref2' ? boxPages(true, 3, 7) : (PRM !== 'list' ? boxPages() : '') + (PRM === 'list' || PRM === 'both' ? listPage() : '');
+  $('printArea').querySelectorAll('svg[data-pr]').forEach(sv => { const d = drawingFor(slots[+sv.dataset.pr]); DrawingKit.render(sv, d.steps, d.steps.length - 1, false); });
+  window.print();
+});
+
+function drawZ() {
+  const count = z => slots.filter(x => zOf(x.m, x.idx) === z).length;
+  const used = ZIMG.filter(zi => count(zi.n)).length;
+  $('zLead').textContent = 'From your two Visual Research sheets, with your labels. The green number is how many of your 27 ideas come from each image: ' + used + ' of 18 are used. Click an image to highlight its ideas; click again to clear.';
+  $('zGrid').innerHTML = ZIMG.map(zi => { const c = count(zi.n); return '<button type="button" data-z="' + zi.n + '" aria-pressed="' + (focusZ === zi.n) + '" title="' + esc(zi.d) + '"><img alt="' + esc(zi.d) + '" src="chaos-images/z' + String(zi.n).padStart(2, '0') + '-t.jpg"><span class="zn">' + zi.n + '</span><span class="zc' + (c ? '' : ' none') + '">' + c + '</span><span class="zl">' + zLabel(zi.n) + '</span></button>'; }).join('');
+  $('zGrid').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    const z = +b.dataset.z; focusZ = focusZ === z ? 0 : z; draw();
+    if (focusZ) { const first = document.querySelector('.card.hit'); if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  }));
+}
+draw();
+})();
+</script>
+</body>
+</html>

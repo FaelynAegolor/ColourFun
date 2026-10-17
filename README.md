@@ -205,6 +205,15 @@ The page has:
 - **Example drawings**: every one of the 48 ideas has a drawing to copy, in its medium's style. It builds up in 6–7 animated steps, each with an instruction (pencil grades, pen sizes, layering, marker order). Cards show the finished drawing; "How to draw it, step by step" opens the player. Drawings live in `drawings-pencil.js`, `drawings-fineliner.js`, `drawings-colpencil.js` and `drawings-markers.js`, rendered by `drawing-kit.js`. `drawing-test.html?file=drawings-pencil.js` previews a set, and adding `&id=pencil-3` shows every step of one drawing.
 - **Print**: three A4 drawing sheets with 9.5 cm boxes, labelled with the idea, elements and principles and space for notes; the same sheets with the example drawings as references; and a one-page ideas list.
 
+## Chaos: 27 Boxes
+
+`chaos-27.html` supports the 27-box chaos assignment: 3 pencil, 3 black ink, 3 coloured pencil, 3 coloured markers, 3 collage, 3 construction paper and 9 mixed media boxes of 10 × 10 cm, based on Zaina's 18 Visual Research images.
+
+- **Your 18 images**: cropped from her two Visual Research sheets (`chaos-images/z01.jpg`–`z18.jpg`) with her element/principle labels. Each shows how many of the 27 ideas use it; clicking one highlights its ideas.
+- **Ideas**: every idea in every pool (`chaos-ideas.js`) maps to one of her images (`CHAOS_ZMAP`), with a sentence on how it grows from that image (`CHAOS_ZWHY`). New sets try to use all 18 images, and regenerating prefers images not yet used.
+- **Step-by-step examples**: every idea has one, including the new collage, construction paper and mixed-media sets (`drawings-collage.js`, `drawings-paper.js`, `drawings-mixed.js`).
+- **Print**: blank sheets (7 pages), reference sheets with the examples in two parts (boxes 1–12 and 13–27), and an ideas list (3 pages).
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
