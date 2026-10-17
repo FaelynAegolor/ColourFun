@@ -52,6 +52,11 @@
 .zgrid .zc { position: absolute; right: 4px; top: 4px; background: #2E8B57; color: #fff; font-size: 11px; font-weight: 800; border-radius: 999px; padding: 0 6px; }
 .zgrid .zc.none { background: #999; }
 .card.dim { opacity: .3; }
+.combo { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; padding: 6px 10px; border-radius: 8px; background: var(--bg); border-left: 4px solid var(--c); }
+.combo span { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.combo b { font-size: 15px; }
+.combo em { flex-basis: 100%; font-style: normal; font-size: 12px; font-weight: 700; color: #D2402A; }
+.combo.dup { border-left-color: #D2402A; background: color-mix(in srgb, #D2402A 10%, var(--panel)); }
 .card.hit { box-shadow: 0 0 0 3px var(--accent); }
 .inspo.mine img { outline: 2px solid #2E8B57; }
 @media (max-width: 960px) { .zgrid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
@@ -92,11 +97,14 @@ dialog.player::backdrop { background: rgba(0,0,0,.55); }
 @media (max-width: 620px) { .cards { grid-template-columns: 1fr; } }
 
 #printArea { display: none; }
-@page { size: A4 portrait; margin: 0; }
 @media print {
   html, body { background: #fff; }
   body > *:not(#printArea):not(#dk-defs) { display: none !important; }
   #printArea { display: block; }
+  .pp.a3 { width: 297mm; height: 419mm; }
+  .box.b3 { width: 85mm; height: 85mm; }
+  .bl.b3l { width: 85mm; font-size: 8.5pt; }
+  .bl.b3l b { font-size: 10pt; }
   .pp { position: relative; width: 210mm; height: 296mm; overflow: hidden; break-after: page; page-break-after: always; font-family: Archivo, Helvetica, Arial, sans-serif; color: #141414; }
   .pp:last-child { break-after: auto; page-break-after: auto; }
   .pp .h1 { position: absolute; left: 7mm; top: 6mm; font-size: 8pt; font-weight: 700; }
@@ -113,6 +121,7 @@ dialog.player::backdrop { background: rgba(0,0,0,.55); }
   * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 }
 </style>
+<style id="pageSize">@page { size: A3 portrait; margin: 0; }</style>
 </head>
 <body>
 <header class="site-head">
@@ -178,12 +187,13 @@ dialog.player::backdrop { background: rgba(0,0,0,.55); }
     <h2 class="sec-title" id="briefTitle">The brief</h2>
     <div class="brief">
       <div class="panel">
-        <h3>Project 1: Wordscapes · Chaos, 27 boxes</h3>
+        <h3>Project 1: Wordscapes · Step 2: Visual Studies</h3>
         <ul>
           <li><b>27 boxes</b> of <b>10 × 10 cm</b>, inspired by your chaos images.</li>
           <li>3 <b>pencil</b> (HB, H, 2H, 2B…), 3 <b>black ink</b>, 3 <b>coloured pencil</b>, 3 <b>coloured markers</b>.</li>
           <li>3 <b>collage</b>, 3 <b>construction coloured paper</b>, and <b>9 mixed media</b>.</li>
-          <li>Reference the design elements and principles to show they have been considered.</li>
+          <li>Each square explores a <b>different combination</b> of design element and principle; the page checks this for you.</li>
+          <li>Explore literal and abstract interpretations. Deliverable: <b>3 A3 Visual Studies sheets</b> of 9 compositions each.</li>
         </ul>
       </div>
       <div class="panel">
@@ -224,7 +234,7 @@ dialog.player::backdrop { background: rgba(0,0,0,.55); }
 
   <section aria-labelledby="printTitle">
     <h2 class="sec-title" id="printTitle">Print</h2>
-    <p class="sec-lead">A4 portrait. The <b>blank sheets</b> have the 27 boxes at 9.5 × 9.5 cm (four to a page, so they fit inside a printer’s margins, 7 pages), each labelled with its medium, idea, element and principle. The <b>reference sheets</b> print the examples in the same boxes, to copy from, in two parts (boxes 1–12, then 13–27) because the drawings are detailed. The <b>ideas list</b> prints all 27 ideas with instructions (3 pages). Print at 100% / actual size.</p>
+    <p class="sec-lead">A4 portrait. The <b>A3 Visual Studies plan</b> lays out your 27 compositions as the 3 A3 sheets you hand in, 9 per sheet, each square labelled with its combination, medium and source image (squares print at 8.5 cm so they fit the printer margins; use it as a plan or guide for your own grid paper). <b>A3 with examples</b> puts the example drawings in the squares. The <b>A4 blank sheets</b> have the 27 boxes at 9.5 × 9.5 cm (four to a page, so they fit inside a printer’s margins, 7 pages), each labelled with its medium, idea, element and principle. The <b>reference sheets</b> print the examples in the same boxes, to copy from, in two parts (boxes 1–12, then 13–27) because the drawings are detailed. The <b>ideas list</b> prints all 27 ideas with instructions (3 pages). Print at 100% / actual size.</p>
     <div class="print-ctl">
       <div class="bgrid" role="group" aria-label="What to print" id="prMode"></div>
       <button type="button" class="btn primary spacer" id="printBtn">Print</button>
@@ -296,18 +306,21 @@ const ZIMG = window.CHAOS_Z, ZMAP = window.CHAOS_ZMAP;
 const zOf = (m, idx) => ZMAP[m][idx];
 const nm = el => el === 'Color' ? 'Colour' : el;
 const zLabel = z => nm(ZIMG[z - 1].el) + ' / ' + ZIMG[z - 1].pr;
-// Order candidates so ideas from images not yet used on the page come first
-function spreadFirst(m, order, usedZ) {
-  return order.filter(k => !usedZ.includes(zOf(m, k))).concat(order.filter(k => usedZ.includes(zOf(m, k))));
+// Each box should explore a different combination: the idea's main element / main principle
+const pairOf = (m, idx) => POOL[m][idx].el[0] + ' / ' + POOL[m][idx].pr[0];
+// Order candidates: new combinations first, then ideas from images not yet used
+function spreadFirst(m, order, usedZ, usedP) {
+  const rank = k => (usedP.includes(pairOf(m, k)) ? 2 : 0) + (usedZ.includes(zOf(m, k)) ? 1 : 0);
+  return order.slice().sort((a, b) => rank(a) - rank(b));
 }
 function fresh() {
-  const out = [], usedZ = [];
+  const out = [], usedZ = [], usedP = [];
   MEDIA.forEach(md => {
     const order = [...POOL[md.key].keys()].sort(() => Math.random() - .5);
     for (let k = 0; k < (md.n || 3); k++) {
-      const pick = spreadFirst(md.key, order.filter(x => !out.some(o => o.m === md.key && o.idx === x)), usedZ)[0];
+      const pick = spreadFirst(md.key, order.filter(x => !out.some(o => o.m === md.key && o.idx === x)), usedZ, usedP)[0];
       out.push({ m: md.key, idx: pick, locked: false });
-      usedZ.push(zOf(md.key, pick));
+      usedZ.push(zOf(md.key, pick)); usedP.push(pairOf(md.key, pick));
     }
   });
   return out;
@@ -315,9 +328,9 @@ function fresh() {
 function freshBest() {
   let best = null, score = -1;
   for (let t = 0; t < 300; t++) {
-    const f = fresh(), sc = new Set(f.map(x => zOf(x.m, x.idx))).size;
+    const f = fresh(), sc = new Set(f.map(x => pairOf(x.m, x.idx))).size * 100 + new Set(f.map(x => zOf(x.m, x.idx))).size;
     if (sc > score) { best = f; score = sc; }
-    if (score === 18) break;
+    if (score === TOTAL * 100 + 18) break;
   }
   return best;
 }
@@ -334,20 +347,30 @@ function regen(i) {
   let pool = [...POOL[s.m].keys()].filter(k => !used.includes(k) && k !== s.idx);
   const unseen = pool.filter(k => !seen[s.m].includes(k));
   if (unseen.length) pool = unseen; else seen[s.m] = [];
-  const usedZ = slots.filter((x, j) => j !== i).map(x => zOf(x.m, x.idx));
+  const others = slots.filter((x, j) => j !== i);
+  const usedZ = others.map(x => zOf(x.m, x.idx)), usedP = others.map(x => pairOf(x.m, x.idx));
+  // Never repeat a combination if there is another choice; then prefer unused images
+  const newPair = pool.filter(k => !usedP.includes(pairOf(s.m, k)));
+  if (newPair.length) pool = newPair;
   const fav = pool.filter(k => !usedZ.includes(zOf(s.m, k)));
   if (fav.length && Math.random() < .8) pool = fav;
   s.idx = pool[Math.floor(Math.random() * pool.length)];
 }
 
 let focusZ = 0;
+// Box number (1-based) of an earlier box with the same combination, or 0
+function dupOf(i) {
+  const pr = pairOf(slots[i].m, slots[i].idx);
+  const j = slots.findIndex((x, k) => k !== i && pairOf(x.m, x.idx) === pr);
+  return j >= 0 ? j + 1 : 0;
+}
 function card(s, i) {
   const it = POOL[s.m][s.idx], md = MEDIA.find(x => x.key === s.m), n = slots.filter((x, j) => j <= i && x.m === s.m).length;
   const zc = zOf(s.m, s.idx), cls = focusZ ? (zc === focusZ ? ' hit' : ' dim') : '';
   return '<article class="card' + (s.locked ? ' locked' : '') + cls + '" style="--c:' + md.c + '">' +
     '<div class="top">' + md.name + ' ' + n + '<span class="kind ' + it.k + '">' + (it.k === 'literal' ? 'Literal' : 'Conceptual') + '</span></div>' +
     (drawingFor(s) ? '<button type="button" class="prev" data-i="' + i + '" aria-label="Show how to draw ' + esc(it.t) + '"><svg viewBox="0 0 400 400" data-final="' + i + '" aria-hidden="true"></svg><span>Step by step ▶</span></button>' : '') +
-    '<div class="body"><h4>' + esc(it.t) + '</h4>' +
+    '<div class="body"><div class="combo' + (dupOf(i) ? ' dup' : '') + '"><span>Combination</span><b>' + nm(it.el[0]) + ' / ' + it.pr[0] + '</b>' + (dupOf(i) ? '<em>Same as box ' + dupOf(i) + ': press Regenerate</em>' : '') + '</div><h4>' + esc(it.t) + '</h4>' +
     '<p><span class="lbl">Draw</span>' + esc(it.d) + '</p>' +
     '<p><span class="lbl">How, in ' + md.name.toLowerCase() + '</span>' + esc(it.m) + '</p>' +
     '<div><span class="lbl">Elements and principles</span><div class="tags">' + it.el.map(e => '<span class="el">' + e + '</span>').join('') + it.pr.map(p => '<span class="pr">' + p + '</span>').join('') + '</div></div>' +
@@ -363,7 +386,8 @@ function draw() {
   $('groups').querySelectorAll('.how, .prev').forEach(b => b.addEventListener('click', () => openPlayer(+b.dataset.i)));
   $('groups').querySelectorAll('svg[data-final]').forEach(sv => { const d = drawingFor(slots[+sv.dataset.final]); DrawingKit.render(sv, d.steps, d.steps.length - 1, false); });
   const n = slots.filter(s => s.locked).length;
-  $('lockCount').textContent = n + ' of ' + TOTAL + ' locked';
+  const distinct = new Set(slots.map(x => pairOf(x.m, x.idx))).size;
+  $('lockCount').innerHTML = n + ' of ' + TOTAL + ' locked · ' + (distinct === TOTAL ? '<b style="color:#2E8B57">all ' + TOTAL + ' boxes use a different combination of element and principle ✓</b>' : '<b style="color:#D2402A">' + (TOTAL - distinct) + ' repeated combination' + (TOTAL - distinct > 1 ? 's' : '') + ': regenerate the boxes marked in red</b>');
   drawZ();
 }
 $('regenAll').addEventListener('click', () => { slots.forEach((s, i) => { if (!s.locked) regen(i); }); save(); draw(); });
@@ -408,10 +432,10 @@ $('plPlay').addEventListener('click', () => {
 });
 
 /* ---------- Printing ---------- */
-let PRM = 'boxes';
+let PRM = 'a3';
 (function () {
   const el = $('prMode');
-  [['boxes', 'Blank sheets (7 pages)'], ['ref', 'Reference, boxes 1–12 (3 pages)'], ['ref2', 'Reference, boxes 13–27 (4 pages)'], ['list', 'Ideas list (3 pages)'], ['both', 'Blank sheets + ideas list']].forEach(([k, l]) => {
+  [['a3', 'A3 Visual Studies plan (3 sheets)'], ['a3ref', 'A3 with examples (3 sheets)'], ['boxes', 'A4 blank sheets (7 pages)'], ['ref', 'Reference, boxes 1–12 (3 pages)'], ['ref2', 'Reference, boxes 13–27 (4 pages)'], ['list', 'Ideas list (3 pages)'], ['both', 'Blank sheets + ideas list']].forEach(([k, l]) => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'tbtn'; b.textContent = l; b.setAttribute('aria-pressed', String(k === PRM));
     b.addEventListener('click', () => { el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b))); PRM = k; });
@@ -419,6 +443,22 @@ let PRM = 'boxes';
   });
 })();
 const head = t => '<div class="h1">Project 1 · Wordscapes: Chaos, 27 boxes</div><div class="h2">' + t + '</div><div class="nm">NAME ______________________</div>';
+// A3 portrait, 9 squares (3 × 3) per sheet: the 3 A3 Visual Studies sheets
+function a3Pages(withRef) {
+  let h = '';
+  for (let p = 0; p < 3; p++) {
+    h += '<div class="pp a3">' + head('CHAOS · VISUAL STUDIES · SHEET ' + (p + 1) + ' OF 3');
+    for (let k = 0; k < 9; k++) {
+      const i = p * 9 + k, s = slots[i], it = POOL[s.m][s.idx], md = MEDIA.find(x => x.key === s.m);
+      const x = 14 + (k % 3) * 93, y = 24 + Math.floor(k / 3) * 128;
+      const d = withRef && drawingFor(s);
+      h += '<div class="box b3" style="left:' + x + 'mm;top:' + y + 'mm;border-color:' + md.c + '">' + (d ? '<svg viewBox="0 0 400 400" data-pr="' + i + '" style="width:100%;height:100%;display:block"></svg>' : '') + '</div>';
+      h += '<div class="bl b3l" style="left:' + x + 'mm;top:' + (y + 87) + 'mm"><b>' + (i + 1) + '. ' + nm(it.el[0]).toUpperCase() + ' / ' + it.pr[0].toUpperCase() + '</b><br>' + md.name + ': ' + esc(it.t) + '<br><span>From your image ' + zOf(s.m, s.idx) + ' · ' + it.k + '</span></div>';
+    }
+    h += '</div>';
+  }
+  return h;
+}
 function boxPages(withRef, p0, p1) {
   let h = '';
   for (let p = p0 || 0; p < (p1 || Math.ceil(TOTAL / 4)); p++) {
@@ -448,7 +488,8 @@ function listChunk(from, to, p) {
   return h + '</div></div>';
 }
 $('printBtn').addEventListener('click', () => {
-  $('printArea').innerHTML = PRM === 'ref' ? boxPages(true, 0, 3) : PRM === 'ref2' ? boxPages(true, 3, 7) : (PRM !== 'list' ? boxPages() : '') + (PRM === 'list' || PRM === 'both' ? listPage() : '');
+  $('pageSize').textContent = PRM.startsWith('a3') ? '@page { size: A3 portrait; margin: 0; }' : '@page { size: A4 portrait; margin: 0; }';
+  $('printArea').innerHTML = PRM === 'a3' ? a3Pages(false) : PRM === 'a3ref' ? a3Pages(true) : PRM === 'ref' ? boxPages(true, 0, 3) : PRM === 'ref2' ? boxPages(true, 3, 7) : (PRM !== 'list' ? boxPages() : '') + (PRM === 'list' || PRM === 'both' ? listPage() : '');
   $('printArea').querySelectorAll('svg[data-pr]').forEach(sv => { const d = drawingFor(slots[+sv.dataset.pr]); DrawingKit.render(sv, d.steps, d.steps.length - 1, false); });
   window.print();
 });
