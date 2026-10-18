@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Lamp Views</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="lesson.css">
+<style>
+.wrap { max-width: 1240px; }
+.brief { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: start; }
+.brief ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 15px; }
+.brief h3 { margin: 0 0 8px; font-size: 15px; }
+
+/* Lamp chooser */
+.lamps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.lamps button { padding: 0; border: 2px solid var(--border); border-radius: 12px; background: var(--panel); color: var(--ink); cursor: pointer; overflow: hidden; text-align: left; font: inherit; }
+.lamps button[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.lamps svg { display: block; width: 100%; height: auto; aspect-ratio: 1; background: #fffefa; }
+.lamps b { display: block; padding: 8px 10px 2px; font-size: 15px; }
+.lamps span { display: block; padding: 0 10px 10px; font-size: 12px; color: var(--muted); }
+
+/* Proportions */
+.sizes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px 16px; margin-top: 14px; }
+.sizes .note { grid-column: 1 / -1; font-size: 13px; color: var(--muted); margin: 0; }
+
+/* Views */
+.views { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.view { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
+.view .prev { display: block; padding: 0; border: 0; border-bottom: 1px solid var(--border); background: #fffefa; cursor: pointer; position: relative; }
+.view .prev svg { display: block; width: 100%; height: auto; aspect-ratio: 1; }
+.view .prev span { position: absolute; right: 8px; bottom: 8px; background: rgba(0,0,0,.72); color: #fff; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+.view .prev:hover span { background: var(--accent); }
+.view .vt { padding: 10px 12px 12px; }
+.view h3 { margin: 0; font-size: 16px; }
+.view p { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+.view.wide { grid-column: span 2; }
+.view.wide .prev svg { aspect-ratio: 2 / 1; }
+
+/* Player */
+dialog.player { border: 0; border-radius: 16px; padding: 0; width: min(1000px, calc(100vw - 20px)); max-height: calc(100vh - 20px); background: var(--panel); color: var(--ink); box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+dialog.player::backdrop { background: rgba(0,0,0,.55); }
+.pl { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; padding: 20px; }
+.pl .art { background: #fffefa; border: 1px solid #cfcbc2; border-radius: 10px; overflow: hidden; }
+.pl .art svg { display: block; width: 100%; height: auto; aspect-ratio: 1; }
+.pl h3 { margin: 0 0 2px; font-size: 20px; }
+.pl .sub { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+.pl .count { font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.pl .stext { font-size: 17px; line-height: 1.5; margin: 6px 0 14px; min-height: 6em; }
+.pl .pdots { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
+.pl .pdots button { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border); background: var(--panel); color: var(--ink); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.pl .pdots button.done { background: color-mix(in srgb, var(--accent) 18%, var(--panel)); }
+.pl .pdots button[aria-current="step"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.pl .pbtns { display: flex; gap: 8px; flex-wrap: wrap; }
+.pl .pbtns .btn { min-height: 42px; padding: 6px 14px; font-size: 14px; }
+.pl .vnav { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
+.pl .vnav .tbtn { font-size: 12px; min-height: 36px; padding: 2px 10px; }
+
+.tips { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.tips li { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+.tips b { display: block; margin-bottom: 2px; }
+.print-ctl { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.print-ctl .bgrid { display: flex; gap: 6px; flex-wrap: wrap; }
+.print-ctl .spacer { margin-left: auto; }
+
+@media (max-width: 1000px) { .lamps { grid-template-columns: repeat(3, minmax(0, 1fr)); } .views { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sizes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .pl { grid-template-columns: 1fr; } .pl .stext { min-height: 0; } }
+@media (max-width: 520px) { .lamps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .views { grid-template-columns: 1fr; } .view.wide { grid-column: auto; } }
+
+#printArea { display: none; }
+@media print {
+  html, body { background: #fff; }
+  body > *:not(#printArea):not(#dk-defs) { display: none !important; }
+  #printArea { display: block; }
+  #printArea svg.sheet { display: block; width: 420mm; height: 296mm; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+</style>
+<style id="pageSize">@page { size: A3 landscape; margin: 0; }</style>
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 13V1a12 12 0 0 1 10.4 6z" fill="#E4252C"/><path d="M13 13l10.4-6a12 12 0 0 1 0 12z" fill="#F7941D"/><path d="M13 13l10.4 6A12 12 0 0 1 13 25z" fill="#FFE600"/><path d="M13 13v12a12 12 0 0 1-10.4-6z" fill="#3AAA35"/><path d="M13 13L2.6 19a12 12 0 0 1 0-12z" fill="#1F5FBF"/><path d="M13 13L2.6 7A12 12 0 0 1 13 1z" fill="#7B3F99"/></svg>
+    ColourFun
+  </a>
+  <nav class="site-nav" id="siteNav" aria-label="Pages">
+    <ul>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Colour</button>
+        <ul>
+          <li><a href="colour-schemes.html">Colour schemes</a></li>
+          <li><a href="colour-interaction.html">Colour interaction</a></li>
+          <li><a href="paint-mixing.html">Paint mixing</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Form &amp; space</button>
+        <ul>
+          <li><a href="shape-shading.html">3D shape shading</a></li>
+          <li><a href="ellipses.html">Ellipses</a></li>
+          <li><a href="lamp-views.html" aria-current="page">Lamp views</a></li>
+          <li><a href="perspective.html">Perspective</a></li>
+          <li><a href="letter-3d.html">3D letter</a></li>
+          <li><a href="atmospheric-perspective.html">Atmospheric perspective</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Reference tools</button>
+        <ul>
+          <li><a href="value-notan.html">Value &amp; notan</a></li>
+          <li><a href="grid-proportion.html">Grid &amp; proportion</a></li>
+          <li><a href="composition.html">Composition</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><button type="button" class="nav-toggle" aria-expanded="false">Practice</button>
+        <ul>
+          <li><a href="design-principles.html">Design principles</a></li>
+          <li><a href="black-square.html">Black square problem</a></li>
+          <li><a href="word-board.html">Chaos image matrix</a></li>
+          <li><a href="perfume-bottles.html">Perfume bottle compositions</a></li>
+          <li><a href="chaos-drawings.html">Chaos drawing ideas</a></li>
+          <li><a href="chaos-27.html">Chaos: 27 boxes</a></li>
+          <li><a href="gesture-timer.html">Gesture timer</a></li>
+          <li><a href="mark-making.html">Mark-making &amp; media</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="head-end">
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="siteNav">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Menu
+    </button>
+    <span class="for-z">For Z</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>Lamp views</h1>
+    <p>Draw a lamp from home in seven views: top, bottom, side 1, side 2, front, back, and a perspective view. Pick the lamp that looks most like yours, adjust its proportions, then follow the step-by-step guide for each view.</p>
+  </div>
+
+  <section aria-labelledby="briefTitle">
+    <h2 class="sec-title" id="briefTitle">The brief</h2>
+    <div class="brief">
+      <div class="panel">
+        <h3>Draw a lamp from home</h3>
+        <ul>
+          <li><b>Six orthographic views</b>: top, bottom, side 1, side 2, front and back.</li>
+          <li><b>One perspective view</b>: one-point perspective, looking down at the lamp from about 45°.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>How the views work</h3>
+        <ul>
+          <li>Orthographic views look <b>straight at</b> one side, with no perspective: verticals stay vertical, nothing shrinks with distance, circles stay circles.</li>
+          <li>Every view uses the <b>same measurements</b>: the front, back and sides are all the same height, and the top and bottom are the same width as the front.</li>
+          <li>The perspective view shows depth: the front face stays flat, and lines going back meet at <b>one vanishing point</b>.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="lampTitle">
+    <h2 class="sec-title" id="lampTitle">1. Choose a lamp</h2>
+    <p class="sec-lead">Five simple lamps made from easy shapes. Pick the one closest to yours.</p>
+    <div class="lamps" id="lamps" role="group" aria-label="Lamp"></div>
+    <div class="sizes panel" id="sizes"></div>
+  </section>
+
+  <section aria-labelledby="viewsTitle">
+    <h2 class="sec-title" id="viewsTitle">2. Draw the seven views</h2>
+    <p class="sec-lead">Click any view to draw it step by step. Start with the front: the other views take their measurements from it.</p>
+    <div class="views" id="views"></div>
+  </section>
+
+  <section aria-labelledby="tipsTitle">
+    <h2 class="sec-title" id="tipsTitle">Tips</h2>
+    <ul class="tips">
+      <li><b>Measure your lamp</b>Measure its total height, the shade’s width and height, and the base’s width with a ruler or tape. Set the sliders to match.</li>
+      <li><b>Choose a scale</b>Divide your box size by the lamp’s height. A 45 cm lamp in a 9 cm box is drawn at 1 : 5, so every 5 cm on the lamp is 1 cm on paper.</li>
+      <li><b>Light construction first</b>Draw the bounding box and centre line with a 2H or H pencil. You’ll rub them out at the end.</li>
+      <li><b>Line up the views</b>Front, back and both sides share the same top and bottom lines. Rule light lines across from one to the next so the heights match.</li>
+      <li><b>Hidden parts</b>From the top you can’t see the stem under the shade, so don’t draw it. Draw only what you would really see from that side.</li>
+      <li><b>One light direction</b>Shade every view with the light from the same side (here, the left) so the set looks consistent.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="printTitle">
+    <h2 class="sec-title" id="printTitle">Print</h2>
+    <p class="sec-lead">An A3 landscape sheet with all seven views laid out as a technical drawing: the top view above the front, the bottom view below it, the sides on either side, the back on the far right, and the perspective view in the corner. Print at 100%.</p>
+    <div class="print-ctl">
+      <div class="bgrid" role="group" aria-label="What to print" id="prMode"></div>
+      <button type="button" class="btn primary spacer" id="printBtn">Print</button>
+    </div>
+  </section>
+</main>
+
+<dialog class="player" id="player" aria-labelledby="plTitle">
+  <div class="pl">
+    <div class="art"><svg id="plSvg" viewBox="0 0 400 400" role="img" aria-labelledby="plText"></svg></div>
+    <div>
+      <h3 id="plTitle"></h3>
+      <p class="sub" id="plSub"></p>
+      <div class="count" id="plCount"></div>
+      <p class="stext" id="plText" aria-live="polite"></p>
+      <div class="pdots" id="plDots" aria-label="Steps"></div>
+      <div class="pbtns">
+        <button type="button" class="btn ghost" id="plPrev">Back</button>
+        <button type="button" class="btn primary" id="plNext">Next</button>
+        <button type="button" class="btn ghost" id="plPlay">Play all</button>
+        <button type="button" class="btn ghost" id="plClose">Close</button>
+      </div>
+      <div class="vnav" id="plViews" role="group" aria-label="Other views"></div>
+    </div>
+  </div>
+</dialog>
+
+<div id="printArea"></div>
+
+<script src="site.js"></script>
+<script src="drawing-kit.js"></script>
+<script>
+(function () {
+'use strict';
+const $ = id => document.getElementById(id);
+const esc = t => String(t || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+const f1 = n => Math.round(n * 10) / 10;
+const cm = n => (Math.round(n * 2) / 2).toString();
+
+/* ================= Lamps =================
+   Units: cm. y up from the floor, front of the lamp faces +z, its right is +x.
+   Parts are simple convex shapes:
+   cyl  {x,z,y0,y1,r}            vertical cylinder
+   fru  {x,z,y0,y1,r0,r1}        vertical cone frustum (r0 bottom, r1 top)
+   dome {x,z,y,r}                upper half sphere sitting on height y
+   box  {x0,x1,y0,y1,z0,z1}
+   cylz {x,y,z0,z1,r}            cylinder lying front to back
+*/
+const TONES = { shade: '#f1ece0', base: '#8d8a84', stem: '#b9b6af', metal: '#c9c6bf', dark: '#55534f', cord: '#3a3a3a' };
+const LAMPS = [
+  { key: 'drum', name: 'Drum shade lamp', blurb: 'Round base, thin stem, cylinder shade',
+    p: { H: 45, sw: 30, sh: 20, bw: 14 },
+    build: P => [
+      { n: 'Base', t: 'cyl', x: 0, z: 0, y0: 0, y1: 3, r: P.bw / 2, c: 'base' },
+      { n: 'Switch', t: 'box', x0: -1, x1: 1, y0: .8, y1: 2.2, z0: P.bw / 2 - .4, z1: P.bw / 2 + .8, c: 'dark' },
+      { n: 'Cord', t: 'cylz', x: 0, y: 1.2, z0: -P.bw / 2 - 9, z1: -P.bw / 2 + .5, r: .45, c: 'cord' },
+      { n: 'Stem', t: 'cyl', x: 0, z: 0, y0: 3, y1: P.H - P.sh * .75, r: .9, c: 'stem' },
+      { n: 'Shade', t: 'cyl', x: 0, z: 0, y0: P.H - P.sh, y1: P.H, r: P.sw / 2, c: 'shade' },
+    ] },
+  { key: 'cone', name: 'Cone shade lamp', blurb: 'Round base, stem, cone-shaped shade',
+    p: { H: 48, sw: 32, sh: 22, bw: 15 },
+    build: P => [
+      { n: 'Base', t: 'fru', x: 0, z: 0, y0: 0, y1: 3.5, r0: P.bw / 2, r1: P.bw / 2 * .85, c: 'base' },
+      { n: 'Cord', t: 'cylz', x: 0, y: 1.2, z0: -P.bw / 2 - 9, z1: -P.bw / 2 + .8, r: .45, c: 'cord' },
+      { n: 'Stem', t: 'cyl', x: 0, z: 0, y0: 3.5, y1: P.H - P.sh * .7, r: 1, c: 'stem' },
+      { n: 'Switch', t: 'box', x0: -.9, x1: .9, y0: 10, y1: 12.5, z0: .4, z1: 2, c: 'dark' },
+      { n: 'Shade', t: 'fru', x: 0, z: 0, y0: P.H - P.sh, y1: P.H, r0: P.sw / 2, r1: P.sw / 4, c: 'shade' },
+    ] },
+  { key: 'mushroom', name: 'Mushroom lamp', blurb: 'Tapered body with a dome on top',
+    p: { H: 32, sw: 26, sh: 13, bw: 13 },
+    build: P => [
+      { n: 'Body', t: 'fru', x: 0, z: 0, y0: 0, y1: P.H - P.sw / 2 + 1, r0: P.bw / 2, r1: P.bw / 3.2, c: 'stem' },
+      { n: 'Cord', t: 'cylz', x: 0, y: 1.2, z0: -P.bw / 2 - 9, z1: -P.bw / 2 + .8, r: .45, c: 'cord' },
+      { n: 'Switch', t: 'box', x0: -1, x1: 1, y0: 3, y1: 5, z0: P.bw / 2 - .9, z1: P.bw / 2 + .6, c: 'dark' },
+      { n: 'Dome shade', t: 'dome', x: 0, z: 0, y: P.H - P.sw / 2, r: P.sw / 2, c: 'shade' },
+    ] },
+  { key: 'cube', name: 'Cube lamp', blurb: 'Box base, short stem, cube shade',
+    p: { H: 40, sw: 22, sh: 22, bw: 14 },
+    build: P => [
+      { n: 'Base', t: 'box', x0: -P.bw / 2, x1: P.bw / 2, y0: 0, y1: 4, z0: -P.bw / 2, z1: P.bw / 2, c: 'base' },
+      { n: 'Switch', t: 'box', x0: P.bw / 2 - 4, x1: P.bw / 2 - 2, y0: 1.2, y1: 2.8, z0: P.bw / 2, z1: P.bw / 2 + .8, c: 'dark' },
+      { n: 'Cord', t: 'cylz', x: 0, y: 1.5, z0: -P.bw / 2 - 9, z1: -P.bw / 2, r: .45, c: 'cord' },
+      { n: 'Stem', t: 'cyl', x: 0, z: 0, y0: 4, y1: P.H - P.sh, r: 1.1, c: 'stem' },
+      { n: 'Shade', t: 'box', x0: -P.sw / 2, x1: P.sw / 2, y0: P.H - P.sh, y1: P.H, z0: -P.sw / 2, z1: P.sw / 2, c: 'shade' },
+    ] },
+  { key: 'desk', name: 'Simple desk lamp', blurb: 'Flat base, upright post, arm and cone head',
+    p: { H: 40, sw: 14, sh: 10, bw: 22 },
+    build: P => {
+      // Post at the left of the base, arm reaching across to the right, head hanging from its end
+      const bd = P.bw * .7, px = -P.bw / 2 + 2.5, arm = P.bw * .95, ay = P.H - 2;
+      return [
+        { n: 'Base', t: 'box', x0: -P.bw / 2, x1: P.bw / 2, y0: 0, y1: 3, z0: -bd / 2, z1: bd / 2, c: 'base' },
+        { n: 'Switch', t: 'box', x0: 1, x1: 3.4, y0: 3, y1: 4.2, z0: bd / 2 - 3, z1: bd / 2 - 1, c: 'dark' },
+        { n: 'Cord', t: 'cylz', x: px, y: 1.2, z0: -bd / 2 - 9, z1: -bd / 2 + .5, r: .45, c: 'cord' },
+        { n: 'Post', t: 'cyl', x: px, z: 0, y0: 3, y1: P.H, r: 1.1, c: 'metal' },
+        { n: 'Arm', t: 'cylx', y: ay, z: 0, x0: px, x1: px + arm, r: .9, c: 'metal' },
+        { n: 'Head', t: 'fru', x: px + arm, z: 0, y0: ay - P.sh, y1: ay, r0: P.sw / 2, r1: P.sw / 5, c: 'shade' },
+      ];
+    } },
+];
+const PARAMS = [['H', 'Total height', 20, 80], ['sw', 'Shade width', 8, 50], ['sh', 'Shade height', 5, 40], ['bw', 'Base width', 6, 40]];
+
+/* ================= Geometry ================= */
+const N = 40;
+function ring(cx, cz, y, r, n) { const out = []; for (let k = 0; k < (n || N); k++) { const a = k / (n || N) * Math.PI * 2; out.push([cx + r * Math.cos(a), y, cz + r * Math.sin(a)]); } return out; }
+// Points that outline each part (all parts are convex, so the hull of these is the silhouette)
+function pointsOf(p) {
+  if (p.t === 'cyl') return ring(p.x, p.z, p.y0, p.r).concat(ring(p.x, p.z, p.y1, p.r));
+  if (p.t === 'fru') return ring(p.x, p.z, p.y0, p.r0).concat(ring(p.x, p.z, p.y1, p.r1));
+  if (p.t === 'dome') { let pts = []; for (let k = 0; k <= 8; k++) { const t = k / 8 * Math.PI / 2; pts = pts.concat(ring(p.x, p.z, p.y + p.r * Math.sin(t), p.r * Math.cos(t), 32)); } return pts; }
+  if (p.t === 'box') { const o = []; for (const x of [p.x0, p.x1]) for (const y of [p.y0, p.y1]) for (const z of [p.z0, p.z1]) o.push([x, y, z]); return o; }
+  if (p.t === 'cylx') { const o = []; for (const x of [p.x0, p.x1]) for (let k = 0; k < 24; k++) { const a = k / 24 * Math.PI * 2; o.push([x, p.y + p.r * Math.cos(a), p.z + p.r * Math.sin(a)]); } return o; }
+  if (p.t === 'cylz') { const o = []; for (const z of [p.z0, p.z1]) for (let k = 0; k < 24; k++) { const a = k / 24 * Math.PI * 2; o.push([p.x + p.r * Math.cos(a), p.y + p.r * Math.sin(a), z]); } return o; }
+}
+function centreOf(p) { const pts = pointsOf(p); return [0, 1, 2].map(i => pts.reduce((s, q) => s + q[i], 0) / pts.length); }
+// Faces that can face the viewer: caps of cylinders etc. { pts, n }
+function capsOf(p) {
+  if (p.t === 'cyl') return [{ pts: ring(p.x, p.z, p.y1, p.r), n: [0, 1, 0] }, { pts: ring(p.x, p.z, p.y0, p.r), n: [0, -1, 0] }];
+  if (p.t === 'fru') return [{ pts: ring(p.x, p.z, p.y1, p.r1), n: [0, 1, 0] }, { pts: ring(p.x, p.z, p.y0, p.r0), n: [0, -1, 0] }];
+  if (p.t === 'cylz') { const c = z => { const o = []; for (let k = 0; k < 24; k++) { const a = k / 24 * Math.PI * 2; o.push([p.x + p.r * Math.cos(a), p.y + p.r * Math.sin(a), z]); } return o; }; return [{ pts: c(p.z1), n: [0, 0, 1] }, { pts: c(p.z0), n: [0, 0, -1] }]; }
+  if (p.t === 'cylx') { const c = x => { const o = []; for (let k = 0; k < 24; k++) { const a = k / 24 * Math.PI * 2; o.push([x, p.y + p.r * Math.cos(a), p.z + p.r * Math.sin(a)]); } return o; }; return [{ pts: c(p.x1), n: [1, 0, 0] }, { pts: c(p.x0), n: [-1, 0, 0] }]; }
+  if (p.t === 'box') {
+    const v = (x, y, z) => [x ? p.x1 : p.x0, y ? p.y1 : p.y0, z ? p.z1 : p.z0];
+    return [
+      { pts: [v(0,0,1), v(1,0,1), v(1,1,1), v(0,1,1)], n: [0, 0, 1] }, { pts: [v(0,0,0), v(1,0,0), v(1,1,0), v(0,1,0)], n: [0, 0, -1] },
+      { pts: [v(1,0,0), v(1,0,1), v(1,1,1), v(1,1,0)], n: [1, 0, 0] }, { pts: [v(0,0,0), v(0,0,1), v(0,1,1), v(0,1,0)], n: [-1, 0, 0] },
+      { pts: [v(0,1,0), v(1,1,0), v(1,1,1), v(0,1,1)], n: [0, 1, 0] }, { pts: [v(0,0,0), v(1,0,0), v(1,0,1), v(0,0,1)], n: [0, -1, 0] },
+    ];
+  }
+  return [];
+}
+function hull(pts) {
+  pts = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = [];
+  for (const p of pts) { while (lo.length > 1 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 1e-9) lo.pop(); lo.push(p); }
+  for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (up.length > 1 && cr(up[up.length - 2], up[up.length - 1], p) <= 1e-9) up.pop(); up.push(p); }
+  up.pop(); lo.pop(); return lo.concat(up);
+}
+const inPoly = (pt, poly) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const a = poly[i], b = poly[j]; if ((a[1] > pt[1]) !== (b[1] > pt[1]) && pt[0] < (b[0] - a[0]) * (pt[1] - a[1]) / (b[1] - a[1]) + a[0]) c = !c; } return c; };
+
+/* ================= Views ================= */
+// Orthographic views: screen right (r) and up (u) vectors; dir = direction the viewer looks
+const VIEWS = [
+  { key: 'front', name: 'Front', r: [1, 0, 0], u: [0, 1, 0], dir: [0, 0, -1], kind: 'side', note: 'Looking straight at the front. The switch faces you.' },
+  { key: 'side1', name: 'Side 1 (left)', r: [0, 0, 1], u: [0, 1, 0], dir: [1, 0, 0], kind: 'side', note: 'Standing on the lamp’s left, looking at its left side. The front is on your right.' },
+  { key: 'side2', name: 'Side 2 (right)', r: [0, 0, -1], u: [0, 1, 0], dir: [-1, 0, 0], kind: 'side', note: 'Standing on the lamp’s right. The front is on your left.' },
+  { key: 'back', name: 'Back', r: [-1, 0, 0], u: [0, 1, 0], dir: [0, 0, 1], kind: 'side', note: 'From behind: the cord comes towards you.' },
+  { key: 'top', name: 'Top', r: [1, 0, 0], u: [0, 0, -1], dir: [0, -1, 0], kind: 'top', note: 'Looking straight down, with the front of the lamp at the bottom of the drawing.' },
+  { key: 'bottom', name: 'Bottom', r: [1, 0, 0], u: [0, 0, 1], dir: [0, 1, 0], kind: 'bottom', note: 'Looking straight up from underneath, with the front at the top of the drawing.' },
+  { key: 'persp', name: 'Perspective (45°)', kind: 'persp', note: 'One-point perspective: front-on, looking down from about 45°, with one vanishing point.' },
+];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const LIGHT = (() => { const v = [-0.6, 0.75, 0.45], l = Math.hypot(...v); return v.map(x => x / l); })();
+
+// Project all parts of a lamp for one view, fitted into a W × H box. Returns drawable shapes in depth order.
+function project(parts, view, W, H, P) {
+  let proj, depth, cam = null;
+  if (view.kind === 'persp') {
+    // Eye above the lamp, looking down at roughly 40°; the VP sits on the horizon straight ahead
+    const D = P.H * 2.4, ch = P.H / 2 + D * 0.8;
+    cam = [0, ch, D];
+    proj = q => { const z = D - q[2]; return [q[0] / z, -(q[1] - ch) / z]; };
+    depth = q => Math.hypot(q[0] - cam[0], q[1] - cam[1], q[2] - cam[2]);
+  } else {
+    proj = q => [dot(q, view.r), -dot(q, view.u)];
+    depth = q => dot(q, view.dir);   // larger = further away
+  }
+  const facing = (n, at) => view.kind === 'persp' ? dot(n, [cam[0] - at[0], cam[1] - at[1], cam[2] - at[2]]) > 1e-6 : dot(n, view.dir) < -1e-6;
+  const shapes = parts.map(p => {
+    const hp = hull(pointsOf(p).map(proj));
+    const caps = capsOf(p).filter(c => { const ctr = [0, 1, 2].map(i => c.pts.reduce((s, q) => s + q[i], 0) / c.pts.length); return facing(c.n, ctr); })
+      .map(c => ({ pts: c.pts.map(proj), n: c.n }));
+    return { p, hull: hp, caps, d: depth(centreOf(p)) };
+  });
+  // Fit to the box
+  const all = shapes.flatMap(s => s.hull);
+  const xs = all.map(q => q[0]), ys = all.map(q => q[1]);
+  let x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const vp = view.kind === 'persp' ? [0, 0] : null;
+  const sc = Math.min((W * .76) / (x1 - x0), (H * .8) / (y1 - y0));
+  const ox = W / 2 - (x0 + x1) / 2 * sc, oy = H / 2 - (y0 + y1) / 2 * sc + (vp ? H * .06 : 0);
+  const S = q => [ox + q[0] * sc, oy + q[1] * sc];
+  shapes.forEach(s => { s.hull = s.hull.map(S); s.caps.forEach(c => { c.pts = c.pts.map(S); }); });
+  shapes.sort((a, b) => b.d - a.d); // far first
+  // Hidden: every point of the hull inside a nearer shape's hull
+  shapes.forEach((s, i) => { s.hidden = shapes.slice(i + 1).some(o => s.hull.every(q => inPoly(q, o.hull) || o.hull.some(h => Math.hypot(h[0] - q[0], h[1] - q[1]) < .5))); });
+  const box = [ox + x0 * sc, oy + y0 * sc, ox + x1 * sc, oy + y1 * sc];
+  return { shapes, box, sc, vp: vp ? S(vp) : null, S };
+}
+
+/* ================= Step-by-step guide for one view ================= */
+const pathOf = pts => 'M' + pts.map(q => f1(q[0]) + ' ' + f1(q[1])).join('L') + 'Z';
+const lightLine = 'style="stroke-dasharray:none;stroke:#9a978f;stroke-width:1.4"';
+function partText(s, view, P, scaleNote) {
+  const p = s.p, n = p.n, d = v => cm(v) + ' cm';
+  if (s.hidden) return n + ': hidden behind another part in this view, so you don’t draw it.';
+  const side = view.kind === 'side', top = view.kind === 'top' || view.kind === 'bottom', persp = view.kind === 'persp';
+  if (p.t === 'cyl') {
+    if (side) return n + ': a rectangle ' + d(p.r * 2) + ' wide and ' + d(p.y1 - p.y0) + ' tall, centred on the centre line.';
+    if (top) return n + ': a circle ' + d(p.r * 2) + ' across.';
+    return n + ': draw the top as an ellipse, the bottom as the lower half of a slightly rounder ellipse, and join them with two vertical lines.';
+  }
+  if (p.t === 'fru') {
+    if (side) return n + ': a trapezium ' + d(p.r0 * 2) + ' across the bottom, ' + d(p.r1 * 2) + ' across the top and ' + d(p.y1 - p.y0) + ' tall.';
+    if (top) return n + ': ' + (view.kind === 'top' ? 'an outer circle ' + d(p.r0 * 2) + ' across with a smaller circle ' + d(p.r1 * 2) + ' inside it (the top)' : 'a circle ' + d(p.r0 * 2) + ' across (the wide bottom edge)') + '.';
+    return n + ': an ellipse for the top and a wider, rounder ellipse for the bottom; join their outer edges with two slanting lines.';
+  }
+  if (p.t === 'dome') {
+    if (side) return n + ': a half circle ' + d(p.r * 2) + ' across, sitting on a flat line.';
+    if (top) return n + ': a circle ' + d(p.r * 2) + ' across.';
+    return n + ': draw the flat base as an ellipse, then a smooth curve over the top for the dome.';
+  }
+  if (p.t === 'box') {
+    const w = p.x1 - p.x0, h = p.y1 - p.y0, dz = p.z1 - p.z0;
+    if (side) { const wide = view.key === 'front' || view.key === 'back' ? w : dz; return n + ': a rectangle ' + d(wide) + ' wide and ' + d(h) + ' tall.'; }
+    if (top) return n + ': a rectangle ' + d(w) + ' by ' + d(dz) + '.';
+    return n + ': draw the front face as a flat rectangle, then rule lines from its top corners towards the vanishing point and stop them where the box ends; join them with a horizontal line.';
+  }
+  if (p.t === 'cylx') {
+    const L = p.x1 - p.x0;
+    if (view.key === 'side1' || view.key === 'side2') return n + ': it points straight at you, so it is just a small circle ' + d(p.r * 2) + ' across.';
+    if (side || top) return n + ': a long thin rectangle ' + d(L) + ' long, running across the page.';
+    return n + ': it runs sideways, parallel to the picture, so it stays a straight horizontal tube (no vanishing point needed).';
+  }
+  if (p.t === 'cylz') {
+    const L = p.z1 - p.z0;
+    if (view.key === 'front' || view.key === 'back') return n + ': it points straight at you, so it is just a small circle ' + d(p.r * 2) + ' across.';
+    if (side) return n + ': a long thin rectangle ' + d(L) + ' long.';
+    if (top) return n + ': a long thin rectangle ' + d(L) + ' long, running up and down the page.';
+    return n + ': it runs straight back, so rule its edges towards the vanishing point.';
+  }
+}
+function viewSteps(lamp, P, view) {
+  const parts = lamp.build(P);
+  const pr = project(parts, view, 400, 400, P);
+  const steps = [];
+  const [bx0, by0, bx1, by1] = pr.box;
+  const scale = P.H > 0 ? Math.round(P.H / 9) : 5;
+  // 1. Construction
+  let e = ['<path class="cn" d="M' + f1(bx0) + ' ' + f1(by0) + 'H' + f1(bx1) + 'V' + f1(by1) + 'H' + f1(bx0) + 'Z"/>', '<path class="cn" d="M' + f1((bx0 + bx1) / 2) + ' ' + f1(by0 - 12) + 'V' + f1(by1 + 12) + '"/>'];
+  let t;
+  if (view.kind === 'persp') {
+    const vpIn = pr.vp[1] > 14;
+    const vy = vpIn ? pr.vp[1] : 14;
+    e = vpIn ? ['<path class="cn" d="M10 ' + f1(vy) + 'H390"/>', '<circle class="dot" cx="' + f1(pr.vp[0]) + '" cy="' + f1(vy) + '" r="4"/>']
+             : ['<path class="cn" d="M' + f1(pr.vp[0]) + ' 26V8M' + f1(pr.vp[0] - 6) + ' 15L' + f1(pr.vp[0]) + ' 8L' + f1(pr.vp[0] + 6) + ' 15"/>', '<text class="lbl" x="' + f1(pr.vp[0] + 10) + '" y="20">VP above the box</text>'];
+    e.push('<path class="cn" d="M' + f1((bx0 + bx1) / 2) + ' ' + f1(vy) + 'V' + f1(by1 + 10) + '"/>');
+    t = 'Your eye is above the lamp, looking down at about 45°, so the horizon and the single vanishing point (VP) are high up: straight above the lamp, ' + (vpIn ? 'near the top of your box' : 'above the top of your box (tape a strip of paper on top, or just aim your lines at it)') + '. With a 2H pencil, draw a light vertical centre line down from the VP.';
+  } else if (view.kind === 'side') {
+    t = 'With a 2H pencil, lightly draw a box for the whole lamp: ' + cm(P.H) + ' cm tall on the lamp, about ' + f1(P.H / scale) + ' cm on paper (scale 1 : ' + scale + '). Add a vertical centre line.';
+  } else {
+    e.push('<path class="cn" d="M' + f1(bx0 - 12) + ' ' + f1((by0 + by1) / 2) + 'H' + f1(bx1 + 12) + '"/>');
+    t = 'With a 2H pencil, lightly draw a box as wide as the widest part of the lamp, plus centre lines in both directions. ' + (view.kind === 'top' ? 'The front of the lamp is at the bottom of the box.' : 'The front of the lamp is at the top of the box.');
+  }
+  steps.push({ t, e });
+  // 2 (perspective). Guide lines to the VP
+  if (view.kind === 'persp') {
+    const ends = pr.shapes.flatMap(s => s.hull);
+    const lo = ends.reduce((a, b) => (b[1] > a[1] ? b : a)), left = ends.reduce((a, b) => (b[0] < a[0] ? b : a)), right = ends.reduce((a, b) => (b[0] > a[0] ? b : a));
+    const toward = q => { const vy = Math.max(pr.vp[1], 8), t2 = (q[1] - vy) / (q[1] - pr.vp[1]); return [q[0] + (pr.vp[0] - q[0]) * t2, vy]; };
+    steps.push({ t: 'Lightly rule guide lines from the widest front points of the lamp up towards the VP. Everything that goes back into the picture follows these lines; verticals stay vertical, and circles become ellipses that look rounder the lower they are.',
+      e: ['<path class="cn" d="M' + [left, right, lo].map(q => { const w = toward(q); return f1(q[0]) + ' ' + f1(q[1]) + 'L' + f1(w[0]) + ' ' + f1(w[1]); }).join('M') + '"/>'] });
+  }
+  // 3. Each part, bottom to top as listed
+  const byPart = new Map(pr.shapes.map(s => [s.p, s]));
+  parts.forEach(p => {
+    const s = byPart.get(p);
+    if (s.hidden) { steps.push({ t: partText(s, view, P), e: [] }); return; }
+    steps.push({ t: partText(s, view, P), e: ['<path class="cn" ' + lightLine + ' d="' + pathOf(s.hull) + '"/>' + s.caps.map(c => '<path class="cn" ' + lightLine + ' d="' + pathOf(c.pts) + '"/>').join('')] });
+  });
+  // Drop "hidden" steps that add nothing (keep the text so the student knows why)
+  // 4. Firm up visible outlines (painter's order so hidden lines are covered)
+  const outline = pr.shapes.map(s => '<path class="ln" pathLength="1" style="fill:#fffefa;stroke-width:2.2" d="' + pathOf(s.hull) + '"/>' + s.caps.map(c => '<path class="ln" pathLength="1" style="fill:none;stroke-width:1.6" d="' + pathOf(c.pts) + '"/>').join('')).join('');
+  steps.push({ t: 'Rub out the construction lines. With an HB, go over only the edges you can really see; anything behind a nearer part stays hidden.', erase: true, e: [{ l: 'b', s: outline }] });
+  // 5. Shade: light from the left
+  const sh = pr.shapes.map((s, k) => shadeShape(s, view, k)).join('');
+  steps.push({ t: shadeText(view), e: [{ l: 'f', s: sh }] });
+  return { steps, pr };
+}
+function toneMix(hex, t) { // t 0 = dark, 1 = light
+  const n = parseInt(hex.slice(1), 16), c = [n >> 16, (n >> 8) & 255, n & 255].map(v => Math.round(v * (.55 + .45 * t) + (255 - v) * .0));
+  return 'rgb(' + c.join(',') + ')';
+}
+function shadeShape(s, view, k) {
+  return '<path class="sh" d="' + pathOf(s.hull) + '" fill="#fffefa"/>' + s.caps.map(c => '<path class="sh" d="' + pathOf(c.pts) + '" fill="#fffefa"/>').join('') + shadeBody(s, view, k);
+}
+function shadeBody(s, view, k) {
+  const base = TONES[s.p.c] || '#ccc', id = 'g' + k;
+  const xs = s.hull.map(q => q[0]), x0 = Math.min(...xs), x1 = Math.max(...xs);
+  const curved = s.p.t !== 'box';
+  let body;
+  if (curved && view.kind !== 'top' && view.kind !== 'bottom') {
+    body = '<defs><linearGradient id="' + id + '" gradientUnits="userSpaceOnUse" x1="' + f1(x0) + '" y1="0" x2="' + f1(x1) + '" y2="0"><stop offset="0" stop-color="' + toneMix(base, .8) + '"/><stop offset=".3" stop-color="' + toneMix(base, 1) + '"/><stop offset=".75" stop-color="' + toneMix(base, .62) + '"/><stop offset="1" stop-color="' + toneMix(base, .45) + '"/></linearGradient></defs>' +
+      '<path class="sh" d="' + pathOf(s.hull) + '" fill="url(#' + id + ')" filter="url(#grain)" stroke="#1d1d1f" stroke-width="2"/>';
+  } else if (curved) {
+    const t = view.kind === 'top' ? .95 : .55;
+    body = '<path class="sh" d="' + pathOf(s.hull) + '" fill="' + toneMix(base, t) + '" filter="url(#grain)" stroke="#1d1d1f" stroke-width="2"/>';
+  } else {
+    body = '<path class="sh" d="' + pathOf(s.hull) + '" fill="' + toneMix(base, .7) + '" filter="url(#grain)" stroke="#1d1d1f" stroke-width="2"/>';
+  }
+  // Faces turned to the viewer: cap ellipses on curved parts, faces on boxes, toned by the light
+  body += s.caps.map(c => { const l = Math.max(0, dot(c.n, LIGHT)); return '<path class="sh" d="' + pathOf(c.pts) + '" fill="' + toneMix(base, .5 + .5 * l) + '" filter="url(#grain)" stroke="#1d1d1f" stroke-width="1.6"/>'; }).join('');
+  return body;
+}
+function shadeText(view) {
+  if (view.kind === 'top') return 'Shade with the light from the left. Faces pointing up at you are lightest: give each one an even tone. Darken edges where one part overlaps another.';
+  if (view.kind === 'bottom') return 'Underneath is in shadow, so shade this view darker overall with a 2B. Keep each flat surface one even tone and darken the edges between parts.';
+  if (view.kind === 'persp') return 'Shade with the light from the left: tops light, curved sides going light on the left to dark on the right, the side faces of boxes darker. Leave a thin highlight strip on round shapes.';
+  return 'Shade with the light from the left. Round parts go light on the left, lightest just left of centre, and dark on the right (use HB then 2B). Flat faces get one even tone.';
+}
+
+/* ================= Page state ================= */
+let L = 0, P = {};
+try { const s = JSON.parse(localStorage.getItem('lampViews') || 'null'); if (s && LAMPS[s.L]) { L = s.L; P = s.P || {}; } } catch (e) { /* storage unavailable */ }
+const paramsOf = i => Object.assign({}, LAMPS[i].p, P[LAMPS[i].key] || {});
+const save = () => { try { localStorage.setItem('lampViews', JSON.stringify({ L, P })); } catch (e) { /* ignore */ } };
+
+function finalSvg(sv, lampI, view) {
+  const { steps } = viewSteps(LAMPS[lampI], paramsOf(lampI), view);
+  DrawingKit.render(sv, steps, steps.length - 1, false);
+}
+function drawLamps() {
+  $('lamps').innerHTML = LAMPS.map((l, i) => '<button type="button" aria-pressed="' + (i === L) + '" data-i="' + i + '"><svg viewBox="0 0 400 400" aria-hidden="true"></svg><b>' + l.name + '</b><span>' + l.blurb + '</span></button>').join('');
+  $('lamps').querySelectorAll('button').forEach(b => {
+    finalSvg(b.querySelector('svg'), +b.dataset.i, VIEWS[6]);
+    b.addEventListener('click', () => { L = +b.dataset.i; save(); drawAll(); });
+  });
+}
+function drawSizes() {
+  const p = paramsOf(L);
+  $('sizes').innerHTML = '<p class="note">Proportions of the ' + LAMPS[L].name.toLowerCase() + ' in cm. Measure your own lamp and match these so the views look like yours.</p>' +
+    PARAMS.map(([k, label, mn, mx]) => '<label class="range"><span>' + label + ' <output data-o="' + k + '">' + p[k] + ' cm</output></span><input type="range" min="' + mn + '" max="' + mx + '" step="1" value="' + p[k] + '" data-k="' + k + '"></label>').join('') +
+    '<button type="button" class="btn ghost" id="resetSizes" style="grid-column:1/-1;justify-self:start">Reset proportions</button>';
+  $('sizes').querySelectorAll('input').forEach(inp => inp.addEventListener('input', () => {
+    const key = LAMPS[L].key; P[key] = Object.assign({}, paramsOf(L), { [inp.dataset.k]: +inp.value });
+    if (P[key].sh > P[key].H - 6) P[key].sh = P[key].H - 6;
+    $('sizes').querySelector('[data-o="' + inp.dataset.k + '"]').textContent = inp.value + ' cm';
+    save(); drawViews(); drawLamps();
+  }));
+  $('resetSizes').addEventListener('click', () => { delete P[LAMPS[L].key]; save(); drawAll(); });
+}
+function drawViews() {
+  $('views').innerHTML = VIEWS.map((v, i) => '<div class="view' + (v.kind === 'persp' ? '' : '') + '"><button type="button" class="prev" data-v="' + i + '" aria-label="Draw the ' + v.name + ' view step by step"><svg viewBox="0 0 400 400" aria-hidden="true"></svg><span>Step by step ▶</span></button><div class="vt"><h3>' + v.name + '</h3><p>' + v.note + '</p></div></div>').join('');
+  $('views').querySelectorAll('.prev').forEach(b => { finalSvg(b.querySelector('svg'), L, VIEWS[+b.dataset.v]); b.addEventListener('click', () => openPlayer(+b.dataset.v)); });
+}
+function drawAll() { drawLamps(); drawSizes(); drawViews(); }
+
+/* ================= Player ================= */
+const PL = { v: 0, step: 0, steps: [], timer: 0 };
+function plDraw(animate) {
+  DrawingKit.render($('plSvg'), PL.steps, PL.step, animate);
+  $('plCount').textContent = 'Step ' + (PL.step + 1) + ' of ' + PL.steps.length;
+  $('plText').textContent = PL.steps[PL.step].t;
+  $('plPrev').disabled = PL.step === 0; $('plNext').disabled = PL.step === PL.steps.length - 1;
+  $('plDots').innerHTML = PL.steps.map((_, k) => '<button type="button" data-k="' + k + '"' + (k === PL.step ? ' aria-current="step"' : k < PL.step ? ' class="done"' : '') + '>' + (k + 1) + '</button>').join('');
+  $('plDots').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { plStop(); PL.step = +b.dataset.k; plDraw(true); }));
+}
+function openPlayer(v) {
+  plStop(); PL.v = v; PL.step = 0; PL.steps = viewSteps(LAMPS[L], paramsOf(L), VIEWS[v]).steps;
+  $('plTitle').textContent = VIEWS[v].name + ' view';
+  $('plSub').textContent = LAMPS[L].name + ' · ' + VIEWS[v].note;
+  $('plViews').innerHTML = VIEWS.map((x, i) => '<button type="button" class="tbtn" aria-pressed="' + (i === v) + '" data-v="' + i + '">' + x.name + '</button>').join('');
+  $('plViews').querySelectorAll('button').forEach(b => b.addEventListener('click', () => openPlayer(+b.dataset.v)));
+  plDraw(true);
+  if (!$('player').open) $('player').showModal();
+}
+function plStop() { clearTimeout(PL.timer); PL.timer = 0; $('plPlay').textContent = 'Play all'; }
+$('plPrev').addEventListener('click', () => { plStop(); if (PL.step > 0) { PL.step--; plDraw(true); } });
+$('plNext').addEventListener('click', () => { plStop(); if (PL.step < PL.steps.length - 1) { PL.step++; plDraw(true); } });
+$('plClose').addEventListener('click', () => { plStop(); $('player').close(); });
+$('player').addEventListener('close', plStop);
+$('player').addEventListener('click', e => { if (e.target === $('player')) $('player').close(); });
+$('plPlay').addEventListener('click', () => {
+  if (PL.timer) { plStop(); return; }
+  $('plPlay').textContent = 'Pause'; PL.step = 0; plDraw(true);
+  const next = () => { if (PL.step >= PL.steps.length - 1) { plStop(); return; } PL.step++; plDraw(true); PL.timer = setTimeout(next, 3000); };
+  PL.timer = setTimeout(next, 3000);
+});
+
+/* ================= Printing: A3 landscape layout ================= */
+let PRM = 'guide';
+(function () {
+  const el = $('prMode');
+  [['guide', 'Finished views (guide)'], ['blank', 'Construction only (to draw over)']].forEach(([k, l]) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; b.textContent = l; b.setAttribute('aria-pressed', String(k === PRM));
+    b.addEventListener('click', () => { el.querySelectorAll('.tbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b))); PRM = k; });
+    el.appendChild(b);
+  });
+})();
+function sheet() {
+  // Grid of 80 mm cells: [top] above [front]; [side1] left, [side2] right, [back] far right; [bottom] below; perspective bottom-right
+  const cell = 80, ox = 28, oy = 18;
+  const pos = { top: [1, 0], side1: [0, 1], front: [1, 1], side2: [2, 1], back: [3, 1], bottom: [1, 2], persp: [3.3, 2] };
+  let s = '<svg class="sheet" viewBox="0 0 420 296" xmlns="http://www.w3.org/2000/svg"><rect width="420" height="296" fill="#fff"/>';
+  s += '<text x="14" y="12" style="font:800 6px Archivo,sans-serif;letter-spacing:.6px;fill:#141414">LAMP · SEVEN VIEWS · ' + esc(LAMPS[L].name.toUpperCase()) + '</text>';
+  s += '<text x="300" y="12" style="font:700 4px Archivo,sans-serif;fill:#141414">NAME ______________________</text>';
+  VIEWS.forEach(v => {
+    const [cx, cy] = pos[v.key], x = ox + cx * (cell + 6), y = oy + cy * (cell + 12);
+    const { steps } = viewSteps(LAMPS[L], paramsOf(L), v);
+    const k = PRM === 'guide' ? steps.length - 1 : 0;
+    s += '<svg x="' + x + '" y="' + y + '" width="' + cell + '" height="' + cell + '" viewBox="0 0 400 400" data-v="' + VIEWS.indexOf(v) + '" data-k="' + k + '"></svg>';
+    s += '<rect x="' + x + '" y="' + y + '" width="' + cell + '" height="' + cell + '" fill="none" stroke="#999" stroke-width=".3"/>';
+    s += '<text x="' + x + '" y="' + (y + cell + 5) + '" style="font:700 4.2px Archivo,sans-serif;fill:#141414">' + esc(v.name.toUpperCase()) + '</text>';
+  });
+  return s + '</svg>';
+}
+$('printBtn').addEventListener('click', () => {
+  $('printArea').innerHTML = sheet();
+  $('printArea').querySelectorAll('svg[data-v]').forEach(sv => {
+    const v = VIEWS[+sv.dataset.v], { steps } = viewSteps(LAMPS[L], paramsOf(L), v);
+    DrawingKit.render(sv, steps, +sv.dataset.k, false);
+  });
+  window.print();
+});
+
+drawAll();
+})();
+</script>
+</body>
+</html>

@@ -214,6 +214,15 @@ The page has:
 - **Step-by-step examples**: every idea has one, including the new collage, construction paper and mixed-media sets (`drawings-collage.js`, `drawings-paper.js`, `drawings-mixed.js`).
 - **Print**: blank sheets (7 pages), reference sheets with the examples in two parts (boxes 1–12 and 13–27), and an ideas list (3 pages).
 
+## Lamp Views
+
+`lamp-views.html` supports drawing a lamp in seven views: top, bottom, side 1, side 2, front, back, and a one-point perspective view looking down from about 45°.
+
+- **Lamps**: five simple lamps built from basic shapes (drum shade, cone shade, mushroom, cube, desk lamp), with sliders for total height, shade width and height, and base width.
+- **Views**: every view is drawn from the same 3D model, so the views always agree. Hidden parts are left out, and the shading has light from the left.
+- **Step-by-step guides**: generated for each view. Each starts with a construction box and centre lines (horizon, VP and guide lines in perspective), then draws each part with its real measurements, then firms up the visible outlines, then shades.
+- **Print**: an A3 landscape sheet laying out all seven views as a technical drawing, either finished or construction only.
+
 ## Site structure
 
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
