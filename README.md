@@ -225,6 +225,9 @@ The page has:
 
 ## Site structure
 
+Every page loads `gate.js` first, which shows a password screen until the correct password is entered; the browser then remembers it. Only a SHA-256 hash of the password is stored in the code. This keeps casual visitors out, but it is not real security: the site and this repository are public, so the files can still be read directly.
+
+
 `index.html` is the home page. Every page links `site.css` (theme tokens, base styles, header) and `site.js` (the Menu button on narrow screens), and repeats the same `<header class="site-head">` markup. To add a page, copy that header and add a link to the nav on every page.
 
 The lesson pages also share `lesson.css` (layout, buttons, the step-by-step guide and its drawing marks) and `stepper.js` (the animated step-by-step player; see the comment at the top for the guide data format).
